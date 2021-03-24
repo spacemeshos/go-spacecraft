@@ -1,11 +1,15 @@
 package cmd
 
 import (
-	"github.com/spacemeshos/spacecraft/config"
+	"fmt"
+
+	cfg "github.com/spacemeshos/spacecraft/config"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 var cfgFile string
+var config = cfg.DefaultConfig()
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -15,10 +19,31 @@ var rootCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.PersistentFlags().StringVarP(&config.NetworkName, "network-name", "n", "", "name of the network")
-	rootCmd.MarkPersistentFlagRequired("network-name")
+	cobra.OnInitialize(initConfig)
+
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file")
+	rootCmd.PersistentFlags().StringVarP(&config.NetworkName, "network-name", "n", config.NetworkName, "name of the network")
+
+	err := viper.BindPFlags(rootCmd.PersistentFlags())
+	if err != nil {
+		fmt.Println("an error has occurred while binding flags:", err)
+	}
 }
 
 func Execute() {
 	cobra.CheckErr(rootCmd.Execute())
+}
+
+func initConfig() {
+	if cfgFile != "" {
+		// Use config file from the flag.
+		viper.SetConfigFile(cfgFile)
+	}
+
+	viper.AutomaticEnv()
+
+	if err := viper.ReadInConfig(); err == nil {
+		fmt.Println("Using config file:", viper.ConfigFileUsed())
+		viper.Unmarshal(&config)
+	}
 }
