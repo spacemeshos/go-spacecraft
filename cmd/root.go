@@ -9,7 +9,7 @@ import (
 )
 
 var cfgFile string
-var config = cfg.DefaultConfig()
+var config = cfg.Config
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{

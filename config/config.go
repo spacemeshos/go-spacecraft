@@ -14,7 +14,7 @@ type Configuration struct {
 	PoetImage      string `mapstructure:"poet-image"`
 }
 
-var config = Configuration{
+var Config = Configuration{
 	NetworkName:    "devnet",
 	NumberOfMiners: 10,
 	NumberOfPoets:  3,
@@ -26,8 +26,4 @@ var config = Configuration{
 	PoetDiskSize:   50,
 	GoSmImage:      "spacemeshos/go-spacemesh:v0.1.24",
 	PoetImage:      "spacemeshos/poet:73488d6",
-}
-
-func DefaultConfig() Configuration {
-	return config
 }
