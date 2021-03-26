@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"strings"
 
 	cfg "github.com/spacemeshos/spacecraft/config"
 	"github.com/spf13/cobra"
@@ -9,7 +10,7 @@ import (
 )
 
 var cfgFile string
-var config = cfg.Config
+var config = &cfg.Config
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -23,6 +24,7 @@ func init() {
 
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file")
 	rootCmd.PersistentFlags().StringVarP(&config.NetworkName, "network-name", "n", config.NetworkName, "name of the network")
+	rootCmd.PersistentFlags().StringVar(&config.GCPAuthFile, "gcp-auth-file", config.GCPAuthFile, "gcp json key file path")
 
 	err := viper.BindPFlags(rootCmd.PersistentFlags())
 	if err != nil {
@@ -35,15 +37,15 @@ func Execute() {
 }
 
 func initConfig() {
+	viper.SetEnvPrefix("spacecraft")
+	viper.SetEnvKeyReplacer(strings.NewReplacer("-", "_"))
+	viper.AutomaticEnv()
+
 	if cfgFile != "" {
 		// Use config file from the flag.
 		viper.SetConfigFile(cfgFile)
+		viper.ReadInConfig()
 	}
 
-	viper.AutomaticEnv()
-
-	if err := viper.ReadInConfig(); err == nil {
-		fmt.Println("Using config file:", viper.ConfigFileUsed())
-		viper.Unmarshal(&config)
-	}
+	viper.Unmarshal(&config)
 }

@@ -3,6 +3,8 @@ module github.com/spacemeshos/spacecraft
 go 1.15
 
 require (
+	cloud.google.com/go v0.46.3
+	github.com/fatih/color v1.7.0
 	github.com/fsnotify/fsnotify v1.4.9 // indirect
 	github.com/magiconair/properties v1.8.4 // indirect
 	github.com/mitchellh/go-homedir v1.1.0
@@ -16,5 +18,6 @@ require (
 	github.com/spf13/viper v1.7.1
 	golang.org/x/sys v0.0.0-20210320140829-1e4c9ba3b0c4 // indirect
 	golang.org/x/text v0.3.5 // indirect
+	google.golang.org/api v0.13.0
 	gopkg.in/ini.v1 v1.62.0 // indirect
 )
