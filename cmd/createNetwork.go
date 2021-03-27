@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"context"
 	"fmt"
 
 	network "github.com/spacemeshos/spacecraft/network"
@@ -16,10 +15,9 @@ var createNetworkCmd = &cobra.Command{
 
 spacecraft createNetwork -m=10 -p=3`,
 	Run: func(cmd *cobra.Command, args []string) {
-		go network.Create()
-
-		ctx, _ := context.WithCancel(context.Background())
-		<-ctx.Done()
+		network.Create()
+		// ctx, _ := context.WithCancel(context.Background())
+		// <-ctx.Done()
 	},
 }
 
