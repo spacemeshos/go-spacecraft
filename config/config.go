@@ -12,7 +12,6 @@ type Configuration struct {
 	PoetDiskSize   int    `mapstructure:"poet-disk-size"`
 	GoSmImage      string `mapstructure:"go-sm-image"`
 	PoetImage      string `mapstructure:"poet-image"`
-	GCPAuthFile    string `mapstructure:"gcp-auth-file"`
 	GCPProject     string `mapstructure:"gcp-project"`
 	GCPLocation    string `mapstructure:"gcp-location"`
 	GCPMachineType string `mapstructure:"gcp-machine-type"`
@@ -30,7 +29,6 @@ var Config = Configuration{
 	PoetDiskSize:   50,
 	GoSmImage:      "spacemeshos/go-spacemesh:v0.1.24",
 	PoetImage:      "spacemeshos/poet:73488d6",
-	GCPAuthFile:    "",
 	GCPProject:     "",
 	GCPLocation:    "",
 	GCPMachineType: "e2-standard-16",
