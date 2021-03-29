@@ -3,7 +3,8 @@ package cmd
 import (
 	"fmt"
 
-	network "github.com/spacemeshos/spacecraft/network"
+	"github.com/spacemeshos/spacecraft/log"
+	"github.com/spacemeshos/spacecraft/network"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -15,7 +16,10 @@ var createNetworkCmd = &cobra.Command{
 
 spacecraft createNetwork -m=10 -p=3`,
 	Run: func(cmd *cobra.Command, args []string) {
-		network.Create()
+		err := network.Create()
+		if err != nil {
+			log.Error.Println(err)
+		}
 		// ctx, _ := context.WithCancel(context.Background())
 		// <-ctx.Done()
 	},
