@@ -51,7 +51,7 @@ func getCluster() (*containerpb.Cluster, error) {
 	return client.GetCluster(context.Background(), req)
 }
 
-func CreateK8SCluster() error {
+func CreateKubernetesCluster() error {
 	client, err := getClient()
 
 	if err != nil {
