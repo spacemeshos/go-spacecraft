@@ -4,28 +4,28 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"strconv"
 	"time"
 
 	gabs "github.com/Jeffail/gabs/v2"
+
 	"github.com/spacemeshos/spacecraft/gcp"
 	k8s "github.com/spacemeshos/spacecraft/k8s"
 )
 
 func Create() error {
-	err := gcp.CreateKubernetesCluster()
+	// err := gcp.CreateKubernetesCluster()
+
+	// if err != nil {
+	// 	return err
+	// }
+
+	k8sRestConfig, k8sClient, err := gcp.GetKubernetesClient()
 
 	if err != nil {
 		return err
 	}
 
-	k8sClient, err := gcp.GetKubernetesClient()
-
-	if err != nil {
-		return err
-	}
-
-	kubernetes = k8s.Kubernetes{k8sClient}
+	kubernetes := k8s.Kubernetes{k8sClient, k8sRestConfig}
 
 	minerConfigBuf, err := ioutil.ReadFile(config.GoSmConfig)
 
@@ -61,18 +61,27 @@ func Create() error {
 
 	poetConfig := "duration = \"" + fmt.Sprintf("%d", int((layerDurationSec)*(layersPerEpoch))) + "s\"\nn=\"21\""
 
-	fmt.Println(minerConfigJsonStr)
 	fmt.Println(poetConfig)
 
-	var poetInitialDurations []string
-	shift := 0
-	for i := 0; i < config.NumberOfPoets; i++ {
-		initialduration := (genesisMinutes * 60) + int(layerDurationSec) + shift
-		poetInitialDurations = append(poetInitialDurations, strconv.Itoa(initialduration)+"s")
-		shift = shift + config.InitPhaseShift
+	miner, err := kubernetes.DeployMiner(true, []string{}, "1", minerConfigJsonStr)
+
+	if err != nil {
+		return err
 	}
 
-	fmt.Println(poetInitialDurations)
+	fmt.Println(miner)
 
 	return nil
+
+	// var poetInitialDurations []string
+	// shift := 0
+	// for i := 0; i < config.NumberOfPoets; i++ {
+	// 	initialduration := (genesisMinutes * 60) + int(layerDurationSec) + shift
+	// 	poetInitialDurations = append(poetInitialDurations, strconv.Itoa(initialduration)+"s")
+	// 	shift = shift + config.InitPhaseShift
+	// }
+
+	// fmt.Println(poetInitialDurations)
+
+	// return nil
 }

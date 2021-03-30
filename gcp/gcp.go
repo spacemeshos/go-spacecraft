@@ -13,6 +13,7 @@ import (
 	containerpb "google.golang.org/genproto/googleapis/container/v1"
 	"k8s.io/client-go/kubernetes"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
+	restclient "k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/tools/clientcmd/api"
 )
@@ -130,7 +131,7 @@ func CreateKubernetesCluster() error {
 	return nil
 }
 
-func GetKubernetesClient() (*kubernetes.Clientset, error) {
+func GetKubernetesClient() (*restclient.Config, *kubernetes.Clientset, error) {
 	cluster, err := getCluster()
 	ret := api.Config{
 		APIVersion: "v1",
@@ -143,7 +144,7 @@ func GetKubernetesClient() (*kubernetes.Clientset, error) {
 	cert, err := base64.StdEncoding.DecodeString(cluster.MasterAuth.ClusterCaCertificate)
 
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	ret.Clusters[name] = &api.Cluster{
@@ -167,12 +168,12 @@ func GetKubernetesClient() (*kubernetes.Clientset, error) {
 
 	cfg, err := clientcmd.NewNonInteractiveClientConfig(ret, name, &clientcmd.ConfigOverrides{CurrentContext: name}, nil).ClientConfig()
 	if err != nil {
-		return nil, fmt.Errorf("failed to create Kubernetes configuration cluster=%s: %w", name, err)
+		return nil, nil, fmt.Errorf("failed to create Kubernetes configuration cluster=%s: %w", name, err)
 	}
 
 	k8s, err := kubernetes.NewForConfig(cfg)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create Kubernetes client cluster=%s: %w", name, err)
+		return nil, nil, fmt.Errorf("failed to create Kubernetes client cluster=%s: %w", name, err)
 	}
 
 	// ns, err := k8s.CoreV1().Namespaces().List(context.Background(), metav1.ListOptions{})
@@ -186,5 +187,5 @@ func GetKubernetesClient() (*kubernetes.Clientset, error) {
 	// 	fmt.Println(item.Name)
 	// }
 
-	return k8s, nil
+	return cfg, k8s, nil
 }
