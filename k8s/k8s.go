@@ -35,10 +35,6 @@ type Deployment struct {
 	ContainerName string
 }
 
-func (k8s *Kubernetes) execueCommand() string {
-	return ""
-}
-
 func (k8s *Kubernetes) getExternalIpOfNode(nodeId string) (string, error) {
 	node, err := k8s.Client.CoreV1().Nodes().Get(context.Background(), nodeId, metav1.GetOptions{})
 
@@ -96,7 +92,74 @@ func (k8s *Kubernetes) getNodeId(podName string) (string, error) {
 	return resFinal, nil
 }
 
+func (k8s *Kubernetes) createPVC(name string, size string) error {
+	fs := apiv1.PersistentVolumeFilesystem
+
+	createOpts := &apiv1.PersistentVolumeClaim{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: name,
+		},
+		Spec: apiv1.PersistentVolumeClaimSpec{
+			AccessModes: []apiv1.PersistentVolumeAccessMode{apiv1.ReadWriteOnce},
+			Resources: apiv1.ResourceRequirements{
+				Requests: apiv1.ResourceList{
+					apiv1.ResourceName(apiv1.ResourceStorage): resource.MustParse(size + "Gi"),
+				},
+			},
+			VolumeMode: &fs,
+		},
+		Status: apiv1.PersistentVolumeClaimStatus{
+			Phase:       apiv1.ClaimBound,
+			AccessModes: []apiv1.PersistentVolumeAccessMode{apiv1.ReadWriteOnce},
+			Capacity: apiv1.ResourceList{
+				apiv1.ResourceName(apiv1.ResourceStorage): resource.MustParse(size + "Gi"),
+			},
+		},
+	}
+
+	_, err := k8s.Client.CoreV1().PersistentVolumeClaims("default").Create(context.TODO(), createOpts, metav1.CreateOptions{})
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (k8s *Kubernetes) getDeploymentPodAndNode(name string) (string, string, error) {
+	pods, err := k8s.Client.CoreV1().Pods("default").List(context.TODO(), metav1.ListOptions{})
+
+	if err != nil {
+		return "", "", err
+	}
+
+	nodeName := ""
+	podName := ""
+
+	for _, pod := range pods.Items {
+		if strings.Contains(pod.Name, name) {
+			nodeName = pod.Spec.NodeName
+			podName = pod.Name
+
+			return nodeName, podName, nil
+		}
+	}
+
+	return "", "", errors.New("pod not found")
+}
+
 func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, bootnodes []string, minerNumber string, configJSON string) (string, error) {
+
+	fmt.Println("creating miner-" + minerNumber + " pvc")
+
+	err := k8s.createPVC("miner-"+minerNumber, config.MinerDiskSize)
+
+	if err != nil {
+		return "", err
+	}
+
+	fmt.Println("created miner-" + minerNumber + " pvc")
+
 	configMap := &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: "miner-" + minerNumber,
@@ -104,7 +167,7 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, bootnodes []string, miner
 		Data: map[string]string{"config.json": configJSON},
 	}
 
-	_, err := k8s.Client.CoreV1().ConfigMaps("default").Create(context.TODO(), configMap, metav1.CreateOptions{})
+	_, err = k8s.Client.CoreV1().ConfigMaps("default").Create(context.TODO(), configMap, metav1.CreateOptions{})
 
 	if err != nil {
 		return "", err
@@ -124,6 +187,8 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, bootnodes []string, miner
 		"--grpc-port-new=8000",
 		"--coinbase=7566a5e003748be1c1a999c62fbe2610f69237f57ac3043f3213983819fe3ea5",
 		"--config=/etc/config/config.json",
+		"--post-datadir=/root/data/post",
+		"-d=/root/data/node",
 	}
 
 	if bootstrapNode == false {
@@ -184,6 +249,10 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, bootnodes []string, miner
 									Name:      "config",
 									MountPath: "/etc/config",
 								},
+								{
+									Name:      "data",
+									MountPath: "/root/data",
+								},
 							},
 						},
 					},
@@ -195,6 +264,14 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, bootnodes []string, miner
 									LocalObjectReference: apiv1.LocalObjectReference{
 										Name: "miner-" + minerNumber,
 									},
+								},
+							},
+						},
+						{
+							Name: "data",
+							VolumeSource: apiv1.VolumeSource{
+								PersistentVolumeClaim: &apiv1.PersistentVolumeClaimVolumeSource{
+									ClaimName: "miner-" + minerNumber,
 								},
 							},
 						},
@@ -256,21 +333,7 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, bootnodes []string, miner
 
 	fmt.Println("created miner-" + minerNumber + " service")
 
-	pods, err := k8s.Client.CoreV1().Pods("default").List(context.TODO(), metav1.ListOptions{})
-
-	if err != nil {
-		return "", err
-	}
-
-	nodeName := ""
-	podName := ""
-
-	for _, pod := range pods.Items {
-		if strings.Contains(pod.Name, "miner-"+minerNumber) {
-			nodeName = pod.Spec.NodeName
-			podName = pod.Name
-		}
-	}
+	nodeName, podName, err := k8s.getDeploymentPodAndNode("miner-" + minerNumber)
 
 	externalIP, err := k8s.getExternalIpOfNode(nodeName)
 
@@ -291,96 +354,6 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, bootnodes []string, miner
 	}
 
 	return "spacemesh://" + nodeId + "@" + externalIP + ":" + port, nil
-}
-
-func (k8s *Kubernetes) DeployBootstrap() (string, error) {
-	// svc, err := k8s.Client.CoreV1().Services("default").Get(context.TODO(), "demo-service-test", metav1.GetOptions{})
-
-	// fmt.Println(err)
-	// fmt.Println(svc)
-
-	// deploymentsClient := k8s.Client.AppsV1().Deployments(apiv1.NamespaceDefault)
-
-	// d, err := deploymentsClient.Get(context.TODO(), "demo-deployment-test", metav1.GetOptions{})
-	// if err != nil {
-	// 	panic(err)
-	// }
-
-	// fmt.Println(d)
-
-	// pods, err := k8s.Client.CoreV1().Pods("default").List(context.TODO(), metav1.ListOptions{})
-
-	// fmt.Println(pods)
-
-	return "", nil
-
-	// deployment := &appsv1.Deployment{
-	// 	ObjectMeta: metav1.ObjectMeta{
-	// 		Name: "demo-deployment-test",
-	// 	},
-	// 	Spec: appsv1.DeploymentSpec{
-	// 		Replicas: int32Ptr(2),
-	// 		Selector: &metav1.LabelSelector{
-	// 			MatchLabels: map[string]string{
-	// 				"app": "demo-test",
-	// 			},
-	// 		},
-	// 		Template: apiv1.PodTemplateSpec{
-	// 			ObjectMeta: metav1.ObjectMeta{
-	// 				Labels: map[string]string{
-	// 					"app": "demo-test",
-	// 				},
-	// 			},
-	// 			Spec: apiv1.PodSpec{
-	// 				Containers: []apiv1.Container{
-	// 					{
-	// 						Name:  "web",
-	// 						Image: "nginx:1.12",
-	// 						Ports: []apiv1.ContainerPort{
-	// 							{
-	// 								Name:          "http",
-	// 								Protocol:      apiv1.ProtocolTCP,
-	// 								ContainerPort: 80,
-	// 							},
-	// 						},
-	// 					},
-	// 				},
-	// 			},
-	// 		},
-	// 	},
-	// }
-
-	// fmt.Println("Creating deployment...")
-	// _, err := deploymentsClient.Create(context.TODO(), deployment, metav1.CreateOptions{})
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// fmt.Println("Deployment Created...")
-
-	// svc, err := k8s.Client.CoreV1().Services("default").Create(context.TODO(), &corev1.Service{
-	// 	ObjectMeta: metav1.ObjectMeta{
-	// 		Name: "demo-service-test",
-	// 		Labels: map[string]string{
-	// 			"app": "demo-test",
-	// 		},
-	// 	},
-	// 	Spec: corev1.ServiceSpec{
-	// 		Ports: []corev1.ServicePort{corev1.ServicePort{Name: "http", Port: 80, TargetPort: intstr.FromInt(80)}},
-	// 		Selector: map[string]string{
-	// 			"app": "demo-test",
-	// 		},
-	// 		Type: apiv1.ServiceTypeNodePort,
-	// 	},
-	// }, metav1.CreateOptions{})
-
-	// fmt.Println(svc)
-
-	// svc, err = k8s.Client.CoreV1().Services("default").Get(context.TODO(), "demo-service-test", metav1.GetOptions{})
-
-	// fmt.Println(err)
-	// fmt.Println(svc)
-
-	// return "", nil
 }
 
 func int32Ptr(i int32) *int32 { return &i }

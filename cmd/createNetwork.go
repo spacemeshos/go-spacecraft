@@ -36,8 +36,8 @@ func init() {
 	createNetworkCmd.Flags().StringVar(&config.MinerCPU, "miner-cpu", config.MinerCPU, "vCPUs for each miner")
 	createNetworkCmd.Flags().StringVar(&config.PoetMemory, "poet-ram", config.PoetMemory, "RAM for each poet")
 	createNetworkCmd.Flags().StringVar(&config.PoetCPU, "poet-cpu", config.PoetCPU, "vCPUs for each poet")
-	createNetworkCmd.Flags().IntVar(&config.MinerDiskSize, "miner-disk-size", config.MinerDiskSize, "Disk size of miner in GB")
-	createNetworkCmd.Flags().IntVar(&config.PoetDiskSize, "poet-disk-size", config.PoetDiskSize, "Disk size of poet in GB")
+	createNetworkCmd.Flags().StringVar(&config.MinerDiskSize, "miner-disk-size", config.MinerDiskSize, "Disk size of miner in GB")
+	createNetworkCmd.Flags().StringVar(&config.PoetDiskSize, "poet-disk-size", config.PoetDiskSize, "Disk size of poet in GB")
 	createNetworkCmd.Flags().StringVar(&config.GoSmImage, "go-sm-image", config.GoSmImage, "docker image for go-spacemesh build")
 	createNetworkCmd.Flags().StringVar(&config.PoetImage, "poet-image", config.PoetImage, "docker image for poet build")
 

@@ -8,8 +8,8 @@ type Configuration struct {
 	MinerCPU       string `mapstructure:"miner-cpu"`
 	PoetMemory     string `mapstructure:"poet-ram"`
 	PoetCPU        string `mapstructure:"poet-cpu"`
-	MinerDiskSize  int    `mapstructure:"miner-disk-size"`
-	PoetDiskSize   int    `mapstructure:"poet-disk-size"`
+	MinerDiskSize  string `mapstructure:"miner-disk-size"`
+	PoetDiskSize   string `mapstructure:"poet-disk-size"`
 	GoSmImage      string `mapstructure:"go-sm-image"`
 	PoetImage      string `mapstructure:"poet-image"`
 	GCPProject     string `mapstructure:"gcp-project"`
@@ -28,8 +28,8 @@ var Config = Configuration{
 	MinerCPU:       "2",
 	PoetMemory:     "4",
 	PoetCPU:        "2",
-	MinerDiskSize:  50,
-	PoetDiskSize:   50,
+	MinerDiskSize:  "50",
+	PoetDiskSize:   "50",
 	GoSmImage:      "spacemeshos/go-spacemesh:v0.1.24",
 	PoetImage:      "spacemeshos/poet:73488d6",
 	GCPProject:     "",
