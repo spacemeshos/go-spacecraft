@@ -356,4 +356,181 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, bootnodes []string, miner
 	return "spacemesh://" + nodeId + "@" + externalIP + ":" + port, nil
 }
 
+func (k8s *Kubernetes) DeployPoet(initialDuration string, poetNumber string, configFile string) (string, error) {
+
+	fmt.Println("creating poet-" + poetNumber + " pvc")
+
+	err := k8s.createPVC("poet-"+poetNumber, config.MinerDiskSize)
+
+	if err != nil {
+		return "", err
+	}
+
+	fmt.Println("created poet-" + poetNumber + " pvc")
+
+	configMap := &corev1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: "poet-" + poetNumber,
+		},
+		Data: map[string]string{"config.conf": configFile},
+	}
+
+	_, err = k8s.Client.CoreV1().ConfigMaps("default").Create(context.TODO(), configMap, metav1.CreateOptions{})
+
+	if err != nil {
+		return "", err
+	}
+
+	deploymentClient := k8s.Client.AppsV1().Deployments(apiv1.NamespaceDefault)
+
+	command := []string{
+		"--restlisten=0.0.0.0:5000",
+		"--initialduration=" + initialDuration,
+		"--jsonlog",
+		"--configfile=/etc/config/config.conf",
+		"--datadir=/root/data",
+	}
+
+	deployment := &appsv1.Deployment{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: "poet-" + poetNumber,
+		},
+		Spec: appsv1.DeploymentSpec{
+			Replicas: int32Ptr(1),
+			Selector: &metav1.LabelSelector{
+				MatchLabels: map[string]string{
+					"poet": poetNumber,
+				},
+			},
+			Template: apiv1.PodTemplateSpec{
+				ObjectMeta: metav1.ObjectMeta{
+					Labels: map[string]string{
+						"poet": poetNumber,
+					},
+				},
+				Spec: apiv1.PodSpec{
+					Containers: []apiv1.Container{
+						{
+							Name:    "poet",
+							Image:   config.PoetImage,
+							Command: []string{"/bin/poet"},
+							Args:    command,
+							Ports: []apiv1.ContainerPort{
+								{
+									ContainerPort: 5000,
+								},
+							},
+							Resources: apiv1.ResourceRequirements{
+								Limits: apiv1.ResourceList{
+									"cpu":    resource.MustParse(config.PoetCPU),
+									"memory": resource.MustParse(config.PoetMemory + "Gi"),
+								},
+								Requests: apiv1.ResourceList{
+									"cpu":    resource.MustParse(config.PoetCPU),
+									"memory": resource.MustParse(config.PoetMemory + "Gi"),
+								},
+							},
+							VolumeMounts: []apiv1.VolumeMount{
+								{
+									Name:      "config",
+									MountPath: "/etc/config",
+								},
+								{
+									Name:      "data",
+									MountPath: "/root/data",
+								},
+							},
+						},
+					},
+					Volumes: []apiv1.Volume{
+						{
+							Name: "config",
+							VolumeSource: apiv1.VolumeSource{
+								ConfigMap: &apiv1.ConfigMapVolumeSource{
+									LocalObjectReference: apiv1.LocalObjectReference{
+										Name: "poet-" + poetNumber,
+									},
+								},
+							},
+						},
+						{
+							Name: "data",
+							VolumeSource: apiv1.VolumeSource{
+								PersistentVolumeClaim: &apiv1.PersistentVolumeClaimVolumeSource{
+									ClaimName: "poet-" + poetNumber,
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	deployment, err = deploymentClient.Create(context.TODO(), deployment, metav1.CreateOptions{})
+
+	if err != nil {
+		return "", err
+	}
+
+	fmt.Println("creating poet-" + poetNumber + " deployment")
+
+	for range time.Tick(5 * time.Second) {
+		deployment, err := deploymentClient.Get(context.TODO(), "poet-"+poetNumber, metav1.GetOptions{})
+		if err != nil {
+			return "", err
+		}
+
+		fmt.Println("waiting for poet-" + poetNumber + " deployment")
+
+		if deployment.Status.ReadyReplicas == 1 {
+			break
+		}
+	}
+
+	fmt.Println("finished poet-" + poetNumber + " deployment")
+
+	fmt.Println("creating poet-" + poetNumber + " service")
+
+	_, err = k8s.Client.CoreV1().Services("default").Create(context.TODO(), &corev1.Service{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: "poet-" + poetNumber,
+			Labels: map[string]string{
+				"poet": poetNumber,
+			},
+		},
+		Spec: corev1.ServiceSpec{
+			Ports: []corev1.ServicePort{
+				corev1.ServicePort{Name: "restport", Port: 5000, TargetPort: intstr.FromInt(5000)},
+			},
+			Selector: map[string]string{
+				"poet": poetNumber,
+			},
+			Type: apiv1.ServiceTypeNodePort,
+		},
+	}, metav1.CreateOptions{})
+
+	if err != nil {
+		return "", err
+	}
+
+	fmt.Println("created poet-" + poetNumber + " service")
+
+	nodeName, _, err := k8s.getDeploymentPodAndNode("poet-" + poetNumber)
+
+	externalIP, err := k8s.getExternalIpOfNode(nodeName)
+
+	if err != nil {
+		return "", err
+	}
+
+	port, err := k8s.getExternalPort("poet-"+poetNumber, "restport")
+
+	if err != nil {
+		return "", err
+	}
+
+	return externalIP + ":" + port, nil
+}
+
 func int32Ptr(i int32) *int32 { return &i }
