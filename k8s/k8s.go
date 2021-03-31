@@ -148,7 +148,7 @@ func (k8s *Kubernetes) getDeploymentPodAndNode(name string) (string, string, err
 	return "", "", errors.New("pod not found")
 }
 
-func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, bootnodes []string, minerNumber string, configJSON string) (string, error) {
+func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, configJSON string) (string, error) {
 
 	fmt.Println("creating miner-" + minerNumber + " pvc")
 
@@ -191,10 +191,10 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, bootnodes []string, miner
 		"-d=/root/data/node",
 	}
 
-	if bootstrapNode == false {
-		command = append(command, "--bootstrap")
-		command = append(command, "--bootnodes="+strings.Join(bootnodes[:], ","))
-	}
+	// if bootstrapNode == false {
+	// 	command = append(command, "--bootstrap")
+	// 	command = append(command, "--bootnodes="+strings.Join(bootnodes[:], ","))
+	// }
 
 	deployment := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
@@ -214,6 +214,7 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, bootnodes []string, miner
 					},
 				},
 				Spec: apiv1.PodSpec{
+					RestartPolicy: apiv1.RestartPolicyNever,
 					Containers: []apiv1.Container{
 						{
 							Name:    "miner",
@@ -315,7 +316,7 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, bootnodes []string, miner
 		},
 		Spec: corev1.ServiceSpec{
 			Ports: []corev1.ServicePort{
-				corev1.ServicePort{Name: "tcpport", Port: 5000, TargetPort: intstr.FromInt(5000)},
+				corev1.ServicePort{Name: "tcpport", Protocol: corev1.ProtocolUDP, Port: 5000, TargetPort: intstr.FromInt(5000)},
 				corev1.ServicePort{Name: "grpcport", Port: 6000, TargetPort: intstr.FromInt(6000)},
 				corev1.ServicePort{Name: "jsonport", Port: 7000, TargetPort: intstr.FromInt(7000)},
 				corev1.ServicePort{Name: "grpcportnew", Port: 8000, TargetPort: intstr.FromInt(8000)},
@@ -409,6 +410,7 @@ func (k8s *Kubernetes) DeployPoet(initialDuration string, poetNumber string, con
 					},
 				},
 				Spec: apiv1.PodSpec{
+					RestartPolicy: apiv1.RestartPolicyNever,
 					Containers: []apiv1.Container{
 						{
 							Name:    "poet",
