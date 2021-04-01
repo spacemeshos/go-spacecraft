@@ -177,14 +177,9 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 
 	deploymentClient := k8s.Client.AppsV1().Deployments(apiv1.NamespaceDefault)
 
-	minerNumberInt, _ := strconv.ParseInt(minerNumber, 10, 32)
-	hostPort := int(5000 + minerNumberInt)
-	hostPortStr := strconv.Itoa(hostPort)
-	fmt.Println(hostPort)
-
 	command := []string{
 		"--test-mode",
-		"--tcp-port=" + hostPortStr,
+		"--tcp-port=5000",
 		"--acquire-port=0",
 		"--grpc-port=6000",
 		"--json-port=7000",
@@ -229,9 +224,8 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 							Args:    command,
 							Ports: []apiv1.ContainerPort{
 								{
-									ContainerPort: int32(hostPort),
+									ContainerPort: 5000,
 									Protocol:      corev1.ProtocolUDP,
-									HostPort:      int32(hostPort),
 								},
 								{
 									ContainerPort: 6000,
@@ -324,7 +318,7 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 		},
 		Spec: corev1.ServiceSpec{
 			Ports: []corev1.ServicePort{
-				corev1.ServicePort{Name: "tcpport", Protocol: corev1.ProtocolUDP, Port: int32(hostPort), TargetPort: intstr.FromInt(hostPort)},
+				corev1.ServicePort{Name: "tcpport", Port: 5000, TargetPort: intstr.FromInt(5000), Protocol: corev1.ProtocolUDP},
 				corev1.ServicePort{Name: "grpcport", Port: 6000, TargetPort: intstr.FromInt(6000)},
 				corev1.ServicePort{Name: "jsonport", Port: 7000, TargetPort: intstr.FromInt(7000)},
 				corev1.ServicePort{Name: "grpcportnew", Port: 8000, TargetPort: intstr.FromInt(8000)},
@@ -350,11 +344,11 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 		return "", "", err
 	}
 
-	// port, err := k8s.getExternalPort("miner-"+minerNumber, "tcpport")
+	port, err := k8s.getExternalPort("miner-"+minerNumber, "tcpport")
 
-	// if err != nil {
-	// 	return "", "", err
-	// }
+	if err != nil {
+		return "", "", err
+	}
 
 	grpcport, err := k8s.getExternalPort("miner-"+minerNumber, "grpcport")
 
@@ -368,7 +362,7 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 		return "", "", err
 	}
 
-	return "spacemesh://" + nodeId + "@" + externalIP + ":" + hostPortStr, externalIP + ":" + grpcport, nil
+	return "spacemesh://" + nodeId + "@" + externalIP + ":" + port, externalIP + ":" + grpcport, nil
 }
 
 func (k8s *Kubernetes) DeployPoet(initialDuration string, poetNumber string, configFile string) (string, error) {
