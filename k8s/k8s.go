@@ -141,6 +141,8 @@ func (k8s *Kubernetes) getDeploymentPodAndNode(name string) (string, string, err
 			nodeName = pod.Spec.NodeName
 			podName = pod.Name
 
+			fmt.Println(pod.Spec.NodeSelector)
+
 			return nodeName, podName, nil
 		}
 	}
@@ -148,14 +150,14 @@ func (k8s *Kubernetes) getDeploymentPodAndNode(name string) (string, string, err
 	return "", "", errors.New("pod not found")
 }
 
-func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, configJSON string) (string, error) {
+func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, configJSON string) (string, string, error) {
 
 	fmt.Println("creating miner-" + minerNumber + " pvc")
 
 	err := k8s.createPVC("miner-"+minerNumber, config.MinerDiskSize)
 
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 
 	fmt.Println("created miner-" + minerNumber + " pvc")
@@ -170,14 +172,19 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 	_, err = k8s.Client.CoreV1().ConfigMaps("default").Create(context.TODO(), configMap, metav1.CreateOptions{})
 
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 
 	deploymentClient := k8s.Client.AppsV1().Deployments(apiv1.NamespaceDefault)
 
+	minerNumberInt, _ := strconv.ParseInt(minerNumber, 10, 32)
+	hostPort := int(5000 + minerNumberInt)
+	hostPortStr := strconv.Itoa(hostPort)
+	fmt.Println(hostPort)
+
 	command := []string{
 		"--test-mode",
-		"--tcp-port=5000",
+		"--tcp-port=" + hostPortStr,
 		"--acquire-port=0",
 		"--grpc-port=6000",
 		"--json-port=7000",
@@ -214,7 +221,6 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 					},
 				},
 				Spec: apiv1.PodSpec{
-					RestartPolicy: apiv1.RestartPolicyNever,
 					Containers: []apiv1.Container{
 						{
 							Name:    "miner",
@@ -223,7 +229,9 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 							Args:    command,
 							Ports: []apiv1.ContainerPort{
 								{
-									ContainerPort: 5000,
+									ContainerPort: int32(hostPort),
+									Protocol:      corev1.ProtocolUDP,
+									HostPort:      int32(hostPort),
 								},
 								{
 									ContainerPort: 6000,
@@ -285,7 +293,7 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 	deployment, err = deploymentClient.Create(context.TODO(), deployment, metav1.CreateOptions{})
 
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 
 	fmt.Println("creating miner-" + minerNumber + " deployment")
@@ -293,7 +301,7 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 	for range time.Tick(5 * time.Second) {
 		deployment, err := deploymentClient.Get(context.TODO(), "miner-"+minerNumber, metav1.GetOptions{})
 		if err != nil {
-			return "", err
+			return "", "", err
 		}
 
 		fmt.Println("waiting for miner-" + minerNumber + " deployment")
@@ -316,7 +324,7 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 		},
 		Spec: corev1.ServiceSpec{
 			Ports: []corev1.ServicePort{
-				corev1.ServicePort{Name: "tcpport", Protocol: corev1.ProtocolUDP, Port: 5000, TargetPort: intstr.FromInt(5000)},
+				corev1.ServicePort{Name: "tcpport", Protocol: corev1.ProtocolUDP, Port: int32(hostPort), TargetPort: intstr.FromInt(hostPort)},
 				corev1.ServicePort{Name: "grpcport", Port: 6000, TargetPort: intstr.FromInt(6000)},
 				corev1.ServicePort{Name: "jsonport", Port: 7000, TargetPort: intstr.FromInt(7000)},
 				corev1.ServicePort{Name: "grpcportnew", Port: 8000, TargetPort: intstr.FromInt(8000)},
@@ -329,7 +337,7 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 	}, metav1.CreateOptions{})
 
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 
 	fmt.Println("created miner-" + minerNumber + " service")
@@ -339,22 +347,28 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 	externalIP, err := k8s.getExternalIpOfNode(nodeName)
 
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 
-	port, err := k8s.getExternalPort("miner-"+minerNumber, "tcpport")
+	// port, err := k8s.getExternalPort("miner-"+minerNumber, "tcpport")
+
+	// if err != nil {
+	// 	return "", "", err
+	// }
+
+	grpcport, err := k8s.getExternalPort("miner-"+minerNumber, "grpcport")
 
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 
 	nodeId, err := k8s.getNodeId(podName)
 
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 
-	return "spacemesh://" + nodeId + "@" + externalIP + ":" + port, nil
+	return "spacemesh://" + nodeId + "@" + externalIP + ":" + hostPortStr, externalIP + ":" + grpcport, nil
 }
 
 func (k8s *Kubernetes) DeployPoet(initialDuration string, poetNumber string, configFile string) (string, error) {
@@ -389,7 +403,6 @@ func (k8s *Kubernetes) DeployPoet(initialDuration string, poetNumber string, con
 		"--initialduration=" + initialDuration,
 		"--jsonlog",
 		"--configfile=/etc/config/config.conf",
-		"--datadir=/root/data",
 	}
 
 	deployment := &appsv1.Deployment{
@@ -410,7 +423,6 @@ func (k8s *Kubernetes) DeployPoet(initialDuration string, poetNumber string, con
 					},
 				},
 				Spec: apiv1.PodSpec{
-					RestartPolicy: apiv1.RestartPolicyNever,
 					Containers: []apiv1.Container{
 						{
 							Name:    "poet",
@@ -439,7 +451,7 @@ func (k8s *Kubernetes) DeployPoet(initialDuration string, poetNumber string, con
 								},
 								{
 									Name:      "data",
-									MountPath: "/root/data",
+									MountPath: "/root/.poet",
 								},
 							},
 						},

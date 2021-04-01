@@ -40,6 +40,8 @@ func init() {
 	createNetworkCmd.Flags().StringVar(&config.PoetDiskSize, "poet-disk-size", config.PoetDiskSize, "Disk size of poet in GB")
 	createNetworkCmd.Flags().StringVar(&config.GoSmImage, "go-sm-image", config.GoSmImage, "docker image for go-spacemesh build")
 	createNetworkCmd.Flags().StringVar(&config.PoetImage, "poet-image", config.PoetImage, "docker image for poet build")
+	createNetworkCmd.Flags().IntVar(&config.PoetGatewayAmount, "poet-gateway-amount", config.PoetGatewayAmount, "number of gateway to pass when activating poet(s)")
+	createNetworkCmd.Flags().IntVar(&config.BootnodeAmount, "bootnode-amount", config.BootnodeAmount, "total bootnodes in the generated config file")
 
 	err := viper.BindPFlags(createNetworkCmd.Flags())
 	if err != nil {

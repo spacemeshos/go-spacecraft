@@ -1,9 +1,12 @@
 package network
 
 import (
+	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"net/http"
 	"strconv"
 	"time"
 
@@ -68,58 +71,69 @@ func Create() error {
 		shift = shift + config.InitPhaseShift
 	}
 
-	var poetGateways []string
+	var poetRESTUrls []string
 
-	for i := 0; i < len(poetInitialDurations); i++ {
+	for i := 0; i < config.NumberOfPoets; i++ {
 		poet, err := kubernetes.DeployPoet(poetInitialDurations[i], strconv.Itoa(i+1), poetConfig)
 
 		if err != nil {
 			return err
 		}
 
-		poetGateways = append(poetGateways, poet)
+		poetRESTUrls = append(poetRESTUrls, poet)
 	}
 
-	minerConfigJson.SetP(poetGateways[0], "main.poet-server")
+	minerConfigJson.SetP(poetRESTUrls[0], "main.poet-server")
 
 	var miners []string
-	noOfMiners := int(config.NumberOfMiners)
-
-	for i := 0; i < noOfMiners; i++ {
-		var bootnodes []string
-
-		if i > 0 {
-			bootnodes = append(bootnodes, miners[0])
-		}
-
+	var minerGRPCURls []string
+	for i := 0; i < config.NumberOfMiners; i++ {
 		if i == 0 {
-
-			miner, err := kubernetes.DeployMiner(true, strconv.Itoa(i+1), minerConfigJson.String())
+			tcpurl, grpcurl, err := kubernetes.DeployMiner(true, strconv.Itoa(i+1), minerConfigJson.String())
 			if err != nil {
 				return err
 			}
 
-			miners = append(miners, miner)
-		} else if i < 5 {
+			miners = append(miners, tcpurl)
+			minerGRPCURls = append(minerGRPCURls, grpcurl)
+		} else if i < config.BootnodeAmount {
 			minerConfigJson.SetP(true, "p2p.swarm.bootstrap")
-			minerConfigJson.SetP([]string{miners[0]}, "p2p.swarm.bootnodes")
+			minerConfigJson.SetP(miners[0:1], "p2p.swarm.bootnodes")
 
-			miner, err := kubernetes.DeployMiner(false, strconv.Itoa(i+1), minerConfigJson.String())
+			tcpurl, grpcurl, err := kubernetes.DeployMiner(false, strconv.Itoa(i+1), minerConfigJson.String())
 			if err != nil {
 				return err
 			}
 
-			miners = append(miners, miner)
+			miners = append(miners, tcpurl)
+			minerGRPCURls = append(minerGRPCURls, grpcurl)
 		} else {
 			minerConfigJson.SetP(true, "p2p.swarm.bootstrap")
-			minerConfigJson.SetP([]string{miners[0], miners[1], miners[2], miners[3], miners[4]}, "p2p.swarm.bootnodes")
+			minerConfigJson.SetP(miners[0:config.BootnodeAmount], "p2p.swarm.bootnodes")
 
-			miner, err := kubernetes.DeployMiner(false, strconv.Itoa(i+1), minerConfigJson.String())
+			tcpurl, grpcurl, err := kubernetes.DeployMiner(false, strconv.Itoa(i+1), minerConfigJson.String())
 			if err != nil {
 				return err
 			}
 
-			miners = append(miners, miner)
+			miners = append(miners, tcpurl)
+			minerGRPCURls = append(minerGRPCURls, grpcurl)
+
+		}
+	}
+
+	gateways := minerGRPCURls[:len(minerGRPCURls)-config.PoetGatewayAmount]
+
+	for i := 0; i < config.NumberOfPoets; i++ {
+		poetRESTUrl := poetRESTUrls[i]
+		postBody, _ := json.Marshal(map[string][]string{
+			"gatewayAddresses": gateways,
+		})
+		responseBody := bytes.NewBuffer(postBody)
+		_, err := http.Post("http://"+poetRESTUrl+"/v1/start", "application/json", responseBody)
+
+		if err != nil {
+			return err
 		}
 	}
 
