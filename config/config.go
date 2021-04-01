@@ -16,10 +16,10 @@ type Configuration struct {
 	GCPLocation       string `mapstructure:"gcp-location"`
 	GCPMachineType    string `mapstructure:"gcp-machine-type"`
 	GoSmConfig        string `mapstructure:"go-sm-config"`
-	PoetConfig        string `mapstructure:"poet-config"`
 	InitPhaseShift    int    `mapstructure:"init-phase-shift"`
 	PoetGatewayAmount int    `mapstructure:"poet-gateway-amount"`
 	BootnodeAmount    int    `mapstructure:"bootnode-amount"`
+	GCPMachineMemory  int    `mapstructure:"gcp-machine-memory"`
 }
 
 var Config = Configuration{
@@ -32,13 +32,13 @@ var Config = Configuration{
 	PoetCPU:           "2",
 	MinerDiskSize:     "200",
 	PoetDiskSize:      "50",
-	GoSmImage:         "spacemeshos/go-spacemesh:v0.1.24",
+	GoSmImage:         "spacemeshos/go-spacemesh:v0.1.26",
 	PoetImage:         "spacemeshos/poet:73488d6",
 	GCPProject:        "",
 	GCPLocation:       "",
 	GCPMachineType:    "e2-standard-16",
+	GCPMachineMemory:  16,
 	GoSmConfig:        "./artifacts/devnet/miner/config.json",
-	PoetConfig:        "./artifacts/devnet/poet/config.json",
 	InitPhaseShift:    0,
 	PoetGatewayAmount: 4,
 	BootnodeAmount:    6,

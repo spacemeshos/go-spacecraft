@@ -29,10 +29,23 @@ type Kubernetes struct {
 	RestConfig *restclient.Config
 }
 
-type Deployment struct {
-	Name          string
-	Labels        map[string]string
-	ContainerName string
+type MinerDeploymentData struct {
+	TcpURL  string
+	GrpcURL string
+}
+
+type PoetDeploymentData struct {
+	RestURL string
+}
+
+type MinerChannel struct {
+	Err  chan error
+	Done chan *MinerDeploymentData
+}
+
+type PoetChannel struct {
+	Err  chan error
+	Done chan *PoetDeploymentData
 }
 
 func (k8s *Kubernetes) getExternalIpOfNode(nodeId string) (string, error) {
@@ -68,28 +81,37 @@ func (k8s *Kubernetes) getExternalPort(serviceId string, portName string) (strin
 }
 
 func (k8s *Kubernetes) getNodeId(podName string) (string, error) {
-	podLogOpts := corev1.PodLogOptions{}
-	req := k8s.Client.CoreV1().Pods("default").GetLogs(podName, &podLogOpts)
-	podLogs, err := req.Stream(context.Background())
-	defer podLogs.Close()
+	for range time.Tick(5 * time.Second) {
+		podLogOpts := corev1.PodLogOptions{}
+		req := k8s.Client.CoreV1().Pods("default").GetLogs(podName, &podLogOpts)
+		podLogs, err := req.Stream(context.Background())
+		defer podLogs.Close()
 
-	if err != nil {
-		return "", err
+		if err != nil {
+			return "", err
+		}
+
+		buf := new(bytes.Buffer)
+		_, err = io.Copy(buf, podLogs)
+		if err != nil {
+			return "", err
+		}
+
+		str := buf.String()
+
+		res := strings.SplitAfter(str, "Local node identity >> ")
+
+		if len(res) >= 2 {
+			res = strings.SplitAfter(res[1], "\"")
+			resFinal := strings.TrimSuffix(res[0], "\"")
+
+			return resFinal, nil
+		} else {
+			fmt.Println(podName + " logs not found")
+		}
 	}
 
-	buf := new(bytes.Buffer)
-	_, err = io.Copy(buf, podLogs)
-	if err != nil {
-		return "", err
-	}
-
-	str := buf.String()
-
-	res := strings.SplitAfter(str, "Local node identity >> ")
-	res = strings.SplitAfter(res[1], "\"")
-	resFinal := strings.TrimSuffix(res[0], "\"")
-
-	return resFinal, nil
+	return "", nil
 }
 
 func (k8s *Kubernetes) createPVC(name string, size string) error {
@@ -141,8 +163,6 @@ func (k8s *Kubernetes) getDeploymentPodAndNode(name string) (string, string, err
 			nodeName = pod.Spec.NodeName
 			podName = pod.Name
 
-			fmt.Println(pod.Spec.NodeSelector)
-
 			return nodeName, podName, nil
 		}
 	}
@@ -150,14 +170,57 @@ func (k8s *Kubernetes) getDeploymentPodAndNode(name string) (string, string, err
 	return "", "", errors.New("pod not found")
 }
 
-func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, configJSON string) (string, string, error) {
+func (k8s *Kubernetes) getDeploymentClusterIP(name string) (string, error) {
+	pods, err := k8s.Client.CoreV1().Pods("default").List(context.TODO(), metav1.ListOptions{})
 
+	if err != nil {
+		return "", err
+	}
+
+	for _, pod := range pods.Items {
+		if strings.Contains(pod.Name, name) {
+			return pod.Status.PodIP, nil
+		}
+	}
+
+	return "", errors.New("pod not found")
+}
+
+func (k8s *Kubernetes) makeDeploymentSticky(deploymentName string, labelValue string) error {
+	deploymentClient := k8s.Client.AppsV1().Deployments(apiv1.NamespaceDefault)
+
+	deployment := &appsv1.Deployment{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: deploymentName,
+		},
+		Spec: appsv1.DeploymentSpec{
+			Template: apiv1.PodTemplateSpec{
+				Spec: apiv1.PodSpec{
+					NodeSelector: map[string]string{
+						"kubernetes.io/hostname": labelValue,
+					},
+				},
+			},
+		},
+	}
+
+	_, err := deploymentClient.Update(context.TODO(), deployment, metav1.UpdateOptions{})
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, configJSON string, bootstrap bool, bootnodes []string, channel *MinerChannel) {
 	fmt.Println("creating miner-" + minerNumber + " pvc")
 
 	err := k8s.createPVC("miner-"+minerNumber, config.MinerDiskSize)
 
 	if err != nil {
-		return "", "", err
+		channel.Err <- err
+		return
 	}
 
 	fmt.Println("created miner-" + minerNumber + " pvc")
@@ -172,7 +235,8 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 	_, err = k8s.Client.CoreV1().ConfigMaps("default").Create(context.TODO(), configMap, metav1.CreateOptions{})
 
 	if err != nil {
-		return "", "", err
+		channel.Err <- err
+		return
 	}
 
 	deploymentClient := k8s.Client.AppsV1().Deployments(apiv1.NamespaceDefault)
@@ -193,10 +257,10 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 		"-d=/root/data/node",
 	}
 
-	// if bootstrapNode == false {
-	// 	command = append(command, "--bootstrap")
-	// 	command = append(command, "--bootnodes="+strings.Join(bootnodes[:], ","))
-	// }
+	if bootstrap == true {
+		command = append(command, "--bootstrap")
+		command = append(command, "--bootnodes="+strings.Join(bootnodes[:], ","))
+	}
 
 	deployment := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
@@ -223,6 +287,10 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 							Command: []string{"/bin/go-spacemesh"},
 							Args:    command,
 							Ports: []apiv1.ContainerPort{
+								{
+									ContainerPort: 5000,
+									Protocol:      corev1.ProtocolTCP,
+								},
 								{
 									ContainerPort: 5000,
 									Protocol:      corev1.ProtocolUDP,
@@ -287,7 +355,8 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 	deployment, err = deploymentClient.Create(context.TODO(), deployment, metav1.CreateOptions{})
 
 	if err != nil {
-		return "", "", err
+		channel.Err <- err
+		return
 	}
 
 	fmt.Println("creating miner-" + minerNumber + " deployment")
@@ -295,7 +364,8 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 	for range time.Tick(5 * time.Second) {
 		deployment, err := deploymentClient.Get(context.TODO(), "miner-"+minerNumber, metav1.GetOptions{})
 		if err != nil {
-			return "", "", err
+			channel.Err <- err
+			return
 		}
 
 		fmt.Println("waiting for miner-" + minerNumber + " deployment")
@@ -307,7 +377,13 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 
 	fmt.Println("finished miner-" + minerNumber + " deployment")
 
+	nodeName, podName, err := k8s.getDeploymentPodAndNode("miner-" + minerNumber)
+	clusterIP, err := k8s.getDeploymentClusterIP("miner-" + minerNumber)
+	err = k8s.makeDeploymentSticky("miner-"+minerNumber, nodeName)
+
 	fmt.Println("creating miner-" + minerNumber + " service")
+
+	//mn, _ := strconv.ParseInt(minerNumber, 10, 8)
 
 	_, err = k8s.Client.CoreV1().Services("default").Create(context.TODO(), &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
@@ -318,7 +394,20 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 		},
 		Spec: corev1.ServiceSpec{
 			Ports: []corev1.ServicePort{
-				corev1.ServicePort{Name: "tcpport", Port: 5000, TargetPort: intstr.FromInt(5000), Protocol: corev1.ProtocolUDP},
+				corev1.ServicePort{
+					Name:       "tcpport",
+					Port:       5000,
+					TargetPort: intstr.FromInt(5000),
+					Protocol:   corev1.ProtocolTCP,
+					//NodePort:   30000 + int32(mn),
+				},
+				corev1.ServicePort{
+					Name:       "udpport",
+					Port:       5000,
+					TargetPort: intstr.FromInt(5000),
+					Protocol:   corev1.ProtocolUDP,
+					//NodePort:   30000 + int32(mn),
+				},
 				corev1.ServicePort{Name: "grpcport", Port: 6000, TargetPort: intstr.FromInt(6000)},
 				corev1.ServicePort{Name: "jsonport", Port: 7000, TargetPort: intstr.FromInt(7000)},
 				corev1.ServicePort{Name: "grpcportnew", Port: 8000, TargetPort: intstr.FromInt(8000)},
@@ -331,48 +420,55 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 	}, metav1.CreateOptions{})
 
 	if err != nil {
-		return "", "", err
+		channel.Err <- err
+		return
 	}
 
 	fmt.Println("created miner-" + minerNumber + " service")
 
-	nodeName, podName, err := k8s.getDeploymentPodAndNode("miner-" + minerNumber)
-
 	externalIP, err := k8s.getExternalIpOfNode(nodeName)
 
 	if err != nil {
-		return "", "", err
+		channel.Err <- err
+		return
 	}
 
-	port, err := k8s.getExternalPort("miner-"+minerNumber, "tcpport")
+	_, err = k8s.getExternalPort("miner-"+minerNumber, "tcpport")
 
 	if err != nil {
-		return "", "", err
+		channel.Err <- err
+		return
 	}
 
 	grpcport, err := k8s.getExternalPort("miner-"+minerNumber, "grpcport")
 
 	if err != nil {
-		return "", "", err
+		channel.Err <- err
+		return
 	}
 
 	nodeId, err := k8s.getNodeId(podName)
 
 	if err != nil {
-		return "", "", err
+		channel.Err <- err
+		return
 	}
 
-	return "spacemesh://" + nodeId + "@" + externalIP + ":" + port, externalIP + ":" + grpcport, nil
+	channel.Done <- &MinerDeploymentData{
+		"spacemesh://" + nodeId + "@" + clusterIP + ":" + "5000",
+		externalIP + ":" + grpcport,
+	}
 }
 
-func (k8s *Kubernetes) DeployPoet(initialDuration string, poetNumber string, configFile string) (string, error) {
+func (k8s *Kubernetes) DeployPoet(initialDuration string, poetNumber string, configFile string, channel *PoetChannel) {
 
 	fmt.Println("creating poet-" + poetNumber + " pvc")
 
 	err := k8s.createPVC("poet-"+poetNumber, config.MinerDiskSize)
 
 	if err != nil {
-		return "", err
+		channel.Err <- err
+		return
 	}
 
 	fmt.Println("created poet-" + poetNumber + " pvc")
@@ -387,7 +483,8 @@ func (k8s *Kubernetes) DeployPoet(initialDuration string, poetNumber string, con
 	_, err = k8s.Client.CoreV1().ConfigMaps("default").Create(context.TODO(), configMap, metav1.CreateOptions{})
 
 	if err != nil {
-		return "", err
+		channel.Err <- err
+		return
 	}
 
 	deploymentClient := k8s.Client.AppsV1().Deployments(apiv1.NamespaceDefault)
@@ -478,7 +575,8 @@ func (k8s *Kubernetes) DeployPoet(initialDuration string, poetNumber string, con
 	deployment, err = deploymentClient.Create(context.TODO(), deployment, metav1.CreateOptions{})
 
 	if err != nil {
-		return "", err
+		channel.Err <- err
+		return
 	}
 
 	fmt.Println("creating poet-" + poetNumber + " deployment")
@@ -486,7 +584,8 @@ func (k8s *Kubernetes) DeployPoet(initialDuration string, poetNumber string, con
 	for range time.Tick(5 * time.Second) {
 		deployment, err := deploymentClient.Get(context.TODO(), "poet-"+poetNumber, metav1.GetOptions{})
 		if err != nil {
-			return "", err
+			channel.Err <- err
+			return
 		}
 
 		fmt.Println("waiting for poet-" + poetNumber + " deployment")
@@ -519,7 +618,8 @@ func (k8s *Kubernetes) DeployPoet(initialDuration string, poetNumber string, con
 	}, metav1.CreateOptions{})
 
 	if err != nil {
-		return "", err
+		channel.Err <- err
+		return
 	}
 
 	fmt.Println("created poet-" + poetNumber + " service")
@@ -529,16 +629,18 @@ func (k8s *Kubernetes) DeployPoet(initialDuration string, poetNumber string, con
 	externalIP, err := k8s.getExternalIpOfNode(nodeName)
 
 	if err != nil {
-		return "", err
+		channel.Err <- err
+		return
 	}
 
 	port, err := k8s.getExternalPort("poet-"+poetNumber, "restport")
 
 	if err != nil {
-		return "", err
+		channel.Err <- err
+		return
 	}
 
-	return externalIP + ":" + port, nil
+	channel.Done <- &PoetDeploymentData{externalIP + ":" + port}
 }
 
 func int32Ptr(i int32) *int32 { return &i }

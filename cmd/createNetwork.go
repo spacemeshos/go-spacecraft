@@ -29,7 +29,6 @@ func init() {
 	rootCmd.AddCommand(createNetworkCmd)
 
 	createNetworkCmd.Flags().StringVar(&config.GoSmConfig, "go-sm-config", config.GoSmConfig, "config file for go-spacemesh")
-	createNetworkCmd.Flags().StringVar(&config.PoetConfig, "poet-config", config.PoetConfig, "config file for poet")
 	createNetworkCmd.Flags().IntVarP(&config.NumberOfMiners, "miners", "m", config.NumberOfMiners, "number of miners")
 	createNetworkCmd.Flags().IntVarP(&config.NumberOfPoets, "poets", "p", config.NumberOfPoets, "number of poets")
 	createNetworkCmd.Flags().StringVar(&config.MinerMemory, "miner-ram", config.MinerMemory, "RAM for each miner")

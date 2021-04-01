@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
 
@@ -76,10 +77,19 @@ func CreateKubernetesCluster() error {
 	// 	InitialNodeCount: 1,
 	// })
 
+	minerCPUInt, _ := strconv.ParseInt(config.MinerCPU, 10, 8)
+	poetCPUInt, _ := strconv.ParseInt(config.PoetCPU, 10, 8)
+	totalCPURequired := (minerCPUInt * int64(config.NumberOfMiners)) + (poetCPUInt * int64(config.NumberOfPoets))
+	totalCPUInstanceHas := int64(config.GCPMachineMemory)
+
+	fmt.Println(totalCPURequired, totalCPUInstanceHas)
+
+	nodeCount := (totalCPURequired / totalCPUInstanceHas) + 1
+
 	nodePools := [](*containerpb.NodePool){
 		&containerpb.NodePool{
 			Name:             "default",
-			InitialNodeCount: 1,
+			InitialNodeCount: int32(nodeCount),
 			Autoscaling: &containerpb.NodePoolAutoscaling{
 				Enabled:      true,
 				MaxNodeCount: 1000,
