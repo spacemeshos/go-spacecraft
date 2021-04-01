@@ -186,33 +186,6 @@ func (k8s *Kubernetes) getDeploymentClusterIP(name string) (string, error) {
 	return "", errors.New("pod not found")
 }
 
-func (k8s *Kubernetes) makeDeploymentSticky(deploymentName string, labelValue string) error {
-	deploymentClient := k8s.Client.AppsV1().Deployments(apiv1.NamespaceDefault)
-
-	deployment := &appsv1.Deployment{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: deploymentName,
-		},
-		Spec: appsv1.DeploymentSpec{
-			Template: apiv1.PodTemplateSpec{
-				Spec: apiv1.PodSpec{
-					NodeSelector: map[string]string{
-						"kubernetes.io/hostname": labelValue,
-					},
-				},
-			},
-		},
-	}
-
-	_, err := deploymentClient.Update(context.TODO(), deployment, metav1.UpdateOptions{})
-
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, configJSON string, bootstrap bool, bootnodes []string, channel *MinerChannel) {
 	fmt.Println("creating miner-" + minerNumber + " pvc")
 
@@ -241,9 +214,13 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 
 	deploymentClient := k8s.Client.AppsV1().Deployments(apiv1.NamespaceDefault)
 
+	minerNumberInt, _ := strconv.Atoi(minerNumber)
+	bindPort := int32(minerNumberInt + 5000)
+	bindPortStr := strconv.Itoa(int(bindPort))
+
 	command := []string{
 		"--test-mode",
-		"--tcp-port=5000",
+		"--tcp-port=" + bindPortStr,
 		"--acquire-port=0",
 		"--grpc-port=6000",
 		"--json-port=7000",
@@ -288,12 +265,14 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 							Args:    command,
 							Ports: []apiv1.ContainerPort{
 								{
-									ContainerPort: 5000,
+									ContainerPort: bindPort,
 									Protocol:      corev1.ProtocolTCP,
+									HostPort:      bindPort,
 								},
 								{
-									ContainerPort: 5000,
+									ContainerPort: bindPort,
 									Protocol:      corev1.ProtocolUDP,
+									HostPort:      bindPort,
 								},
 								{
 									ContainerPort: 6000,
@@ -378,12 +357,9 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 	fmt.Println("finished miner-" + minerNumber + " deployment")
 
 	nodeName, podName, err := k8s.getDeploymentPodAndNode("miner-" + minerNumber)
-	clusterIP, err := k8s.getDeploymentClusterIP("miner-" + minerNumber)
-	err = k8s.makeDeploymentSticky("miner-"+minerNumber, nodeName)
+	_, err = k8s.getDeploymentClusterIP("miner-" + minerNumber)
 
 	fmt.Println("creating miner-" + minerNumber + " service")
-
-	//mn, _ := strconv.ParseInt(minerNumber, 10, 8)
 
 	_, err = k8s.Client.CoreV1().Services("default").Create(context.TODO(), &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
@@ -394,20 +370,20 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 		},
 		Spec: corev1.ServiceSpec{
 			Ports: []corev1.ServicePort{
-				corev1.ServicePort{
-					Name:       "tcpport",
-					Port:       5000,
-					TargetPort: intstr.FromInt(5000),
-					Protocol:   corev1.ProtocolTCP,
-					//NodePort:   30000 + int32(mn),
-				},
-				corev1.ServicePort{
-					Name:       "udpport",
-					Port:       5000,
-					TargetPort: intstr.FromInt(5000),
-					Protocol:   corev1.ProtocolUDP,
-					//NodePort:   30000 + int32(mn),
-				},
+				// corev1.ServicePort{
+				// 	Name:       "tcpport",
+				// 	Port:       bindPort,
+				// 	TargetPort: intstr.FromInt(int(bindPort)),
+				// 	Protocol:   corev1.ProtocolTCP,
+				// 	//NodePort:   30000 + int32(mn),
+				// },
+				// corev1.ServicePort{
+				// 	Name:       "udpport",
+				// 	Port:       bindPort,
+				// 	TargetPort: intstr.FromInt(int(bindPort)),
+				// 	Protocol:   corev1.ProtocolUDP,
+				// 	//NodePort:   30000 + int32(mn),
+				// },
 				corev1.ServicePort{Name: "grpcport", Port: 6000, TargetPort: intstr.FromInt(6000)},
 				corev1.ServicePort{Name: "jsonport", Port: 7000, TargetPort: intstr.FromInt(7000)},
 				corev1.ServicePort{Name: "grpcportnew", Port: 8000, TargetPort: intstr.FromInt(8000)},
@@ -433,13 +409,6 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 		return
 	}
 
-	_, err = k8s.getExternalPort("miner-"+minerNumber, "tcpport")
-
-	if err != nil {
-		channel.Err <- err
-		return
-	}
-
 	grpcport, err := k8s.getExternalPort("miner-"+minerNumber, "grpcport")
 
 	if err != nil {
@@ -453,9 +422,8 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 		channel.Err <- err
 		return
 	}
-
 	channel.Done <- &MinerDeploymentData{
-		"spacemesh://" + nodeId + "@" + clusterIP + ":" + "5000",
+		"spacemesh://" + nodeId + "@" + externalIP + ":" + bindPortStr,
 		externalIP + ":" + grpcport,
 	}
 }
