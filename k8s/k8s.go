@@ -652,4 +652,31 @@ func (k8s *Kubernetes) DeleteMiner(minerNumber string) error {
 	return nil
 }
 
+func (k8s *Kubernetes) NextDeploymentName() (string, error) {
+	deploymentClient := k8s.Client.AppsV1().Deployments(apiv1.NamespaceDefault)
+	deployments, err := deploymentClient.List(context.TODO(), metav1.ListOptions{})
+	if err != nil {
+		return "", err
+	}
+
+	latest := 0
+
+	for _, deployment := range deployments.Items {
+		if strings.Contains(deployment.Name, "miner-") {
+			s := strings.Split(deployment.Name, "-")
+			i, err := strconv.Atoi(s[1])
+
+			if err != nil {
+				return "", err
+			}
+
+			if i > latest {
+				latest = i
+			}
+		}
+	}
+
+	return strconv.Itoa(latest + 1), nil
+}
+
 func int32Ptr(i int32) *int32 { return &i }

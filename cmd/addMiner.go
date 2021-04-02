@@ -18,34 +18,35 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/spacemeshos/spacecraft/log"
+	"github.com/spacemeshos/spacecraft/network"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 // addMinerCmd represents the addMiner command
 var addMinerCmd = &cobra.Command{
 	Use:   "addMiner",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "Add a miner to an existing network",
+	Long:  `For example: spacecraft addMiner`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("addMiner called")
+		err := network.AddMiner()
+		if err != nil {
+			log.Error.Println(err)
+		}
+
+		log.Success.Println("miner added successfully")
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(addMinerCmd)
 
-	// Here you will define your flags and configuration settings.
+	addMinerCmd.Flags().StringVar(&config.MinerGoSmConfig, "miner-go-sm-config", config.MinerGoSmConfig, "config file location for the new miner (example \"./config.json\")")
+	addMinerCmd.Flags().StringVar(&config.MinerNumber, "miner-number", config.MinerNumber, "miner to add")
 
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// addMinerCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// addMinerCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	err := viper.BindPFlags(addMinerCmd.Flags())
+	if err != nil {
+		fmt.Println("an error has occurred while binding flags:", err)
+	}
 }
