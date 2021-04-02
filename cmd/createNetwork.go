@@ -20,8 +20,8 @@ spacecraft createNetwork -m=10 -p=3`,
 		if err != nil {
 			log.Error.Println(err)
 		}
-		// ctx, _ := context.WithCancel(context.Background())
-		// <-ctx.Done()
+
+		log.Success.Println("network created successfully")
 	},
 }
 

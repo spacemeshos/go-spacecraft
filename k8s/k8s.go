@@ -641,4 +641,15 @@ func (k8s *Kubernetes) DeployPoet(initialDuration string, poetNumber string, con
 	channel.Done <- &PoetDeploymentData{externalIP + ":" + port}
 }
 
+func (k8s *Kubernetes) DeleteMiner(minerNumber string) error {
+	deploymentClient := k8s.Client.AppsV1().Deployments(apiv1.NamespaceDefault)
+
+	err := deploymentClient.Delete(context.TODO(), "miner-"+minerNumber, metav1.DeleteOptions{})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func int32Ptr(i int32) *int32 { return &i }

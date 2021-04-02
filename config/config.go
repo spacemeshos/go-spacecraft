@@ -22,6 +22,7 @@ type Configuration struct {
 	BootnodeAmount    int    `mapstructure:"bootnode-amount"`
 	GCPMachineCPU     int    `mapstructure:"gcp-machine-cpu"`
 	GenesisDelay      int    `mapstructure:"genesis-delay"`
+	MinerNumber       string `mapstructure:"miner-number"`
 }
 
 var Config = Configuration{
@@ -46,4 +47,5 @@ var Config = Configuration{
 	PoetGatewayAmount: 4,
 	BootnodeAmount:    6,
 	GenesisDelay:      10,
+	MinerNumber:       "0",
 }

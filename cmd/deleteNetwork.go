@@ -14,6 +14,8 @@ var deleteNetworkCmd = &cobra.Command{
 		if err != nil {
 			log.Error.Println(err)
 		}
+
+		log.Success.Println("network deleted successfully")
 	},
 }
 
