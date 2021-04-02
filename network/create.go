@@ -50,7 +50,9 @@ func Create() error {
 	minerConfigJson.SetP(genesisTime, "main.genesis-time")
 	minerConfigJson.SetP(config.NumberOfMiners, "main.genesis-active-size")
 
+	//should be less than total miners
 	minerConfigJson.SetP(int(((float64(config.NumberOfMiners) / 100) * 60)), "hare.hare-committee-size")
+	//should be half-1 of hare committee size
 	minerConfigJson.SetP(int((((float64(config.NumberOfMiners)/100)*60)/2)-1), "hare.hare-max-adversaries")
 
 	layerDurationSec, ok := minerConfigJson.Path("main.layer-duration-sec").Data().(float64)
@@ -82,6 +84,7 @@ func Create() error {
 		Done: make(chan *k8s.PoetDeploymentData),
 	}
 
+	//Deploy Poet(s)
 	for i := 0; i < config.NumberOfPoets; i++ {
 		go kubernetes.DeployPoet(poetInitialDurations[i], strconv.Itoa(i+1), poetConfig, poetChan)
 	}
@@ -169,6 +172,7 @@ func Create() error {
 		}
 	}
 
+	//Activate poet(s)
 	gateways := minerGRPCURls[0:config.PoetGatewayAmount]
 
 	for i := 0; i < config.NumberOfPoets; i++ {
