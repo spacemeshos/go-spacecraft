@@ -25,8 +25,9 @@ import (
 var config = &cfg.Config
 
 type Kubernetes struct {
-	Client     *kubernetes.Clientset
-	RestConfig *restclient.Config
+	Client      *kubernetes.Clientset
+	RestConfig  *restclient.Config
+	CurrentNode int
 }
 
 type MinerDeploymentData struct {
@@ -186,7 +187,25 @@ func (k8s *Kubernetes) getDeploymentClusterIP(name string) (string, error) {
 	return "", errors.New("pod not found")
 }
 
-func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, configJSON string, bootstrap bool, bootnodes []string, channel *MinerChannel) {
+func (k8s *Kubernetes) NextNode() (string, error) {
+	nodes, err := k8s.Client.CoreV1().Nodes().List(context.Background(), metav1.ListOptions{})
+
+	if err != nil {
+		return "", err
+	}
+
+	if k8s.CurrentNode >= len(nodes.Items) {
+		k8s.CurrentNode = 0
+	}
+
+	node := nodes.Items[k8s.CurrentNode]
+
+	k8s.CurrentNode += 1
+
+	return node.Name, nil
+}
+
+func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, configJSON string, selectedNode string, channel *MinerChannel) {
 	fmt.Println("creating miner-" + minerNumber + " pvc")
 
 	err := k8s.createPVC("miner-"+minerNumber, config.MinerDiskSize)
@@ -232,11 +251,6 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 		"--config=/etc/config/config.json",
 		"--post-datadir=/root/data/post",
 		"-d=/root/data/node",
-	}
-
-	if bootstrap == true {
-		command = append(command, "--bootstrap")
-		command = append(command, "--bootnodes="+strings.Join(bootnodes[:], ","))
 	}
 
 	deployment := &appsv1.Deployment{
@@ -331,6 +345,14 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 		},
 	}
 
+	nodeSelector := map[string]string{}
+
+	if selectedNode != "" {
+		fmt.Println("node selected: ", selectedNode, "miner-"+minerNumber)
+		nodeSelector["kubernetes.io/hostname"] = selectedNode
+		deployment.Spec.Template.Spec.NodeSelector = nodeSelector
+	}
+
 	deployment, err = deploymentClient.Create(context.TODO(), deployment, metav1.CreateOptions{})
 
 	if err != nil {
@@ -357,7 +379,6 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 	fmt.Println("finished miner-" + minerNumber + " deployment")
 
 	nodeName, podName, err := k8s.getDeploymentPodAndNode("miner-" + minerNumber)
-	_, err = k8s.getDeploymentClusterIP("miner-" + minerNumber)
 
 	fmt.Println("creating miner-" + minerNumber + " service")
 
@@ -401,6 +422,11 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 	}
 
 	fmt.Println("created miner-" + minerNumber + " service")
+
+	if err != nil {
+		channel.Err <- err
+		return
+	}
 
 	externalIP, err := k8s.getExternalIpOfNode(nodeName)
 

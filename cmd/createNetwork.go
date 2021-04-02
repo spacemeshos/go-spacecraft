@@ -41,6 +41,7 @@ func init() {
 	createNetworkCmd.Flags().StringVar(&config.PoetImage, "poet-image", config.PoetImage, "docker image for poet build")
 	createNetworkCmd.Flags().IntVar(&config.PoetGatewayAmount, "poet-gateway-amount", config.PoetGatewayAmount, "number of gateway to pass when activating poet(s)")
 	createNetworkCmd.Flags().IntVar(&config.BootnodeAmount, "bootnode-amount", config.BootnodeAmount, "total bootnodes in the generated config file")
+	createNetworkCmd.Flags().IntVar(&config.GCPMachineCPU, "gcp-machine-cpu", config.GCPMachineCPU, "total CPU the GCP machine type has")
 
 	err := viper.BindPFlags(createNetworkCmd.Flags())
 	if err != nil {

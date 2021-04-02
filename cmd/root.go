@@ -25,6 +25,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file")
 	rootCmd.PersistentFlags().StringVarP(&config.NetworkName, "network-name", "n", config.NetworkName, "name of the network")
 	rootCmd.PersistentFlags().StringVar(&config.GCPLocation, "gcp-location", config.GCPLocation, "gcp cluster location")
+	rootCmd.PersistentFlags().StringVar(&config.GCPZone, "gcp-zone", config.GCPZone, "gcp cluster zone")
 	rootCmd.PersistentFlags().StringVar(&config.GCPProject, "gcp-project", config.GCPProject, "gcp project")
 
 	err := viper.BindPFlags(rootCmd.PersistentFlags())

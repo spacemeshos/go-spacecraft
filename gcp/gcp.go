@@ -29,7 +29,6 @@ func getClient() (*container.ClusterManagerClient, error) {
 		return nil, errors.New("please provide JSON key file, project name and location for gcp authorization")
 	}
 
-	// c, err := container.NewClusterManagerClient(ctx, option.WithCredentialsFile(config.GCPAuthFile))
 	c, err := container.NewClusterManagerClient(ctx)
 
 	if err != nil {
@@ -72,17 +71,16 @@ func CreateKubernetesCluster() error {
 		}
 	}
 
-	// fmt.Printf("%+v", containerpb.Cluster{
-	// 	Name:             config.NetworkName,
-	// 	InitialNodeCount: 1,
-	// })
-
 	minerCPUInt, _ := strconv.ParseInt(config.MinerCPU, 10, 8)
 	poetCPUInt, _ := strconv.ParseInt(config.PoetCPU, 10, 8)
 	totalCPURequired := (minerCPUInt * int64(config.NumberOfMiners)) + (poetCPUInt * int64(config.NumberOfPoets))
-	totalCPUInstanceHas := int64(config.GCPMachineMemory)
+	totalCPUInstanceHas := int64(config.GCPMachineCPU)
 
 	nodeCount := (totalCPURequired / totalCPUInstanceHas) + 1
+
+	if nodeCount == 0 {
+		nodeCount = 1
+	}
 
 	nodePools := [](*containerpb.NodePool){
 		&containerpb.NodePool{
@@ -95,6 +93,7 @@ func CreateKubernetesCluster() error {
 			Config: &containerpb.NodeConfig{
 				MachineType: config.GCPMachineType,
 			},
+			Locations: []string{config.GCPZone},
 		},
 	}
 
@@ -183,17 +182,6 @@ func GetKubernetesClient() (*restclient.Config, *kubernetes.Clientset, error) {
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to create Kubernetes client cluster=%s: %w", name, err)
 	}
-
-	// ns, err := k8s.CoreV1().Namespaces().List(context.Background(), metav1.ListOptions{})
-	// if err != nil {
-	// 	return nil, fmt.Errorf("failed to list namespaces cluster=%s: %w", name, err)
-	// }
-
-	// fmt.Printf("Namespaces found in cluster=%s", name)
-
-	// for _, item := range ns.Items {
-	// 	fmt.Println(item.Name)
-	// }
 
 	return cfg, k8s, nil
 }

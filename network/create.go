@@ -29,7 +29,7 @@ func Create() error {
 		return err
 	}
 
-	kubernetes := k8s.Kubernetes{k8sClient, k8sRestConfig}
+	kubernetes := k8s.Kubernetes{k8sClient, k8sRestConfig, 0}
 
 	minerConfigBuf, err := ioutil.ReadFile(config.GoSmConfig)
 
@@ -106,7 +106,11 @@ func Create() error {
 	}
 
 	//Deploy Bootstrap
-	go kubernetes.DeployMiner(true, strconv.Itoa(1), minerConfigJson.String(), false, []string{}, minerChan)
+	nextNode, err := kubernetes.NextNode()
+	if err != nil {
+		return err
+	}
+	go kubernetes.DeployMiner(true, strconv.Itoa(1), minerConfigJson.String(), nextNode, minerChan)
 	select {
 	case err := <-minerChan.Err:
 		return err
@@ -116,10 +120,14 @@ func Create() error {
 	}
 
 	//Deploy bootnodes
-	//minerConfigJson.SetP(true, "p2p.swarm.bootstrap")
-	//minerConfigJson.SetP(miners[0:1], "p2p.swarm.bootnodes")
+	minerConfigJson.SetP(true, "p2p.swarm.bootstrap")
+	minerConfigJson.SetP(miners[0:1], "p2p.swarm.bootnodes")
 	for i := 1; i <= config.BootnodeAmount; i++ {
-		go kubernetes.DeployMiner(true, strconv.Itoa(i+1), minerConfigJson.String(), true, miners[0:1], minerChan)
+		nextNode, err := kubernetes.NextNode()
+		if err != nil {
+			return err
+		}
+		go kubernetes.DeployMiner(true, strconv.Itoa(i+1), minerConfigJson.String(), nextNode, minerChan)
 	}
 
 	for i := 1; i <= config.BootnodeAmount; i++ {
@@ -133,10 +141,9 @@ func Create() error {
 	}
 
 	//Deploy remaining miners
-	// minerConfigJson.SetP(true, "p2p.swarm.bootstrap")
-	// minerConfigJson.SetP(miners[0:config.BootnodeAmount], "p2p.swarm.bootnodes")
+	minerConfigJson.SetP(miners[0:config.BootnodeAmount], "p2p.swarm.bootnodes")
 	for i := config.BootnodeAmount + 1; i < config.NumberOfMiners; i++ {
-		go kubernetes.DeployMiner(true, strconv.Itoa(i+1), minerConfigJson.String(), true, miners[0:config.BootnodeAmount], minerChan)
+		go kubernetes.DeployMiner(true, strconv.Itoa(i+1), minerConfigJson.String(), "", minerChan)
 	}
 
 	for i := config.BootnodeAmount + 1; i < config.NumberOfMiners; i++ {

@@ -20,7 +20,7 @@ require (
 	golang.org/x/sys v0.0.0-20210320140829-1e4c9ba3b0c4 // indirect
 	golang.org/x/text v0.3.5 // indirect
 	google.golang.org/api v0.20.0
-	google.golang.org/genproto v0.0.0-20200526211855-cb27e3aa2013
+	google.golang.org/genproto v0.0.0-20210401141331-865547bb08e2
 	gopkg.in/ini.v1 v1.62.0 // indirect
 	k8s.io/api v0.20.5
 	k8s.io/apimachinery v0.20.5
