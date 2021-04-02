@@ -21,6 +21,7 @@ type Configuration struct {
 	PoetGatewayAmount int    `mapstructure:"poet-gateway-amount"`
 	BootnodeAmount    int    `mapstructure:"bootnode-amount"`
 	GCPMachineCPU     int    `mapstructure:"gcp-machine-cpu"`
+	GenesisDelay      int    `mapstructure:"genesis-delay"`
 }
 
 var Config = Configuration{
@@ -44,4 +45,5 @@ var Config = Configuration{
 	InitPhaseShift:    0,
 	PoetGatewayAmount: 4,
 	BootnodeAmount:    6,
+	GenesisDelay:      10,
 }

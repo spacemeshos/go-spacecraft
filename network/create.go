@@ -29,7 +29,7 @@ func Create() error {
 		return err
 	}
 
-	kubernetes := k8s.Kubernetes{k8sClient, k8sRestConfig, 0}
+	kubernetes := k8s.Kubernetes{Client: k8sClient, RestConfig: k8sRestConfig}
 
 	minerConfigBuf, err := ioutil.ReadFile(config.GoSmConfig)
 
@@ -44,7 +44,7 @@ func Create() error {
 		return err
 	}
 
-	genesisMinutes := 5
+	genesisMinutes := config.GenesisDelay
 
 	genesisTime := time.Now().Add(time.Duration(genesisMinutes) * time.Minute).Format(time.RFC3339)
 	minerConfigJson.SetP(genesisTime, "main.genesis-time")
@@ -95,7 +95,17 @@ func Create() error {
 		}
 	}
 
-	minerConfigJson.SetP(poetRESTUrls[0], "main.poet-server")
+	//assign poets to miners in round robin fashion
+	currentPoet := 0
+	nextPoet := func() string {
+		if currentPoet >= len(poetRESTUrls) {
+			currentPoet = 0
+		}
+
+		currentPoet += 1
+
+		return poetRESTUrls[currentPoet-1]
+	}
 
 	var miners []string
 	var minerGRPCURls []string
@@ -110,6 +120,7 @@ func Create() error {
 	if err != nil {
 		return err
 	}
+	minerConfigJson.SetP(nextPoet(), "main.poet-server")
 	go kubernetes.DeployMiner(true, strconv.Itoa(1), minerConfigJson.String(), nextNode, minerChan)
 	select {
 	case err := <-minerChan.Err:
@@ -127,6 +138,7 @@ func Create() error {
 		if err != nil {
 			return err
 		}
+		minerConfigJson.SetP(nextPoet(), "main.poet-server")
 		go kubernetes.DeployMiner(true, strconv.Itoa(i+1), minerConfigJson.String(), nextNode, minerChan)
 	}
 
@@ -143,6 +155,7 @@ func Create() error {
 	//Deploy remaining miners
 	minerConfigJson.SetP(miners[0:config.BootnodeAmount], "p2p.swarm.bootnodes")
 	for i := config.BootnodeAmount + 1; i < config.NumberOfMiners; i++ {
+		minerConfigJson.SetP(nextPoet(), "main.poet-server")
 		go kubernetes.DeployMiner(true, strconv.Itoa(i+1), minerConfigJson.String(), "", minerChan)
 	}
 

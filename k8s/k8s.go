@@ -8,6 +8,7 @@ import (
 	"io"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	appsv1 "k8s.io/api/apps/v1"
@@ -28,6 +29,7 @@ type Kubernetes struct {
 	Client      *kubernetes.Clientset
 	RestConfig  *restclient.Config
 	CurrentNode int
+	mu          sync.Mutex
 }
 
 type MinerDeploymentData struct {
@@ -194,6 +196,9 @@ func (k8s *Kubernetes) NextNode() (string, error) {
 		return "", err
 	}
 
+	k8s.mu.Lock()
+	defer k8s.mu.Unlock()
+
 	if k8s.CurrentNode >= len(nodes.Items) {
 		k8s.CurrentNode = 0
 	}
@@ -348,7 +353,6 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 	nodeSelector := map[string]string{}
 
 	if selectedNode != "" {
-		fmt.Println("node selected: ", selectedNode, "miner-"+minerNumber)
 		nodeSelector["kubernetes.io/hostname"] = selectedNode
 		deployment.Spec.Template.Spec.NodeSelector = nodeSelector
 	}
