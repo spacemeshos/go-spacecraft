@@ -185,3 +185,23 @@ func GetKubernetesClient() (*restclient.Config, *kubernetes.Clientset, error) {
 
 	return cfg, k8s, nil
 }
+
+func DeleteKubernetesCluster() error {
+	client, err := getClient()
+
+	if err != nil {
+		return err
+	}
+
+	req := &containerpb.DeleteClusterRequest{
+		Name: "projects/" + config.GCPProject + "/locations/" + config.GCPLocation + "/clusters/" + config.NetworkName,
+	}
+
+	_, err = client.DeleteCluster(context.Background(), req)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
