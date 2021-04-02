@@ -156,7 +156,8 @@ func Create() error {
 	}
 
 	//Deploy remaining miners
-	minerConfigJson.SetP(miners[0:config.BootnodeAmount], "p2p.swarm.bootnodes")
+	fmt.Println(miners[1 : config.BootnodeAmount+1])
+	minerConfigJson.SetP(miners[1:config.BootnodeAmount+1], "p2p.swarm.bootnodes")
 	for i := config.BootnodeAmount + 1; i < config.NumberOfMiners; i++ {
 		minerConfigJson.SetP(nextPoet(), "main.poet-server")
 		go kubernetes.DeployMiner(true, strconv.Itoa(i+1), minerConfigJson.String(), "", minerChan)
@@ -186,6 +187,12 @@ func Create() error {
 		if err != nil {
 			return err
 		}
+	}
+
+	err = gcp.UploadConfig(minerConfigJson.StringIndent("", "	"))
+
+	if err != nil {
+		return err
 	}
 
 	return nil

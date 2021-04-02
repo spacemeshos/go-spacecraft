@@ -4,6 +4,7 @@ go 1.15
 
 require (
 	cloud.google.com/go v0.54.0
+	cloud.google.com/go/storage v1.6.0
 	github.com/Jeffail/gabs/v2 v2.6.0
 	github.com/fatih/color v1.7.0
 	github.com/fsnotify/fsnotify v1.4.9 // indirect
