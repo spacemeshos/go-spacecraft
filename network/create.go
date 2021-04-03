@@ -156,7 +156,6 @@ func Create() error {
 	}
 
 	//Deploy remaining miners
-	fmt.Println(miners[1 : config.BootnodeAmount+1])
 	minerConfigJson.SetP(miners[1:config.BootnodeAmount+1], "p2p.swarm.bootnodes")
 	for i := config.BootnodeAmount + 1; i < config.NumberOfMiners; i++ {
 		minerConfigJson.SetP(nextPoet(), "main.poet-server")

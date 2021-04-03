@@ -19,6 +19,7 @@ spacecraft createNetwork -m=10 -p=3`,
 		err := network.Create()
 		if err != nil {
 			log.Error.Println(err)
+			return
 		}
 
 		log.Success.Println("network created successfully")

@@ -264,6 +264,9 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 		},
 		Spec: appsv1.DeploymentSpec{
 			Replicas: int32Ptr(1),
+			Strategy: appsv1.DeploymentStrategy{
+				Type: appsv1.RecreateDeploymentStrategyType,
+			},
 			Selector: &metav1.LabelSelector{
 				MatchLabels: map[string]string{
 					"miner": minerNumber,
@@ -652,7 +655,7 @@ func (k8s *Kubernetes) DeleteMiner(minerNumber string) error {
 	return nil
 }
 
-func (k8s *Kubernetes) NextDeploymentName() (string, error) {
+func (k8s *Kubernetes) NextMinerName() (string, error) {
 	deploymentClient := k8s.Client.AppsV1().Deployments(apiv1.NamespaceDefault)
 	deployments, err := deploymentClient.List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
@@ -677,6 +680,57 @@ func (k8s *Kubernetes) NextDeploymentName() (string, error) {
 	}
 
 	return strconv.Itoa(latest + 1), nil
+}
+
+func (k8s *Kubernetes) GetMiners() ([]string, error) {
+	deploymentClient := k8s.Client.AppsV1().Deployments(apiv1.NamespaceDefault)
+	deployments, err := deploymentClient.List(context.TODO(), metav1.ListOptions{})
+	if err != nil {
+		return []string{}, err
+	}
+
+	miners := []string{}
+
+	for _, deployment := range deployments.Items {
+		if strings.Contains(deployment.Name, "miner-") {
+			miners = append(miners, deployment.Name)
+		}
+	}
+
+	return miners, nil
+}
+
+func (k8s *Kubernetes) UpdateImageOfMiners(name string) error {
+	fmt.Println("updating image of " + name)
+	deploymentClient := k8s.Client.AppsV1().Deployments(apiv1.NamespaceDefault)
+	deployment, err := deploymentClient.Get(context.TODO(), name, metav1.GetOptions{})
+	if err != nil {
+		return err
+	}
+
+	deployment.Spec.Template.Spec.Containers[0].Image = config.GoSmImage
+
+	_, err = deploymentClient.Update(context.TODO(), deployment, metav1.UpdateOptions{})
+	if err != nil {
+		return err
+	}
+
+	for range time.Tick(5 * time.Second) {
+		deployment, err = deploymentClient.Get(context.TODO(), name, metav1.GetOptions{})
+		if err != nil {
+			return err
+		}
+
+		fmt.Println("waiting for " + name + " to start")
+
+		if deployment.Status.ReadyReplicas == 1 {
+			break
+		}
+	}
+
+	fmt.Println("updated image of " + name)
+
+	return nil
 }
 
 func int32Ptr(i int32) *int32 { return &i }

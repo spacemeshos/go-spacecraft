@@ -20,7 +20,7 @@ func AddMiner() error {
 	if config.MinerNumber != "" {
 		minerNumber = config.MinerNumber
 	} else {
-		minerNumber, err = kubernetes.NextDeploymentName()
+		minerNumber, err = kubernetes.NextMinerName()
 
 		if err != nil {
 			return err

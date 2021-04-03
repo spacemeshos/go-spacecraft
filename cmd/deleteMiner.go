@@ -19,6 +19,7 @@ spacecraft deleteMiner --miner=1`,
 		err := network.DeleteMiner()
 		if err != nil {
 			log.Error.Println(err)
+			return
 		}
 
 		log.Success.Println("miner delete successfully")

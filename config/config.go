@@ -24,6 +24,7 @@ type Configuration struct {
 	GenesisDelay      int    `mapstructure:"genesis-delay"`
 	MinerNumber       string `mapstructure:"miner-number"`
 	MinerGoSmConfig   string `mapstructure:"miner-go-sm-config"`
+	RestartWaitTime   int    `mapstructure:"restart-wait-time"`
 }
 
 var Config = Configuration{
@@ -50,4 +51,5 @@ var Config = Configuration{
 	GenesisDelay:      10,
 	MinerNumber:       "",
 	MinerGoSmConfig:   "",
+	RestartWaitTime:   2,
 }

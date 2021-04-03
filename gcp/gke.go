@@ -140,6 +140,11 @@ func CreateKubernetesCluster() error {
 
 func GetKubernetesClient() (*restclient.Config, *kubernetes.Clientset, error) {
 	cluster, err := getCluster()
+
+	if err != nil {
+		return nil, nil, err
+	}
+
 	ret := api.Config{
 		APIVersion: "v1",
 		Kind:       "Config",

@@ -33,6 +33,7 @@ var addMinerCmd = &cobra.Command{
 		err := network.AddMiner()
 		if err != nil {
 			log.Error.Println(err)
+			return
 		}
 
 		log.Success.Println("miner added successfully")
