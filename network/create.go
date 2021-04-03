@@ -31,7 +31,13 @@ func Create() error {
 
 	kubernetes := k8s.Kubernetes{Client: k8sClient, RestConfig: k8sRestConfig}
 
-	minerConfigBuf, err := ioutil.ReadFile(config.GoSmConfig)
+	minerConfigBuf := []byte{}
+
+	if config.Bootstrap {
+		minerConfigBuf, err = ioutil.ReadFile(config.GoSmConfig)
+	} else {
+		minerConfigBuf, err = ioutil.ReadFile(config.MinerGoSmConfig)
+	}
 
 	if err != nil {
 		return err
@@ -46,14 +52,16 @@ func Create() error {
 
 	genesisMinutes := config.GenesisDelay
 
-	genesisTime := time.Now().Add(time.Duration(genesisMinutes) * time.Minute).Format(time.RFC3339)
-	minerConfigJson.SetP(genesisTime, "main.genesis-time")
-	minerConfigJson.SetP(config.NumberOfMiners, "main.genesis-active-size")
+	if config.Bootstrap {
+		genesisTime := time.Now().Add(time.Duration(genesisMinutes) * time.Minute).Format(time.RFC3339)
+		minerConfigJson.SetP(genesisTime, "main.genesis-time")
+		minerConfigJson.SetP(config.NumberOfMiners, "main.genesis-active-size")
 
-	//should be less than total miners
-	minerConfigJson.SetP(int(((float64(config.NumberOfMiners) / 100) * 60)), "hare.hare-committee-size")
-	//should be half-1 of hare committee size
-	minerConfigJson.SetP(int((((float64(config.NumberOfMiners)/100)*60)/2)-1), "hare.hare-max-adversaries")
+		//should be less than total miners
+		minerConfigJson.SetP(int(((float64(config.NumberOfMiners) / 100) * 60)), "hare.hare-committee-size")
+		//should be half-1 of hare committee size
+		minerConfigJson.SetP(int((((float64(config.NumberOfMiners)/100)*60)/2)-1), "hare.hare-max-adversaries")
+	}
 
 	layerDurationSec, ok := minerConfigJson.Path("main.layer-duration-sec").Data().(float64)
 
@@ -119,24 +127,36 @@ func Create() error {
 	}
 
 	//Deploy Bootstrap
-	nextNode, err := kubernetes.NextNode()
-	if err != nil {
-		return err
+	if config.Bootstrap {
+		nextNode, err := kubernetes.NextNode()
+		if err != nil {
+			return err
+		}
+		minerConfigJson.SetP(nextPoet(), "main.poet-server")
+		go kubernetes.DeployMiner(true, strconv.Itoa(1), minerConfigJson.String(), nextNode, minerChan)
+		select {
+		case err := <-minerChan.Err:
+			return err
+		case miner := <-minerChan.Done:
+			miners = append(miners, miner.TcpURL)
+			minerGRPCURls = append(minerGRPCURls, miner.GrpcURL)
+		}
 	}
-	minerConfigJson.SetP(nextPoet(), "main.poet-server")
-	go kubernetes.DeployMiner(true, strconv.Itoa(1), minerConfigJson.String(), nextNode, minerChan)
-	select {
-	case err := <-minerChan.Err:
-		return err
-	case miner := <-minerChan.Done:
-		miners = append(miners, miner.TcpURL)
-		minerGRPCURls = append(minerGRPCURls, miner.GrpcURL)
-	}
+
+	start, end := 0, 0
 
 	//Deploy bootnodes
 	minerConfigJson.SetP(true, "p2p.swarm.bootstrap")
-	minerConfigJson.SetP(miners[0:1], "p2p.swarm.bootnodes")
-	for i := 1; i <= config.BootnodeAmount; i++ {
+	if config.Bootstrap {
+		minerConfigJson.SetP(miners[0:1], "p2p.swarm.bootnodes")
+		start = 1
+		end = config.BootnodeAmount
+	} else {
+		start = 0
+		end = config.BootnodeAmount - 1
+	}
+
+	for i := start; i <= end; i++ {
 		nextNode, err := kubernetes.NextNode()
 		if err != nil {
 			return err
@@ -145,7 +165,7 @@ func Create() error {
 		go kubernetes.DeployMiner(true, strconv.Itoa(i+1), minerConfigJson.String(), nextNode, minerChan)
 	}
 
-	for i := 1; i <= config.BootnodeAmount; i++ {
+	for i := start; i <= end; i++ {
 		select {
 		case err := <-minerChan.Err:
 			return err
@@ -156,13 +176,21 @@ func Create() error {
 	}
 
 	//Deploy remaining miners
-	minerConfigJson.SetP(miners[1:config.BootnodeAmount+1], "p2p.swarm.bootnodes")
-	for i := config.BootnodeAmount + 1; i < config.NumberOfMiners; i++ {
+	if config.Bootstrap {
+		minerConfigJson.SetP(miners[1:config.BootnodeAmount+1], "p2p.swarm.bootnodes")
+		start = config.BootnodeAmount + 1
+		end = config.NumberOfMiners
+	} else {
+		minerConfigJson.SetP(miners[0:config.BootnodeAmount], "p2p.swarm.bootnodes")
+		start = config.BootnodeAmount
+		end = config.NumberOfMiners
+	}
+	for i := start; i < end; i++ {
 		minerConfigJson.SetP(nextPoet(), "main.poet-server")
 		go kubernetes.DeployMiner(true, strconv.Itoa(i+1), minerConfigJson.String(), "", minerChan)
 	}
 
-	for i := config.BootnodeAmount + 1; i < config.NumberOfMiners; i++ {
+	for i := start; i < end; i++ {
 		select {
 		case err := <-minerChan.Err:
 			return err

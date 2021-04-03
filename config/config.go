@@ -25,6 +25,7 @@ type Configuration struct {
 	MinerNumber       string `mapstructure:"miner-number"`
 	MinerGoSmConfig   string `mapstructure:"miner-go-sm-config"`
 	RestartWaitTime   int    `mapstructure:"restart-wait-time"`
+	Bootstrap         bool   `mapstructure:"bootstrap"`
 }
 
 var Config = Configuration{
@@ -52,4 +53,5 @@ var Config = Configuration{
 	MinerNumber:       "",
 	MinerGoSmConfig:   "",
 	RestartWaitTime:   2,
+	Bootstrap:         true,
 }
