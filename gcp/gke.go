@@ -76,7 +76,7 @@ func CreateKubernetesCluster() error {
 	totalCPURequired := (minerCPUInt * int64(config.NumberOfMiners)) + (poetCPUInt * int64(config.NumberOfPoets))
 	totalCPUInstanceHas := int64(config.GCPMachineCPU)
 
-	nodeCount := (totalCPURequired / totalCPUInstanceHas) + 1
+	nodeCount := (totalCPURequired / totalCPUInstanceHas)
 
 	if nodeCount == 0 {
 		nodeCount = 1
