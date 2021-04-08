@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"math"
 	"strconv"
 	"strings"
 	"time"
@@ -76,7 +77,7 @@ func CreateKubernetesCluster() error {
 	totalCPURequired := (minerCPUInt * int64(config.NumberOfMiners)) + (poetCPUInt * int64(config.NumberOfPoets))
 	totalCPUInstanceHas := int64(config.GCPMachineCPU)
 
-	nodeCount := (totalCPURequired / totalCPUInstanceHas)
+	nodeCount := int(math.Ceil((float64(totalCPURequired) / float64(totalCPUInstanceHas))))
 
 	if nodeCount == 0 {
 		nodeCount = 1

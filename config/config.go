@@ -44,7 +44,7 @@ var Config = Configuration{
 	GCPLocation:       "",
 	GCPZone:           "",
 	GCPMachineType:    "e2-standard-16",
-	GCPMachineCPU:     16,
+	GCPMachineCPU:     15,
 	GoSmConfig:        "./artifacts/devnet/miner/config.json",
 	InitPhaseShift:    0,
 	PoetGatewayAmount: 4,
