@@ -11,6 +11,7 @@ require (
 	github.com/magiconair/properties v1.8.4 // indirect
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mitchellh/mapstructure v1.4.1 // indirect
+	github.com/mittwald/go-helm-client v0.4.3
 	github.com/pelletier/go-toml v1.8.1 // indirect
 	github.com/spf13/afero v1.6.0 // indirect
 	github.com/spf13/cast v1.3.1 // indirect
@@ -23,6 +24,7 @@ require (
 	google.golang.org/api v0.20.0
 	google.golang.org/genproto v0.0.0-20210401141331-865547bb08e2
 	gopkg.in/ini.v1 v1.62.0 // indirect
+	helm.sh/helm/v3 v3.5.1
 	k8s.io/api v0.20.5
 	k8s.io/apimachinery v0.20.5
 	k8s.io/client-go v0.20.5

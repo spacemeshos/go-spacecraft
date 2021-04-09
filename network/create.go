@@ -31,6 +31,12 @@ func Create() error {
 
 	kubernetes := k8s.Kubernetes{Client: k8sClient, RestConfig: k8sRestConfig}
 
+	// err = kubernetes.DeployELK()
+	// if err != nil {
+	// 	return err
+	// }
+	// return nil
+
 	minerConfigBuf := []byte{}
 
 	if config.Bootstrap {
