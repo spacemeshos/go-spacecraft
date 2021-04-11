@@ -212,8 +212,8 @@ func Create() error {
 		postBody, _ := json.Marshal(map[string][]string{
 			"gatewayAddresses": gateways,
 		})
-		responseBody := bytes.NewBuffer(postBody)
-		_, err := http.Post("http://"+poetRESTUrl+"/v1/start", "application/json", responseBody)
+		requestBody := bytes.NewBuffer(postBody)
+		_, err := http.Post("http://"+poetRESTUrl+"/v1/start", "application/json", requestBody)
 
 		if err != nil {
 			return err

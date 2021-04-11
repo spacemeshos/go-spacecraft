@@ -1,7 +1,12 @@
 package k8s
 
 import (
+	"bytes"
 	"context"
+	"errors"
+	"io/ioutil"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"net/http"
 	"strings"
 
 	helm "github.com/mittwald/go-helm-client"
@@ -63,12 +68,12 @@ func (k8s *Kubernetes) DeployELK() error {
 		ValuesYaml: sanitizeYaml(`
 			persistence:
 				enabled: true
-			
+	
 			logstashConfig:
 				logstash.yml: |
 					http.host: 0.0.0.0
 					xpack.monitoring.enabled: false
-			
+	
 			logstashPipeline:
 				uptime.conf: |
 					input { beats { port => 5044 } }
@@ -78,28 +83,28 @@ func (k8s *Kubernetes) DeployELK() error {
 							target => "sm"
 							skip_on_invalid_json => false
 						}
-			
-						mutate { 
+	
+						mutate {
 							add_field => { "name" => "%{[kubernetes][labels][name]}" }
-			
+	
 							remove_field => [
-								"log", 
-								"cloud", 
-								"ecs", 
-								"agent", 
-								"input", 
-								"tags", 
+								"log",
+								"cloud",
+								"ecs",
+								"agent",
+								"input",
+								"tags",
 								"docker",
 								"container",
 								"host",
 								"message",
 								"[sm][T]",
 								"kubernetes"
-							]   
+							]
 						}
 					}
 					output { elasticsearch { hosts => ["http://elasticsearch-master:9200"] index => "sm-logs" manage_template => false } }
-
+	
 			service:
 				annotations: {}
 				type: ClusterIP
@@ -175,5 +180,55 @@ func (k8s *Kubernetes) DeployELK() error {
 		return err
 	}
 
+	kibanaURL, err := k8s.GetKibanaURL()
+
+	if err != nil {
+		return err
+	}
+
+	requestBody := bytes.NewBuffer([]byte("{\"attributes\":{\"title\":\"sm-*\",\"timeFieldName\":\"@timestamp\"}}"))
+
+	req, err := http.NewRequest("POST", "http://"+kibanaURL+"/api/saved_objects/index-pattern/*?overwrite=true", requestBody)
+	req.Header.Set("kbn-xsrf", "reporting")
+	req.Header.Set("Content-Type", "application/json")
+
+	if err != nil {
+		return err
+	}
+
+	httpClient := &http.Client{}
+	resp, err := httpClient.Do(req)
+
+	if err != nil {
+		return err
+	}
+
+	if !(resp.StatusCode >= 200 && resp.StatusCode <= 299) {
+		defer resp.Body.Close()
+		body, err := ioutil.ReadAll(resp.Body)
+
+		if err != nil {
+			return err
+		}
+
+		return errors.New(string(body))
+	}
+
 	return nil
+}
+
+func (k8s *Kubernetes) GetKibanaURL() (string, error) {
+	services, err := k8s.Client.CoreV1().Services("default").List(context.TODO(), metav1.ListOptions{})
+
+	if err != nil {
+		return "", err
+	}
+
+	for _, svc := range services.Items {
+		if svc.Name == "kibana-kibana" {
+			return svc.Status.LoadBalancer.Ingress[0].IP+":5601", nil
+		}
+	}
+
+	return "", errors.New("Kibana URL not found")
 }
