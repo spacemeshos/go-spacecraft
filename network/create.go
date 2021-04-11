@@ -213,10 +213,21 @@ func Create() error {
 			"gatewayAddresses": gateways,
 		})
 		requestBody := bytes.NewBuffer(postBody)
-		_, err := http.Post("http://"+poetRESTUrl+"/v1/start", "application/json", requestBody)
+		resp, err := http.Post("http://"+poetRESTUrl+"/v1/start", "application/json", requestBody)
 
 		if err != nil {
 			return err
+		}
+
+		if !(resp.StatusCode >= 200 && resp.StatusCode <= 299) {
+			defer resp.Body.Close()
+			body, err := ioutil.ReadAll(resp.Body)
+
+			if err != nil {
+				return err
+			}
+
+			return errors.New(string(body))
 		}
 	}
 
