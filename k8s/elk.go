@@ -4,10 +4,14 @@ import (
 	"bytes"
 	"context"
 	"errors"
-	"io/ioutil"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"io"
+	"mime/multipart"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strings"
+
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	helm "github.com/mittwald/go-helm-client"
 	"helm.sh/helm/v3/pkg/repo"
@@ -186,32 +190,45 @@ func (k8s *Kubernetes) DeployELK() error {
 		return err
 	}
 
-	requestBody := bytes.NewBuffer([]byte("{\"attributes\":{\"title\":\"sm-*\",\"timeFieldName\":\"@timestamp\"}}"))
+	url := "http://" + kibanaURL + "/api/saved_objects/_import"
+	method := "POST"
 
-	req, err := http.NewRequest("POST", "http://"+kibanaURL+"/api/saved_objects/index-pattern/*?overwrite=true", requestBody)
-	req.Header.Set("kbn-xsrf", "reporting")
-	req.Header.Set("Content-Type", "application/json")
+	payload := &bytes.Buffer{}
+	writer := multipart.NewWriter(payload)
 
+	file, err := os.Open(config.KibanaSavedObjects)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	part, err := writer.CreateFormFile("file", filepath.Base(config.KibanaSavedObjects))
+	if err != nil {
+		return err
+	}
+	_, err = io.Copy(part, file)
+	if err != nil {
+		return err
+	}
+
+	err = writer.Close()
 	if err != nil {
 		return err
 	}
 
 	httpClient := &http.Client{}
-	resp, err := httpClient.Do(req)
+	req, err := http.NewRequest(method, url, payload)
 
 	if err != nil {
 		return err
 	}
+	req.Header.Add("kbn-xsrf", "true")
+	req.Header.Set("Content-Type", writer.FormDataContentType())
 
-	if !(resp.StatusCode >= 200 && resp.StatusCode <= 299) {
-		defer resp.Body.Close()
-		body, err := ioutil.ReadAll(resp.Body)
+	_, err = httpClient.Do(req)
 
-		if err != nil {
-			return err
-		}
-
-		return errors.New(string(body))
+	if err != nil {
+		return err
 	}
 
 	return nil
@@ -226,7 +243,7 @@ func (k8s *Kubernetes) GetKibanaURL() (string, error) {
 
 	for _, svc := range services.Items {
 		if svc.Name == "kibana-kibana" {
-			return svc.Status.LoadBalancer.Ingress[0].IP+":5601", nil
+			return svc.Status.LoadBalancer.Ingress[0].IP + ":5601", nil
 		}
 	}
 
