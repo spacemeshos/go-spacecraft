@@ -73,10 +73,33 @@ func (k8s *Kubernetes) DeployELK() error {
 				uptime.conf: |
 					input { beats { port => 5044 } }
 					filter {
-						mutate { replace => { "[host]" => "%[host][name]" } }
-					}
-					output { elasticsearch { hosts => ["http://elasticsearch-master:9200"] index => "sm" manage_template => false } }
+						json{
+							source => "message"
+							target => "sm"
+							skip_on_invalid_json => false
+						}
 			
+						mutate { 
+							add_field => { "name" => "%{[kubernetes][labels][name]}" }
+			
+							remove_field => [
+								"log", 
+								"cloud", 
+								"ecs", 
+								"agent", 
+								"input", 
+								"tags", 
+								"docker",
+								"container",
+								"host",
+								"message",
+								"[sm][T]",
+								"kubernetes"
+							]   
+						}
+					}
+					output { elasticsearch { hosts => ["http://elasticsearch-master:9200"] index => "sm-logs" manage_template => false } }
+
 			service:
 				annotations: {}
 				type: ClusterIP

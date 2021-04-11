@@ -256,13 +256,13 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 			},
 			Selector: &metav1.LabelSelector{
 				MatchLabels: map[string]string{
-					"miner": minerNumber,
+					"name": "miner-" + minerNumber,
 				},
 			},
 			Template: apiv1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
 					Labels: map[string]string{
-						"miner": minerNumber,
+						"name": "miner-" + minerNumber,
 					},
 				},
 				Spec: apiv1.PodSpec{
@@ -380,7 +380,7 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 		ObjectMeta: metav1.ObjectMeta{
 			Name: "miner-" + minerNumber,
 			Labels: map[string]string{
-				"miner": minerNumber,
+				"name": "miner-" + minerNumber,
 			},
 		},
 		Spec: corev1.ServiceSpec{
@@ -404,7 +404,7 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 				corev1.ServicePort{Name: "grpcportnew", Port: 8000, TargetPort: intstr.FromInt(8000)},
 			},
 			Selector: map[string]string{
-				"miner": minerNumber,
+				"name": "miner-" + minerNumber,
 			},
 			Type: apiv1.ServiceTypeNodePort,
 		},
@@ -492,13 +492,13 @@ func (k8s *Kubernetes) DeployPoet(initialDuration string, poetNumber string, con
 			Replicas: int32Ptr(1),
 			Selector: &metav1.LabelSelector{
 				MatchLabels: map[string]string{
-					"poet": poetNumber,
+					"name": "poet-" + poetNumber,
 				},
 			},
 			Template: apiv1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
 					Labels: map[string]string{
-						"poet": poetNumber,
+						"name": "poet-" + poetNumber,
 					},
 				},
 				Spec: apiv1.PodSpec{
@@ -591,7 +591,7 @@ func (k8s *Kubernetes) DeployPoet(initialDuration string, poetNumber string, con
 		ObjectMeta: metav1.ObjectMeta{
 			Name: "poet-" + poetNumber,
 			Labels: map[string]string{
-				"poet": poetNumber,
+				"name": "poet-" + poetNumber,
 			},
 		},
 		Spec: corev1.ServiceSpec{
@@ -599,7 +599,7 @@ func (k8s *Kubernetes) DeployPoet(initialDuration string, poetNumber string, con
 				corev1.ServicePort{Name: "restport", Port: 5000, TargetPort: intstr.FromInt(5000)},
 			},
 			Selector: map[string]string{
-				"poet": poetNumber,
+				"name": "poet-" + poetNumber,
 			},
 			Type: apiv1.ServiceTypeNodePort,
 		},
