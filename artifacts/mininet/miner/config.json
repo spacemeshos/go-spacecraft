@@ -63,7 +63,7 @@
     "swarm": {
         "bucketsize": 20,
         "alpha": 3,
-        "randcon": 8
+        "randcon": 1
     },
     "network-id": 20
   },

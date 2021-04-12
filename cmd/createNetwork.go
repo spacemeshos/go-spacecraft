@@ -49,9 +49,18 @@ func init() {
 	createNetworkCmd.Flags().IntVar(&config.PoetGatewayAmount, "poet-gateway-amount", config.PoetGatewayAmount, "number of gateway to pass when activating poet(s)")
 	createNetworkCmd.Flags().IntVar(&config.BootnodeAmount, "bootnode-amount", config.BootnodeAmount, "total bootnodes in the generated config file")
 	createNetworkCmd.Flags().IntVar(&config.GCPMachineCPU, "gcp-machine-cpu", config.GCPMachineCPU, "total CPU the GCP machine type has")
+	createNetworkCmd.Flags().IntVar(&config.GCPMachineMemory, "gcp-machine-memory", config.GCPMachineMemory, "total memory the GCP machine type has")
 	createNetworkCmd.Flags().IntVar(&config.GenesisDelay, "genesis-delay", config.GenesisDelay, "delay in minutes after network startup for genesis")
 	createNetworkCmd.Flags().BoolVar(&config.Bootstrap, "bootstrap", config.Bootstrap, "bootstrap a new network without connecting to an existing network")
 	createNetworkCmd.Flags().StringVar(&config.MinerGoSmConfig, "miner-go-sm-config", config.MinerGoSmConfig, "config file location for the miners (example \"./config.json\")")
+	createNetworkCmd.Flags().StringVar(&config.ESDiskSize, "es-disk-size", config.ESDiskSize, "disk size to allocate to elasticsearch")
+	createNetworkCmd.Flags().StringVar(&config.ESCPU, "es-cpu", config.ESCPU, "vCPUs to allocate to elasticsearch")
+	createNetworkCmd.Flags().StringVar(&config.ESMemory, "es-memory", config.ESMemory, "RAM to allocate to elasticsearch")
+	createNetworkCmd.Flags().StringVar(&config.LogstashDiskSize, "logstash-disk-size", config.LogstashDiskSize, "disk size to allocate to logstash")
+	createNetworkCmd.Flags().StringVar(&config.LogstashCPU, "logstash-cpu", config.LogstashCPU, "vCPUs to allocate to logstash")
+	createNetworkCmd.Flags().StringVar(&config.LogstashMemory, "logstash-memory", config.LogstashMemory, "RAM to allocate to logstash")
+	createNetworkCmd.Flags().StringVar(&config.KibanaCPU, "kibana-cpu", config.KibanaCPU, "vCPUs to allocate to kibana")
+	createNetworkCmd.Flags().StringVar(&config.KibanaMemory, "kibana-memory", config.KibanaMemory, "RAM to allocate to kibana")
 
 	err := viper.BindPFlags(createNetworkCmd.Flags())
 	if err != nil {

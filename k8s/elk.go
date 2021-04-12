@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"fmt"
 	"io"
 	"mime/multipart"
 	"net/http"
@@ -50,13 +51,22 @@ func (k8s *Kubernetes) DeployELK() error {
 		Namespace:   "default",
 		Wait:        true,
 		Force:       true,
-		ValuesYaml: sanitizeYaml(`
+		ValuesYaml: sanitizeYaml(fmt.Sprintf(`
+			replicas: 1
+			minimumMasterNodes: 1
 			volumeClaimTemplate:
 				accessModes: [ "ReadWriteOnce" ]
 				resources:
 					requests:
-						storage: 30Gi
-		`),
+						storage: %sGi
+			resources:
+				requests:
+					cpu: "%s"
+					memory: "%sGi"
+				limits:
+					cpu: "%s"
+					memory: "%sGi"
+		`, config.ESDiskSize, config.ESCPU, config.ESMemory, config.ESCPU, config.ESMemory)),
 	}
 
 	if err = client.InstallOrUpgradeChart(context.Background(), &elasticSearchSpec); err != nil {
@@ -69,10 +79,7 @@ func (k8s *Kubernetes) DeployELK() error {
 		Namespace:   "default",
 		Wait:        true,
 		Force:       true,
-		ValuesYaml: sanitizeYaml(`
-			persistence:
-				enabled: true
-	
+		ValuesYaml: sanitizeYaml(fmt.Sprintf(`
 			logstashConfig:
 				logstash.yml: |
 					http.host: 0.0.0.0
@@ -122,7 +129,21 @@ func (k8s *Kubernetes) DeployELK() error {
 						port: 8080
 						protocol: TCP
 						targetPort: 8080
-		`),
+			
+			resources:
+				requests:
+					cpu: "%s"
+					memory: "%sGi"
+				limits:
+					cpu: "%s"
+					memory: "%sGi"
+
+			volumeClaimTemplate:
+				accessModes: [ "ReadWriteOnce" ]
+				resources:
+					requests:
+						storage: %sGi
+		`, "", config.LogstashCPU, config.LogstashMemory, config.LogstashCPU, config.LogstashMemory, config.LogstashDiskSize)),
 	}
 
 	if err = client.InstallOrUpgradeChart(context.Background(), &logstashSpec); err != nil {
@@ -137,10 +158,18 @@ func (k8s *Kubernetes) DeployELK() error {
 		Force:       true,
 		SkipCRDs:    true,
 		UpgradeCRDs: false,
-		ValuesYaml: sanitizeYaml(`
+		ValuesYaml: sanitizeYaml(fmt.Sprintf(`
 			service:
 				type: LoadBalancer
-		`),
+
+			resources:
+				requests:
+					cpu: "%s"
+					memory: "%sGi"
+				limits:
+					cpu: "%s"
+					memory: "%sGi"
+		`, config.KibanaCPU, config.KibanaMemory, config.KibanaCPU, config.KibanaMemory)),
 	}
 
 	if err = client.InstallOrUpgradeChart(context.Background(), &kibanaSpec); err != nil {
@@ -157,6 +186,7 @@ func (k8s *Kubernetes) DeployELK() error {
 		Force:       true,
 		ValuesYaml: sanitizeYaml(`
 			daemonset:
+				resources: {}
 				filebeatConfig:
 					filebeat.yml: |
 						filebeat.autodiscover:

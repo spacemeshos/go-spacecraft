@@ -74,10 +74,31 @@ func CreateKubernetesCluster() error {
 
 	minerCPUInt, _ := strconv.ParseInt(config.MinerCPU, 10, 8)
 	poetCPUInt, _ := strconv.ParseInt(config.PoetCPU, 10, 8)
-	totalCPURequired := (minerCPUInt * int64(config.NumberOfMiners)) + (poetCPUInt * int64(config.NumberOfPoets))
+	esCPUInt, _ := strconv.ParseInt(config.ESCPU, 10, 8)
+	logstashCPUInt, _ := strconv.ParseInt(config.LogstashCPU, 10, 8)
+	kibanaCPUInt, _ := strconv.ParseInt(config.KibanaCPU, 10, 8)
+	totalCPURequired := (minerCPUInt * int64(config.NumberOfMiners)) + (poetCPUInt * int64(config.NumberOfPoets)) + logstashCPUInt + kibanaCPUInt + esCPUInt
 	totalCPUInstanceHas := int64(config.GCPMachineCPU)
 
-	nodeCount := int(math.Ceil((float64(totalCPURequired) / float64(totalCPUInstanceHas))))
+	nodeCount1 := int(math.Ceil((float64(totalCPURequired) / float64(totalCPUInstanceHas))))
+
+	minerMemoryInt, _ := strconv.ParseInt(config.MinerMemory, 10, 8)
+	poetMemoryInt, _ := strconv.ParseInt(config.PoetMemory, 10, 8)
+	esMemoryInt, _ := strconv.ParseInt(config.ESMemory, 10, 8)
+	logstashMemoryInt, _ := strconv.ParseInt(config.LogstashMemory, 10, 8)
+	kibanaMemoryInt, _ := strconv.ParseInt(config.KibanaMemory, 10, 8)
+	totalMemoryRequired := (minerMemoryInt * int64(config.NumberOfMiners)) + (poetMemoryInt * int64(config.NumberOfPoets)) + logstashMemoryInt + kibanaMemoryInt + esMemoryInt
+	totalMemoryInstanceHas := int64(config.GCPMachineMemory)
+
+	nodeCount2 := int(math.Ceil((float64(totalMemoryRequired) / float64(totalMemoryInstanceHas))))
+
+	nodeCount := 0
+
+	if nodeCount1 > nodeCount2 {
+		nodeCount = nodeCount1
+	} else {
+		nodeCount = nodeCount2
+	}
 
 	if nodeCount == 0 {
 		nodeCount = 1

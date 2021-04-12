@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	gabs "github.com/Jeffail/gabs/v2"
@@ -16,7 +17,12 @@ import (
 	k8s "github.com/spacemeshos/spacecraft/k8s"
 )
 
+func sanitizeYaml(yaml string) string {
+	return strings.ReplaceAll(yaml, "	", "  ")
+}
+
 func Create() error {
+
 	err := gcp.CreateKubernetesCluster()
 
 	if err != nil {

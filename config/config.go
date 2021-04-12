@@ -21,22 +21,31 @@ type Configuration struct {
 	PoetGatewayAmount  int    `mapstructure:"poet-gateway-amount"`
 	BootnodeAmount     int    `mapstructure:"bootnode-amount"`
 	GCPMachineCPU      int    `mapstructure:"gcp-machine-cpu"`
+	GCPMachineMemory   int    `mapstructure:"gcp-machine-memory"`
 	GenesisDelay       int    `mapstructure:"genesis-delay"`
 	MinerNumber        string `mapstructure:"miner-number"`
 	MinerGoSmConfig    string `mapstructure:"miner-go-sm-config"`
 	RestartWaitTime    int    `mapstructure:"restart-wait-time"`
 	Bootstrap          bool   `mapstructure:"bootstrap"`
 	KibanaSavedObjects string `mapstructure:"kibana-saved-objects"`
+	ESDiskSize         string `mapstructure:"es-disk-size"`
+	ESMemory           string `mapstructure:"es-memory"`
+	ESCPU              string `mapstructure:"es-cpu"`
+	LogstashDiskSize   string `mapstructure:"logstash-disk-size"`
+	LogstashMemory     string `mapstructure:"logstash-memory"`
+	LogstashCPU        string `mapstructure:"logstash-cpu"`
+	KibanaMemory       string `mapstructure:"kibana-memory"`
+	KibanaCPU          string `mapstructure:"kibana-cpu"`
 }
 
 var Config = Configuration{
-	NetworkName:        "devnet",
-	NumberOfMiners:     50,
+	NetworkName:        "mininet",
+	NumberOfMiners:     10,
 	NumberOfPoets:      1,
-	MinerMemory:        "4",
-	MinerCPU:           "2",
-	PoetMemory:         "4",
-	PoetCPU:            "2",
+	MinerMemory:        "2",
+	MinerCPU:           "1",
+	PoetMemory:         "2",
+	PoetCPU:            "1",
 	MinerDiskSize:      "10", //200
 	PoetDiskSize:       "10", //50
 	GoSmImage:          "spacemeshos/go-spacemesh:v0.1.26",
@@ -45,8 +54,9 @@ var Config = Configuration{
 	GCPLocation:        "",
 	GCPZone:            "",
 	GCPMachineType:     "e2-standard-16",
-	GCPMachineCPU:      15,
-	GoSmConfig:         "./artifacts/devnet/miner/config.json",
+	GCPMachineCPU:      16,
+	GCPMachineMemory:   64,
+	GoSmConfig:         "./artifacts/mininet/miner/config.json",
 	InitPhaseShift:     0,
 	PoetGatewayAmount:  4,
 	BootnodeAmount:     6,
@@ -56,4 +66,12 @@ var Config = Configuration{
 	RestartWaitTime:    2,
 	Bootstrap:          true,
 	KibanaSavedObjects: "./artifacts/elk/kibana.ndjson",
+	ESDiskSize:         "10",
+	ESMemory:           "2",
+	ESCPU:              "1",
+	LogstashDiskSize:   "1",
+	LogstashMemory:     "2",
+	LogstashCPU:        "1",
+	KibanaMemory:       "2",
+	KibanaCPU:          "1",
 }
