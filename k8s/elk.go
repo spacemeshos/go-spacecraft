@@ -114,7 +114,7 @@ func (k8s *Kubernetes) DeployELK() error {
 							]
 						}
 					}
-					output { elasticsearch { hosts => ["http://elasticsearch-master:9200"] index => "sm-logs" manage_template => false } }
+					output { elasticsearch { hosts => ["http://elasticsearch-master:9200"] index => "sm-%{+YYYY.MM.dd}" manage_template => false } }
 	
 			service:
 				annotations: {}
