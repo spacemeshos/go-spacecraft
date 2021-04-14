@@ -96,7 +96,7 @@ func (k8s *Kubernetes) DeployELK() error {
 						}
 	
 						mutate {
-							add_field => { "name" => "%{[kubernetes][labels][name]}" }
+							add_field => { "name" => "%%{[kubernetes][labels][name]}" }
 	
 							remove_field => [
 								"log",
@@ -114,7 +114,7 @@ func (k8s *Kubernetes) DeployELK() error {
 							]
 						}
 					}
-					output { elasticsearch { hosts => ["http://elasticsearch-master:9200"] index => "sm-logs" manage_template => false } }
+					output { elasticsearch { hosts => ["http://elasticsearch-master:9200"] index => "sm-%%{+YYYY.MM.dd}" manage_template => false } }
 	
 			service:
 				annotations: {}
@@ -143,7 +143,7 @@ func (k8s *Kubernetes) DeployELK() error {
 				resources:
 					requests:
 						storage: %sGi
-		`, "", config.LogstashCPU, config.LogstashMemory, config.LogstashCPU, config.LogstashMemory, config.LogstashDiskSize)),
+		`, config.LogstashCPU, config.LogstashMemory, config.LogstashCPU, config.LogstashMemory, config.LogstashDiskSize)),
 	}
 
 	if err = client.InstallOrUpgradeChart(context.Background(), &logstashSpec); err != nil {
