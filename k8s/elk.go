@@ -6,11 +6,14 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"mime/multipart"
 	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
+
+	apiv1 "k8s.io/api/core/v1"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -54,6 +57,8 @@ func (k8s *Kubernetes) DeployELK() error {
 		ValuesYaml: sanitizeYaml(fmt.Sprintf(`
 			replicas: 1
 			minimumMasterNodes: 1
+			service:
+				type: NodePort
 			volumeClaimTemplate:
 				accessModes: [ "ReadWriteOnce" ]
 				resources:
@@ -137,7 +142,6 @@ func (k8s *Kubernetes) DeployELK() error {
 				limits:
 					cpu: "%s"
 					memory: "%sGi"
-
 			volumeClaimTemplate:
 				accessModes: [ "ReadWriteOnce" ]
 				resources:
@@ -161,7 +165,6 @@ func (k8s *Kubernetes) DeployELK() error {
 		ValuesYaml: sanitizeYaml(fmt.Sprintf(`
 			service:
 				type: LoadBalancer
-
 			resources:
 				requests:
 					cpu: "%s"
@@ -278,4 +281,110 @@ func (k8s *Kubernetes) GetKibanaURL() (string, error) {
 	}
 
 	return "", errors.New("Kibana URL not found")
+}
+
+func (k8s *Kubernetes) GetESURL() (string, error) {
+	port, err := k8s.getExternalPort("elasticsearch-master", "http")
+
+	if err != nil {
+		return "", err
+	}
+
+	ip, err := k8s.getExternalIP()
+
+	if err != nil {
+		return "", err
+	}
+
+	return ip + ":" + port, nil
+
+}
+
+func (k8s *Kubernetes) getExternalIP() (string, error) {
+	nodes, err := k8s.Client.CoreV1().Nodes().List(context.Background(), metav1.ListOptions{})
+	node := nodes.Items[0]
+
+	if err != nil {
+		return "", err
+	}
+
+	for _, address := range node.Status.Addresses {
+		if address.Type == apiv1.NodeExternalIP {
+			return address.Address, nil
+		}
+	}
+
+	return "", errors.New("public ip of cluster not found")
+}
+
+func (k8s *Kubernetes) SetupLogDeletionPolicy() error {
+	esURL, err := k8s.GetESURL()
+
+	httpClient := &http.Client{}
+
+	if err != nil {
+		return err
+	}
+
+	req, err := http.NewRequest(http.MethodPut, "http://"+esURL+"/_ilm/policy/cleanup-history", bytes.NewBuffer([]byte(fmt.Sprintf("{\"policy\":{\"phases\":{\"hot\":{\"actions\":{}},\"delete\":{\"min_age\":\"%sd\",\"actions\":{\"delete\":{}}}}}}", config.LogsExpiry))))
+	if err != nil {
+		return err
+	}
+
+	req.Header.Add("Content-Type", "application/json")
+
+	resp, err := httpClient.Do(req)
+
+	if !(resp.StatusCode >= 200 && resp.StatusCode <= 299) {
+		defer resp.Body.Close()
+		body, err := ioutil.ReadAll(resp.Body)
+
+		if err != nil {
+			return err
+		}
+
+		return errors.New(string(body))
+	}
+
+	req, err = http.NewRequest(http.MethodPut, "http://"+esURL+"/sm-*/_settings?pretty", bytes.NewBuffer([]byte("{\"lifecycle.name\":\"cleanup-history\"}")))
+	if err != nil {
+		return err
+	}
+
+	req.Header.Add("Content-Type", "application/json")
+
+	resp, err = httpClient.Do(req)
+
+	if !(resp.StatusCode >= 200 && resp.StatusCode <= 299) {
+		defer resp.Body.Close()
+		body, err := ioutil.ReadAll(resp.Body)
+
+		if err != nil {
+			return err
+		}
+
+		return errors.New(string(body))
+	}
+
+	req, err = http.NewRequest(http.MethodPut, "http://"+esURL+"/_template/logging_policy_template?pretty", bytes.NewBuffer([]byte("{\"index_patterns\":[\"sm-*\"],\"settings\":{\"index.lifecycle.name\":\"cleanup-history\"}}")))
+	if err != nil {
+		return err
+	}
+
+	req.Header.Add("Content-Type", "application/json")
+
+	resp, err = httpClient.Do(req)
+
+	if !(resp.StatusCode >= 200 && resp.StatusCode <= 299) {
+		defer resp.Body.Close()
+		body, err := ioutil.ReadAll(resp.Body)
+
+		if err != nil {
+			return err
+		}
+
+		return errors.New(string(body))
+	}
+
+	return nil
 }

@@ -36,6 +36,7 @@ type Configuration struct {
 	LogstashCPU        string `mapstructure:"logstash-cpu"`
 	KibanaMemory       string `mapstructure:"kibana-memory"`
 	KibanaCPU          string `mapstructure:"kibana-cpu"`
+	LogsExpiry         string `mapstructure:"logs-expiry"`
 }
 
 var Config = Configuration{
@@ -74,4 +75,5 @@ var Config = Configuration{
 	LogstashCPU:        "1",
 	KibanaMemory:       "2",
 	KibanaCPU:          "1",
+	LogsExpiry:         "1",
 }

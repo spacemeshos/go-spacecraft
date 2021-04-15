@@ -238,7 +238,10 @@ func Create() error {
 	}
 
 	err = gcp.UploadConfig(minerConfigJson.StringIndent("", "	"))
-
+	if err != nil {
+		return err
+	}
+	err = kubernetes.SetupLogDeletionPolicy()
 	if err != nil {
 		return err
 	}
