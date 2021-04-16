@@ -94,15 +94,23 @@ func (k8s *Kubernetes) DeployELK() error {
 				uptime.conf: |
 					input { beats { port => 5044 } }
 					filter {
-						json{
-							source => "message"
-							target => "sm"
-							skip_on_invalid_json => false
+						if [message] =~ "\A\{.+\}\z" {
+							json {
+								source => "message"
+								target => "sm"
+								skip_on_invalid_json => false
+							}
+			
+							mutate {
+								remove_field => [
+									"message"
+								]
+							}
 						}
-	
+			
 						mutate {
 							add_field => { "name" => "%%{[kubernetes][labels][name]}" }
-	
+			
 							remove_field => [
 								"log",
 								"cloud",
@@ -113,7 +121,6 @@ func (k8s *Kubernetes) DeployELK() error {
 								"docker",
 								"container",
 								"host",
-								"message",
 								"[sm][T]",
 								"kubernetes"
 							]
@@ -142,6 +149,7 @@ func (k8s *Kubernetes) DeployELK() error {
 				limits:
 					cpu: "%s"
 					memory: "%sGi"
+
 			volumeClaimTemplate:
 				accessModes: [ "ReadWriteOnce" ]
 				resources:
@@ -165,6 +173,7 @@ func (k8s *Kubernetes) DeployELK() error {
 		ValuesYaml: sanitizeYaml(fmt.Sprintf(`
 			service:
 				type: LoadBalancer
+
 			resources:
 				requests:
 					cpu: "%s"
@@ -192,8 +201,21 @@ func (k8s *Kubernetes) DeployELK() error {
 				resources: {}
 				filebeatConfig:
 					filebeat.yml: |
-						filebeat.autodiscover:
-							providers:
+						processors:
+							- script:
+									lang: javascript
+									id: my_filter
+									source: >
+										function process(event) {
+											var message = event.Get('message')
+											try {
+												var msg = JSON.parse(message)
+												Object.keys(msg).forEach(function(k) {msg[k] = msg[k].toString()})
+												event.Put("message", JSON.stringify(msg));
+											} catch(e) {}
+										}
+						filebeat:
+							autodiscover.providers:
 								- type: kubernetes
 									templates:
 										- condition.contains:

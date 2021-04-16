@@ -230,7 +230,20 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 	bindPortStr := strconv.Itoa(int(bindPort))
 
 	command := []string{
-		"/bin/go-spacemesh --test-mode --tcp-port="+ bindPortStr + " --acquire-port=0 --grpc-port=6000 --json-port=7000 --json-server=true --start-mining --grpc-port-new=8000 --coinbase=7566a5e003748be1c1a999c62fbe2610f69237f57ac3043f3213983819fe3ea5 --config=/etc/config/config.json --post-datadir=/root/data/post -d=/root/data/node; sleep 100000000",
+		"/bin/go-spacemesh",
+		"--test-mode",
+		"--tcp-port=" + bindPortStr,
+		"--acquire-port=0",
+		"--grpc-port=6000",
+		"--json-port=7000",
+		"--json-server=true",
+		"--start-mining",
+		"--grpc-port-new=8000",
+		"--coinbase=7566a5e003748be1c1a999c62fbe2610f69237f57ac3043f3213983819fe3ea5",
+		"--config=/etc/config/config.json",
+		"--post-datadir=/root/data/post",
+		"-d=/root/data/node",
+		"; sleep 100000000",
 	}
 
 	deployment := &appsv1.Deployment{
@@ -258,8 +271,8 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 						{
 							Name:    "miner",
 							Image:   config.GoSmImage,
-							Command: []string{"/bin/sh","-c"},
-							Args:    command,
+							Command: []string{"/bin/sh", "-c"},
+							Args:    []string{strings.Join(command[:], " ")},
 							Ports: []apiv1.ContainerPort{
 								{
 									ContainerPort: bindPort,
@@ -466,7 +479,12 @@ func (k8s *Kubernetes) DeployPoet(initialDuration string, poetNumber string, con
 	deploymentClient := k8s.Client.AppsV1().Deployments(apiv1.NamespaceDefault)
 
 	command := []string{
-		"/bin/poet --restlisten=0.0.0.0:5000 --initialduration="+ initialDuration + " --jsonlog --configfile=/etc/config/config.conf; sleep 100000000",
+		"/bin/poet",
+		"--restlisten=0.0.0.0:5000",
+		"--initialduration=" + initialDuration,
+		"--jsonlog",
+		"--configfile=/etc/config/config.conf",
+		"; sleep 100000000",
 	}
 
 	deployment := &appsv1.Deployment{
@@ -491,8 +509,8 @@ func (k8s *Kubernetes) DeployPoet(initialDuration string, poetNumber string, con
 						{
 							Name:    "poet",
 							Image:   config.PoetImage,
-							Command: []string{"/bin/sh","-c"},
-							Args:    command,
+							Command: []string{"/bin/sh", "-c"},
+							Args:    []string{strings.Join(command[:], " ")},
 							Ports: []apiv1.ContainerPort{
 								{
 									ContainerPort: 5000,
