@@ -41,6 +41,10 @@ func Create() error {
 		return err
 	}
 
+	if err = kubernetes.DisablePodRescheduling(); err != nil {
+		return err
+	}
+
 	minerConfigBuf := []byte{}
 
 	if config.Bootstrap {

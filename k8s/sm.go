@@ -13,10 +13,11 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	apiv1 "k8s.io/api/core/v1"
 	corev1 "k8s.io/api/core/v1"
+	v1beta1Type "k8s.io/api/policy/v1beta1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
 	intstr "k8s.io/apimachinery/pkg/util/intstr"
+	v1beta1 "k8s.io/client-go/kubernetes/typed/policy/v1beta1"
 )
 
 type MinerDeploymentData struct {
@@ -197,6 +198,38 @@ func (k8s *Kubernetes) NextNode() (string, error) {
 	return node.Name, nil
 }
 
+func (k8s *Kubernetes) DisablePodRescheduling() error {
+	client, err := v1beta1.NewForConfig(k8s.RestConfig)
+
+	if err != nil {
+		return err
+	}
+
+	pdb := client.PodDisruptionBudgets("default")
+
+	pdb_config := &v1beta1Type.PodDisruptionBudget{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: "pdb",
+		},
+		Spec: v1beta1Type.PodDisruptionBudgetSpec{
+			MaxUnavailable: &intstr.IntOrString{IntVal: 0},
+			Selector: &metav1.LabelSelector{
+				MatchLabels: map[string]string{
+					"restart": "false",
+				},
+			},
+		},
+	}
+
+	_, err = pdb.Create(context.TODO(), pdb_config, metav1.CreateOptions{})
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, configJSON string, selectedNode string, channel *MinerChannel) {
 	fmt.Println("creating miner-" + minerNumber + " pvc")
 
@@ -263,7 +296,8 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 			Template: apiv1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
 					Labels: map[string]string{
-						"name": "miner-" + minerNumber,
+						"name":    "miner-" + minerNumber,
+						"restart": "false",
 					},
 				},
 				Spec: apiv1.PodSpec{
@@ -501,7 +535,8 @@ func (k8s *Kubernetes) DeployPoet(initialDuration string, poetNumber string, con
 			Template: apiv1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
 					Labels: map[string]string{
-						"name": "poet-" + poetNumber,
+						"name":    "poet-" + poetNumber,
+						"restart": "false",
 					},
 				},
 				Spec: apiv1.PodSpec{
