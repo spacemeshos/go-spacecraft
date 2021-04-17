@@ -267,17 +267,24 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 		"--test-mode",
 		"--tcp-port=" + bindPortStr,
 		"--acquire-port=0",
-		"--grpc-port=6000",
-		"--json-port=7000",
 		"--json-server=true",
 		"--start-mining",
-		"--grpc-port-new=8000",
 		"--coinbase=7566a5e003748be1c1a999c62fbe2610f69237f57ac3043f3213983819fe3ea5",
 		"--config=/etc/config/config.json",
 		"--post-datadir=/root/data/post",
 		"-d=/root/data/node",
-		"; sleep 100000000",
+		"--json-port=7000",
 	}
+
+	if config.OldAPIExists == true {
+		command = append(command, "--grpc-port-new=6000")
+		command = append(command, "--grpc-server")
+		command = append(command, "--grpc-port=8000")
+	} else {
+		command = append(command, "--grpc-port=6000")
+	}
+
+	command = append(command, "; sleep 100000000")
 
 	deployment := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
@@ -436,7 +443,7 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 				// },
 				corev1.ServicePort{Name: "grpcport", Port: 6000, TargetPort: intstr.FromInt(6000)},
 				corev1.ServicePort{Name: "jsonport", Port: 7000, TargetPort: intstr.FromInt(7000)},
-				corev1.ServicePort{Name: "grpcportnew", Port: 8000, TargetPort: intstr.FromInt(8000)},
+				corev1.ServicePort{Name: "oldapiport", Port: 8000, TargetPort: intstr.FromInt(8000)},
 			},
 			Selector: map[string]string{
 				"name": "miner-" + minerNumber,

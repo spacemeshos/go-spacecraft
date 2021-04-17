@@ -144,7 +144,7 @@ func CreateKubernetesCluster() error {
 			return err
 		}
 
-		fmt.Println("current k8s cluster status status: ", cluster.Status)
+		fmt.Println("current k8s cluster status: ", cluster.Status)
 
 		if cluster.Status == containerpb.Cluster_PROVISIONING || cluster.Status == containerpb.Cluster_STATUS_UNSPECIFIED || cluster.Status == containerpb.Cluster_RECONCILING {
 			continue

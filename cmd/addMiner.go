@@ -45,6 +45,11 @@ func init() {
 
 	addMinerCmd.Flags().StringVar(&config.MinerGoSmConfig, "miner-go-sm-config", config.MinerGoSmConfig, "config file location for the new miner (example \"./config.json\")")
 	addMinerCmd.Flags().StringVar(&config.MinerNumber, "miner-number", config.MinerNumber, "miner to add")
+	addMinerCmd.Flags().BoolVar(&config.OldAPIExists, "old-api-exists", config.OldAPIExists, "does the go-spacemesh build support the old API")
+	addMinerCmd.Flags().StringVar(&config.MinerMemory, "miner-ram", config.MinerMemory, "RAM for each miner")
+	addMinerCmd.Flags().StringVar(&config.MinerCPU, "miner-cpu", config.MinerCPU, "vCPUs for each miner")
+	addMinerCmd.Flags().StringVar(&config.GoSmImage, "go-sm-image", config.GoSmImage, "docker image for go-spacemesh build")
+	addMinerCmd.Flags().StringVar(&config.MinerDiskSize, "miner-disk-size", config.MinerDiskSize, "Disk size of miner in GB")
 
 	err := viper.BindPFlags(addMinerCmd.Flags())
 	if err != nil {

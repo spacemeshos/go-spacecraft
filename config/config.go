@@ -37,6 +37,7 @@ type Configuration struct {
 	KibanaMemory       string `mapstructure:"kibana-memory"`
 	KibanaCPU          string `mapstructure:"kibana-cpu"`
 	LogsExpiry         string `mapstructure:"logs-expiry"`
+	OldAPIExists       bool   `mapstructure:"old-api-exists"`
 }
 
 var Config = Configuration{
@@ -76,4 +77,5 @@ var Config = Configuration{
 	KibanaMemory:       "2",
 	KibanaCPU:          "1",
 	LogsExpiry:         "1",
+	OldAPIExists:       true,
 }
