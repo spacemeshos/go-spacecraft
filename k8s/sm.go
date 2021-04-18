@@ -98,7 +98,17 @@ func (k8s *Kubernetes) getNodeId(podName string) (string, error) {
 
 			return resFinal, nil
 		} else {
-			fmt.Println(podName + ": identity not found. Re-fetching logs. \n " + str)
+
+			res = strings.SplitAfter(str, "\",\"key\":\"")
+
+			if len(res) >= 2 {
+				res = strings.SplitAfter(res[1], "\"")
+				resFinal := strings.TrimSuffix(res[0], "\"")
+
+				return resFinal, nil
+			} else {
+				fmt.Println(podName + ": identity not found. Re-fetching logs. \n " + str)
+			}
 		}
 	}
 
