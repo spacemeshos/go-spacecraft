@@ -18,8 +18,8 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/spacemeshos/spacecraft/log"
-	"github.com/spacemeshos/spacecraft/network"
+	"github.com/spacemeshos/go-spacecraft/log"
+	"github.com/spacemeshos/go-spacecraft/network"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )

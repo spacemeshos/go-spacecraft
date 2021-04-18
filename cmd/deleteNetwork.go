@@ -1,8 +1,8 @@
 package cmd
 
 import (
-	"github.com/spacemeshos/spacecraft/log"
-	"github.com/spacemeshos/spacecraft/network"
+	"github.com/spacemeshos/go-spacecraft/log"
+	"github.com/spacemeshos/go-spacecraft/network"
 	"github.com/spf13/cobra"
 )
 

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	cfg "github.com/spacemeshos/spacecraft/config"
+	cfg "github.com/spacemeshos/go-spacecraft/config"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )

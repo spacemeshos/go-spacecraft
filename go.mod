@@ -1,4 +1,4 @@
-module github.com/spacemeshos/spacecraft
+module github.com/spacemeshos/go-spacecraft
 
 go 1.15
 

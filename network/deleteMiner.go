@@ -3,8 +3,8 @@ package network
 import (
 	"errors"
 
-	"github.com/spacemeshos/spacecraft/gcp"
-	k8s "github.com/spacemeshos/spacecraft/k8s"
+	"github.com/spacemeshos/go-spacecraft/gcp"
+	k8s "github.com/spacemeshos/go-spacecraft/k8s"
 )
 
 func DeleteMiner() error {

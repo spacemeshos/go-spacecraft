@@ -15,7 +15,7 @@ limitations under the License.
 */
 package main
 
-import "github.com/spacemeshos/spacecraft/cmd"
+import "github.com/spacemeshos/go-spacecraft/cmd"
 
 func main() {
 	cmd.Execute()

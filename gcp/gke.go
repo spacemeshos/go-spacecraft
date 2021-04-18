@@ -11,7 +11,7 @@ import (
 	"time"
 
 	container "cloud.google.com/go/container/apiv1"
-	cfg "github.com/spacemeshos/spacecraft/config"
+	cfg "github.com/spacemeshos/go-spacecraft/config"
 	containerpb "google.golang.org/genproto/googleapis/container/v1"
 	"k8s.io/client-go/kubernetes"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"

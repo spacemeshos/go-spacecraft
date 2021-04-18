@@ -1,7 +1,7 @@
 package network
 
 import (
-	"github.com/spacemeshos/spacecraft/gcp"
+	"github.com/spacemeshos/go-spacecraft/gcp"
 )
 
 func Delete() error {

@@ -3,7 +3,7 @@ package k8s
 import (
 	"sync"
 
-	cfg "github.com/spacemeshos/spacecraft/config"
+	cfg "github.com/spacemeshos/go-spacecraft/config"
 	"k8s.io/client-go/kubernetes"
 	restclient "k8s.io/client-go/rest"
 )

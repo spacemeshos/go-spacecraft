@@ -12,10 +12,10 @@ import (
 	"time"
 
 	gabs "github.com/Jeffail/gabs/v2"
-	"github.com/spacemeshos/spacecraft/log"
+	"github.com/spacemeshos/go-spacecraft/log"
 
-	"github.com/spacemeshos/spacecraft/gcp"
-	k8s "github.com/spacemeshos/spacecraft/k8s"
+	"github.com/spacemeshos/go-spacecraft/gcp"
+	k8s "github.com/spacemeshos/go-spacecraft/k8s"
 )
 
 func sanitizeYaml(yaml string) string {

@@ -3,8 +3,8 @@ package network
 import (
 	"io/ioutil"
 
-	"github.com/spacemeshos/spacecraft/gcp"
-	k8s "github.com/spacemeshos/spacecraft/k8s"
+	"github.com/spacemeshos/go-spacecraft/gcp"
+	k8s "github.com/spacemeshos/go-spacecraft/k8s"
 )
 
 func AddMiner() error {
