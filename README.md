@@ -42,7 +42,7 @@ go build
 The final step is to create the network. Run the below command to create a devnet:
 
 ```
-./go-spacecraft --config=./artifacts/devnet/config.json --go-sm-image=spacemeshos/go-spacemesh:v0.1.26 --poet-image=spacemeshos/poet:73488d6 --network-name=devnettest
+./go-spacecraft createNetwork --config=./artifacts/devnet/config.json --go-sm-image=spacemeshos/go-spacemesh:v0.1.26 --poet-image=spacemeshos/poet:73488d6 --network-name=devnettest
 ```
 
 This command will take around ~10min to finish and at the end you should see the kibana URL. The generated config file is uploaded to GCP storage. 
