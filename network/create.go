@@ -12,6 +12,7 @@ import (
 	"time"
 
 	gabs "github.com/Jeffail/gabs/v2"
+	"github.com/spacemeshos/spacecraft/log"
 
 	"github.com/spacemeshos/spacecraft/gcp"
 	k8s "github.com/spacemeshos/spacecraft/k8s"
@@ -249,6 +250,14 @@ func Create() error {
 	if err != nil {
 		return err
 	}
+
+	kibanaURL, err := kubernetes.GetKibanaURL()
+
+	if err != nil {
+		return err
+	}
+
+	log.Info.Println("Kibana URL: http://" + kibanaURL)
 
 	return nil
 }
