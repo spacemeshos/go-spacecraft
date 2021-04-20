@@ -3,6 +3,7 @@ package k8s
 import (
 	"bytes"
 	"context"
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"io"
@@ -18,6 +19,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	helm "github.com/mittwald/go-helm-client"
+	"github.com/sethvargo/go-password/password"
 	"helm.sh/helm/v3/pkg/repo"
 )
 
@@ -25,7 +27,35 @@ func sanitizeYaml(yaml string) string {
 	return strings.ReplaceAll(yaml, "	", "  ")
 }
 
+func basicAuth(username, password string) string {
+	auth := username + ":" + password
+	return base64.StdEncoding.EncodeToString([]byte(auth))
+}
+
 func (k8s *Kubernetes) DeployELK() error {
+	pass, err := password.Generate(32, 10, 0, false, false)
+	if err != nil {
+		return err
+	}
+
+	k8s.Password = pass
+
+	secretsClient := k8s.Client.CoreV1().Secrets("default")
+	secret := &apiv1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: "elastic-credentials",
+		},
+		StringData: map[string]string{
+			"username": "elastic",
+			"password": pass,
+		},
+	}
+	_, err = secretsClient.Create(context.Background(), secret, metav1.CreateOptions{})
+
+	if err != nil {
+		return err
+	}
+
 	opt := &helm.RestConfClientOptions{
 		Options: &helm.Options{
 			Debug:   true,
@@ -71,6 +101,20 @@ func (k8s *Kubernetes) DeployELK() error {
 				limits:
 					cpu: "%s"
 					memory: "%sGi"
+			esConfig:
+				elasticsearch.yml: |
+					xpack.security.enabled: true
+			extraEnvs:
+				- name: ELASTIC_PASSWORD
+					valueFrom:
+						secretKeyRef:
+							name: elastic-credentials
+							key: password
+				- name: ELASTIC_USERNAME
+					valueFrom:
+						secretKeyRef:
+							name: elastic-credentials
+							key: username
 		`, config.ESDiskSize, config.ESCPU, config.ESMemory, config.ESCPU, config.ESMemory)),
 	}
 
@@ -126,8 +170,19 @@ func (k8s *Kubernetes) DeployELK() error {
 							]
 						}
 					}
-					output { elasticsearch { hosts => ["http://elasticsearch-master:9200"] index => "sm-%%{+YYYY.MM.dd}" manage_template => false } }
-	
+					output { elasticsearch { hosts => ["http://elasticsearch-master:9200"] index => "sm-%%{+YYYY.MM.dd}" manage_template => false user => '${ELASTICSEARCH_USERNAME}' password => '${ELASTICSEARCH_PASSWORD}' } }
+				
+			extraEnvs:
+				- name: 'ELASTICSEARCH_USERNAME'
+					valueFrom:
+						secretKeyRef:
+							name: elastic-credentials
+							key: username
+				- name: 'ELASTICSEARCH_PASSWORD'
+					valueFrom:
+						secretKeyRef:
+							name: elastic-credentials
+							key: password
 			service:
 				annotations: {}
 				type: ClusterIP
@@ -181,6 +236,17 @@ func (k8s *Kubernetes) DeployELK() error {
 				limits:
 					cpu: "%s"
 					memory: "%sGi"
+			extraEnvs:
+				- name: 'ELASTICSEARCH_USERNAME'
+					valueFrom:
+						secretKeyRef:
+							name: elastic-credentials
+							key: username
+				- name: 'ELASTICSEARCH_PASSWORD'
+					valueFrom:
+						secretKeyRef:
+							name: elastic-credentials
+							key: password
 		`, config.KibanaCPU, config.KibanaMemory, config.KibanaCPU, config.KibanaMemory)),
 	}
 
@@ -279,6 +345,7 @@ func (k8s *Kubernetes) DeployELK() error {
 	}
 	req.Header.Add("kbn-xsrf", "true")
 	req.Header.Set("Content-Type", writer.FormDataContentType())
+	req.Header.Add("Authorization", "Basic "+basicAuth("elastic", pass))
 
 	_, err = httpClient.Do(req)
 
@@ -354,6 +421,7 @@ func (k8s *Kubernetes) SetupLogDeletionPolicy() error {
 	}
 
 	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Authorization", "Basic "+basicAuth("elastic", k8s.Password))
 
 	resp, err := httpClient.Do(req)
 
@@ -374,6 +442,7 @@ func (k8s *Kubernetes) SetupLogDeletionPolicy() error {
 	}
 
 	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Authorization", "Basic "+basicAuth("elastic", k8s.Password))
 
 	resp, err = httpClient.Do(req)
 
@@ -394,6 +463,7 @@ func (k8s *Kubernetes) SetupLogDeletionPolicy() error {
 	}
 
 	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Authorization", "Basic "+basicAuth("elastic", k8s.Password))
 
 	resp, err = httpClient.Do(req)
 

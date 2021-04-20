@@ -15,4 +15,5 @@ type Kubernetes struct {
 	RestConfig  *restclient.Config
 	CurrentNode int
 	mu          sync.Mutex
+	Password    string
 }

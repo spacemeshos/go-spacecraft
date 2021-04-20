@@ -258,6 +258,8 @@ func Create() error {
 	}
 
 	log.Info.Println("Kibana URL: http://" + kibanaURL)
+	log.Info.Println("Kibana Username: elastic")
+	log.Info.Println("Kibana Password: " + kubernetes.Password)
 
 	return nil
 }

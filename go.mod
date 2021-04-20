@@ -13,6 +13,7 @@ require (
 	github.com/mitchellh/mapstructure v1.4.1 // indirect
 	github.com/mittwald/go-helm-client v0.4.3
 	github.com/pelletier/go-toml v1.8.1 // indirect
+	github.com/sethvargo/go-password v0.2.0
 	github.com/spf13/afero v1.6.0 // indirect
 	github.com/spf13/cast v1.3.1 // indirect
 	github.com/spf13/cobra v1.1.3
