@@ -481,11 +481,22 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 		return
 	}
 
-	grpcport, err := k8s.getExternalPort("miner-"+minerNumber, "grpcport")
+	apiPort := ""
 
-	if err != nil {
-		channel.Err <- err
-		return
+	if config.OldAPIExists == false {
+		grpcport, err := k8s.getExternalPort("miner-"+minerNumber, "grpcport")
+		apiPort = grpcport
+		if err != nil {
+			channel.Err <- err
+			return
+		}
+	} else {
+		grpcport, err := k8s.getExternalPort("miner-"+minerNumber, "oldapiport")
+		apiPort = grpcport
+		if err != nil {
+			channel.Err <- err
+			return
+		}
 	}
 
 	nodeId, err := k8s.getNodeId(podName)
@@ -496,7 +507,7 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 	}
 	channel.Done <- &MinerDeploymentData{
 		"spacemesh://" + nodeId + "@" + externalIP + ":" + bindPortStr,
-		externalIP + ":" + grpcport,
+		externalIP + ":" + apiPort,
 	}
 }
 
