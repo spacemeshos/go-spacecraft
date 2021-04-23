@@ -63,6 +63,7 @@ func init() {
 	createNetworkCmd.Flags().StringVar(&config.KibanaMemory, "kibana-memory", config.KibanaMemory, "RAM to allocate to kibana")
 	createNetworkCmd.Flags().StringVar(&config.LogsExpiry, "logs-expiry", config.LogsExpiry, "number of days after which logs are deleted automatically")
 	createNetworkCmd.Flags().BoolVar(&config.OldAPIExists, "old-api-exists", config.OldAPIExists, "does the go-spacemesh build support the old API")
+	createNetworkCmd.Flags().BoolVar(&config.AdjustHare, "adjust-hare", config.AdjustHare, "adjust hare parameters according to number of miners")
 
 	err := viper.BindPFlags(createNetworkCmd.Flags())
 	if err != nil {

@@ -72,10 +72,12 @@ func Create() error {
 		minerConfigJson.SetP(genesisTime, "main.genesis-time")
 		minerConfigJson.SetP(config.NumberOfMiners, "main.genesis-active-size")
 
-		//should be less than total miners
-		minerConfigJson.SetP(int(((float64(config.NumberOfMiners) / 100) * 60)), "hare.hare-committee-size")
-		//should be half-1 of hare committee size
-		minerConfigJson.SetP(int((((float64(config.NumberOfMiners)/100)*60)/2)-1), "hare.hare-max-adversaries")
+		if config.AdjustHare == true {
+			//should be less than total miners
+			minerConfigJson.SetP(int(((float64(config.NumberOfMiners) / 100) * 60)), "hare.hare-committee-size")
+			//should be half-1 of hare committee size
+			minerConfigJson.SetP(int((((float64(config.NumberOfMiners)/100)*60)/2)-1), "hare.hare-max-adversaries")
+		}
 	}
 
 	layerDurationSec, ok := minerConfigJson.Path("main.layer-duration-sec").Data().(float64)
