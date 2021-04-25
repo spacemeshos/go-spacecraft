@@ -284,6 +284,10 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 		"--post-datadir=/root/data/post",
 		"-d=/root/data/node",
 		"--json-port=7000",
+		"--mem-profile=/root/data/mem.prof",
+		"--cpu-profile=/root/data/cpu.prof",
+		"--profiler",
+		"--pprof-server",
 	}
 
 	if config.OldAPIExists == true {
@@ -343,6 +347,9 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 								},
 								{
 									ContainerPort: 8000,
+								},
+								{
+									ContainerPort: 6060,
 								},
 							},
 							Resources: apiv1.ResourceRequirements{
@@ -454,6 +461,7 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 				corev1.ServicePort{Name: "grpcport", Port: 6000, TargetPort: intstr.FromInt(6000)},
 				corev1.ServicePort{Name: "jsonport", Port: 7000, TargetPort: intstr.FromInt(7000)},
 				corev1.ServicePort{Name: "oldapiport", Port: 8000, TargetPort: intstr.FromInt(8000)},
+				corev1.ServicePort{Name: "pprof", Port: 6060, TargetPort: intstr.FromInt(6060)},
 			},
 			Selector: map[string]string{
 				"name": "miner-" + minerNumber,
