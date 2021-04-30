@@ -55,7 +55,7 @@ func (k8s *Kubernetes) getExternalIpOfNode(nodeId string) (string, error) {
 	return "", errors.New("public ip of node not found")
 }
 
-func (k8s *Kubernetes) getExternalPort(serviceId string, portName string) (string, error) {
+func (k8s *Kubernetes) GetExternalPort(serviceId string, portName string) (string, error) {
 	svc, err := k8s.Client.CoreV1().Services("default").Get(context.TODO(), serviceId, metav1.GetOptions{})
 
 	if err != nil {
@@ -492,14 +492,14 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 	apiPort := ""
 
 	if config.OldAPIExists == false {
-		grpcport, err := k8s.getExternalPort("miner-"+minerNumber, "grpcport")
+		grpcport, err := k8s.GetExternalPort("miner-"+minerNumber, "grpcport")
 		apiPort = grpcport
 		if err != nil {
 			channel.Err <- err
 			return
 		}
 	} else {
-		grpcport, err := k8s.getExternalPort("miner-"+minerNumber, "oldapiport")
+		grpcport, err := k8s.GetExternalPort("miner-"+minerNumber, "oldapiport")
 		apiPort = grpcport
 		if err != nil {
 			channel.Err <- err
@@ -695,7 +695,7 @@ func (k8s *Kubernetes) DeployPoet(initialDuration string, poetNumber string, con
 		return
 	}
 
-	port, err := k8s.getExternalPort("poet-"+poetNumber, "restport")
+	port, err := k8s.GetExternalPort("poet-"+poetNumber, "restport")
 
 	if err != nil {
 		channel.Err <- err
@@ -792,6 +792,23 @@ func (k8s *Kubernetes) UpdateImageOfMiners(name string) error {
 	fmt.Println("updated image of " + name)
 
 	return nil
+}
+
+func (k8s *Kubernetes) GetExternalIP() (string, error) {
+	nodes, err := k8s.Client.CoreV1().Nodes().List(context.Background(), metav1.ListOptions{})
+	node := nodes.Items[0]
+
+	if err != nil {
+		return "", err
+	}
+
+	for _, address := range node.Status.Addresses {
+		if address.Type == apiv1.NodeExternalIP {
+			return address.Address, nil
+		}
+	}
+
+	return "", errors.New("public ip of cluster not found")
 }
 
 func int32Ptr(i int32) *int32 { return &i }

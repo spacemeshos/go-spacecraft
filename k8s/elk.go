@@ -373,13 +373,13 @@ func (k8s *Kubernetes) GetKibanaURL() (string, error) {
 }
 
 func (k8s *Kubernetes) GetESURL() (string, error) {
-	port, err := k8s.getExternalPort("elasticsearch-master", "http")
+	port, err := k8s.GetExternalPort("elasticsearch-master", "http")
 
 	if err != nil {
 		return "", err
 	}
 
-	ip, err := k8s.getExternalIP()
+	ip, err := k8s.GetExternalIP()
 
 	if err != nil {
 		return "", err
@@ -387,23 +387,6 @@ func (k8s *Kubernetes) GetESURL() (string, error) {
 
 	return ip + ":" + port, nil
 
-}
-
-func (k8s *Kubernetes) getExternalIP() (string, error) {
-	nodes, err := k8s.Client.CoreV1().Nodes().List(context.Background(), metav1.ListOptions{})
-	node := nodes.Items[0]
-
-	if err != nil {
-		return "", err
-	}
-
-	for _, address := range node.Status.Addresses {
-		if address.Type == apiv1.NodeExternalIP {
-			return address.Address, nil
-		}
-	}
-
-	return "", errors.New("public ip of cluster not found")
 }
 
 func (k8s *Kubernetes) SetupLogDeletionPolicy() error {
