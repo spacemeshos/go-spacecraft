@@ -18,6 +18,11 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	intstr "k8s.io/apimachinery/pkg/util/intstr"
 	v1beta1 "k8s.io/client-go/kubernetes/typed/policy/v1beta1"
+
+	"crypto/ecdsa"
+
+	"github.com/ethereum/go-ethereum/common/hexutil"
+	"github.com/ethereum/go-ethereum/crypto"
 )
 
 type MinerDeploymentData struct {
@@ -272,6 +277,35 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 	bindPort := int32(minerNumberInt + 5000)
 	bindPortStr := strconv.Itoa(int(bindPort))
 
+	privateKey, _ := crypto.GenerateKey()
+	privateKeyBytes := crypto.FromECDSA(privateKey)
+	publicKey := privateKey.Public()
+	publicKeyECDSA, _ := publicKey.(*ecdsa.PublicKey)
+	compressedPubkey := crypto.CompressPubkey(publicKeyECDSA)
+
+	privateKeyHex := hexutil.Encode(privateKeyBytes)
+	publicKeyHex := hexutil.Encode(compressedPubkey)[2:]
+
+	fmt.Println("creating miner-" + minerNumber + " coinbase secret")
+
+	secretsClient := k8s.Client.CoreV1().Secrets("default")
+	secret := &apiv1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: "miner-" + minerNumber + "-coinbase",
+		},
+		StringData: map[string]string{
+			"privateKey": privateKeyHex,
+		},
+	}
+	_, err = secretsClient.Create(context.Background(), secret, metav1.CreateOptions{})
+
+	if err != nil {
+		channel.Err <- err
+		return
+	}
+
+	fmt.Println("created miner-" + minerNumber + " coinbase secret")
+
 	command := []string{
 		"/bin/go-spacemesh",
 		"--test-mode",
@@ -279,7 +313,7 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 		"--acquire-port=0",
 		"--json-server=true",
 		"--start-mining",
-		"--coinbase=7566a5e003748be1c1a999c62fbe2610f69237f57ac3043f3213983819fe3ea5",
+		"--coinbase=" + publicKeyHex,
 		"--config=/etc/config/config.json",
 		"--post-datadir=/root/data/post",
 		"-d=/root/data/node",
