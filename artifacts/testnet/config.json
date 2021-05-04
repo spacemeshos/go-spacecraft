@@ -1,0 +1,23 @@
+{
+  "network-name": "tweedlelite",
+  "miners": 100,
+  "poets": 5,
+  "miner-ram": "16",
+  "miner-cpu": "4",
+  "poet-ram": "32",
+  "poet-cpu": "8",
+  "miner-disk-size": "200",
+  "poet-disk-size": "2048",
+  "gcp-machine-type": "e2-standard-16",
+  "go-sm-config": "./artifacts/testnet/miner/config.json",
+  "init-phase-shift": 6000,
+  "poet-gateway-amount": 6,
+  "bootnode-amount": 10,
+  "gcp-machine-cpu": 16,
+  "gcp-machine-memory": 64,
+  "genesis-delay": 10,
+  "es-disk-size": "5000",
+  "es-memory": "16",
+  "es-cpu": "4",
+  "logs-expiry": "7"
+}
