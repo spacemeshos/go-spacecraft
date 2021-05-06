@@ -9,7 +9,7 @@ import (
 	"github.com/spacemeshos/go-spacecraft/log"
 )
 
-func APIURLs() error {
+func ListHosts() error {
 	k8sRestConfig, k8sClient, err := gcp.GetKubernetesClient()
 
 	if err != nil {

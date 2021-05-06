@@ -56,7 +56,7 @@
       "refresh-ntp-interval": "30m"
   },
   "api": {
-      "grpc": "node,mesh,globalstate,transaction,smesher"
+      "grpc": "node,mesh,globalstate,transaction,smesher,debug"
   },
   "logging": {
       "app": "info",

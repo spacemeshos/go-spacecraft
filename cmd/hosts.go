@@ -6,11 +6,11 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var grpcCmd = &cobra.Command{
-	Use:   "viewAPI",
+var hostsCmd = &cobra.Command{
+	Use:   "hosts",
 	Short: "List GRPC endpoints of miners",
 	Run: func(cmd *cobra.Command, args []string) {
-		err := network.APIURLs()
+		err := network.ListHosts()
 		if err != nil {
 			log.Error.Println(err)
 			return
@@ -19,5 +19,5 @@ var grpcCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(grpcCmd)
+	rootCmd.AddCommand(hostsCmd)
 }

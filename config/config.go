@@ -39,6 +39,7 @@ type Configuration struct {
 	LogsExpiry         string `mapstructure:"logs-expiry"`
 	OldAPIExists       bool   `mapstructure:"old-api-exists"`
 	AdjustHare         bool   `mapstructure:"adjust-hare"`
+	Host               string `mapstructure:"host"`
 }
 
 var Config = Configuration{
@@ -80,4 +81,5 @@ var Config = Configuration{
 	LogsExpiry:         "1",
 	OldAPIExists:       true,
 	AdjustHare:         true,
+	Host:               "",
 }

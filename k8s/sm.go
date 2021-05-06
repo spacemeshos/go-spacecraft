@@ -284,7 +284,7 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 	compressedPubkey := crypto.CompressPubkey(publicKeyECDSA)
 
 	privateKeyHex := hexutil.Encode(privateKeyBytes)
-	publicKeyHex := hexutil.Encode(compressedPubkey)[2:]
+	publicKeyHex := hexutil.Encode(compressedPubkey)
 
 	fmt.Println("creating miner-" + minerNumber + " coinbase secret")
 
@@ -295,6 +295,7 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 		},
 		StringData: map[string]string{
 			"privateKey": privateKeyHex,
+			"publicKey":  publicKeyHex,
 		},
 	}
 	_, err = secretsClient.Create(context.Background(), secret, metav1.CreateOptions{})
@@ -313,7 +314,7 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 		"--acquire-port=0",
 		"--json-server=true",
 		"--start-mining",
-		"--coinbase=" + publicKeyHex,
+		"--coinbase=" + publicKeyHex[2:],
 		"--config=/etc/config/config.json",
 		"--post-datadir=/root/data/post",
 		"-d=/root/data/node",
@@ -843,6 +844,26 @@ func (k8s *Kubernetes) GetExternalIP() (string, error) {
 	}
 
 	return "", errors.New("public ip of cluster not found")
+}
+
+func (k8s *Kubernetes) MinerAccounts() ([]string, error) {
+	secretsClient := k8s.Client.CoreV1().Secrets("default")
+	secrets, err := secretsClient.List(context.Background(), metav1.ListOptions{})
+
+	if err != nil {
+		return []string{}, err
+	}
+
+	addresses := []string{}
+
+	for _, secret := range secrets.Items {
+		if val, ok := secret.Data["publicKey"]; ok {
+			publicKey := string(val)
+			addresses = append(addresses, publicKey[len(publicKey)-40:])
+		}
+	}
+
+	return addresses, nil
 }
 
 func int32Ptr(i int32) *int32 { return &i }

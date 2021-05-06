@@ -19,5 +19,7 @@
   "es-disk-size": "5000",
   "es-memory": "16",
   "es-cpu": "4",
-  "logs-expiry": "7"
+  "logs-expiry": "7",
+  "logstash-memory": "16",
+  "logstash-cpu": "4"
 }

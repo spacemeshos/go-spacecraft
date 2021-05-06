@@ -15,6 +15,7 @@ require (
 	github.com/mittwald/go-helm-client v0.4.3
 	github.com/pelletier/go-toml v1.8.1 // indirect
 	github.com/sethvargo/go-password v0.2.0
+	github.com/spacemeshos/api/release/go v0.0.0-20201210094223-105249951c66
 	github.com/spf13/afero v1.6.0 // indirect
 	github.com/spf13/cast v1.3.1 // indirect
 	github.com/spf13/cobra v1.1.3
@@ -26,6 +27,8 @@ require (
 	golang.org/x/text v0.3.5 // indirect
 	google.golang.org/api v0.20.0
 	google.golang.org/genproto v0.0.0-20210401141331-865547bb08e2
+	google.golang.org/grpc v1.36.1
+	google.golang.org/protobuf v1.26.0
 	gopkg.in/ini.v1 v1.62.0 // indirect
 	helm.sh/helm/v3 v3.5.1
 	k8s.io/api v0.20.5
