@@ -87,6 +87,7 @@ func (k8s *Kubernetes) DeployELK() error {
 		ValuesYaml: sanitizeYaml(fmt.Sprintf(`
 			replicas: 1
 			minimumMasterNodes: 1
+			clusterHealthCheckParams: 'wait_for_status=yellow&timeout=1s'
 			service:
 				type: NodePort
 			volumeClaimTemplate:
@@ -103,7 +104,8 @@ func (k8s *Kubernetes) DeployELK() error {
 					memory: "%sGi"
 			esConfig:
 				elasticsearch.yml: |
-					xpack.security.enabled: true
+					xpack.security.enabled: false
+			imageTag: "7.12.1"
 			extraEnvs:
 				- name: ELASTIC_PASSWORD
 					valueFrom:
