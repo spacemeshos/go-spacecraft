@@ -50,9 +50,9 @@ func Rewards() error {
 
 	for _, account := range r.AccountWrapper {
 		log.Info.Println("Account: " + hex.EncodeToString(account.AccountId.Address))
-		fmt.Println("Balance: " + strconv.FormatUint(account.StateCurrent.Balance.Value, 10) + "\n")
+		fmt.Println("Balance: " + strconv.FormatUint(account.StateCurrent.Balance.Value, 10))
 		_, exists := find(managedAddresses, hex.EncodeToString(account.AccountId.Address))
-		fmt.Println("Managed Miner Account: ", strconv.FormatBool(exists))
+		fmt.Println("Managed Miner Account: ", strconv.FormatBool(exists)+"\n")
 	}
 
 	return nil
