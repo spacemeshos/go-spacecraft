@@ -31,9 +31,6 @@ type Configuration struct {
 	ESDiskSize         string `mapstructure:"es-disk-size"`
 	ESMemory           string `mapstructure:"es-memory"`
 	ESCPU              string `mapstructure:"es-cpu"`
-	LogstashDiskSize   string `mapstructure:"logstash-disk-size"`
-	LogstashMemory     string `mapstructure:"logstash-memory"`
-	LogstashCPU        string `mapstructure:"logstash-cpu"`
 	KibanaMemory       string `mapstructure:"kibana-memory"`
 	KibanaCPU          string `mapstructure:"kibana-cpu"`
 	LogsExpiry         string `mapstructure:"logs-expiry"`
@@ -73,9 +70,6 @@ var Config = Configuration{
 	ESDiskSize:         "10",
 	ESMemory:           "2",
 	ESCPU:              "1",
-	LogstashDiskSize:   "1",
-	LogstashMemory:     "2",
-	LogstashCPU:        "1",
 	KibanaMemory:       "2",
 	KibanaCPU:          "1",
 	LogsExpiry:         "1",

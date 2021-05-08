@@ -104,7 +104,7 @@ func (k8s *Kubernetes) DeployELK() error {
 					memory: "%sGi"
 			esConfig:
 				elasticsearch.yml: |
-					xpack.security.enabled: false
+					xpack.security.enabled: true
 			imageTag: "7.12.1"
 			extraEnvs:
 				- name: ELASTIC_PASSWORD
@@ -121,101 +121,6 @@ func (k8s *Kubernetes) DeployELK() error {
 	}
 
 	if err = client.InstallOrUpgradeChart(context.Background(), &elasticSearchSpec); err != nil {
-		return err
-	}
-
-	logstashSpec := helm.ChartSpec{
-		ReleaseName: "logstash",
-		ChartName:   "elastic/logstash",
-		Namespace:   "default",
-		Wait:        true,
-		Force:       true,
-		ValuesYaml: sanitizeYaml(fmt.Sprintf(`
-			logstashConfig:
-				logstash.yml: |
-					http.host: 0.0.0.0
-					xpack.monitoring.enabled: false
-	
-			logstashPipeline:
-				uptime.conf: |
-					input { beats { port => 5044 } }
-					filter {
-						if [message] =~ "\A\{.+\}\z" {
-							json {
-								source => "message"
-								target => "sm"
-								skip_on_invalid_json => false
-							}
-			
-							mutate {
-								remove_field => [
-									"message"
-								]
-							}
-						}
-			
-						mutate {
-							add_field => { "name" => "%%{[kubernetes][labels][name]}" }
-			
-							remove_field => [
-								"log",
-								"cloud",
-								"ecs",
-								"agent",
-								"input",
-								"tags",
-								"docker",
-								"container",
-								"host",
-								"[sm][T]",
-								"kubernetes"
-							]
-						}
-					}
-					output { elasticsearch { hosts => ["http://elasticsearch-master:9200"] index => "sm-%%{+YYYY.MM.dd}" manage_template => false user => '${ELASTICSEARCH_USERNAME}' password => '${ELASTICSEARCH_PASSWORD}' } }
-				
-			extraEnvs:
-				- name: 'ELASTICSEARCH_USERNAME'
-					valueFrom:
-						secretKeyRef:
-							name: elastic-credentials
-							key: username
-				- name: 'ELASTICSEARCH_PASSWORD'
-					valueFrom:
-						secretKeyRef:
-							name: elastic-credentials
-							key: password
-			service:
-				annotations: {}
-				type: ClusterIP
-				loadBalancerIP: ""
-				ports:
-					- name: beats
-						port: 5044
-						protocol: TCP
-						targetPort: 5044
-					- name: http
-						port: 8080
-						protocol: TCP
-						targetPort: 8080
-			
-			resources:
-				requests:
-					cpu: "%s"
-					memory: "%sGi"
-				limits:
-					cpu: "%s"
-					memory: "%sGi"
-
-			volumeClaimTemplate:
-				accessModes: [ "ReadWriteOnce" ]
-				resources:
-					requests:
-						storage: %sGi
-		`, config.LogstashCPU, config.LogstashMemory, config.LogstashCPU, config.LogstashMemory, config.LogstashDiskSize)),
-	}
-
-	if err = client.InstallOrUpgradeChart(context.Background(), &logstashSpec); err != nil {
 		return err
 	}
 
@@ -266,6 +171,17 @@ func (k8s *Kubernetes) DeployELK() error {
 		Force:       true,
 		ValuesYaml: sanitizeYaml(`
 			daemonset:
+				extraEnvs:
+				- name: 'ELASTICSEARCH_USERNAME'
+					valueFrom:
+						secretKeyRef:
+							name: elastic-credentials
+							key: username
+				- name: 'ELASTICSEARCH_PASSWORD'
+					valueFrom:
+						secretKeyRef:
+							name: elastic-credentials
+							key: password
 				resources: {}
 				filebeatConfig:
 					filebeat.yml: |
@@ -279,9 +195,18 @@ func (k8s *Kubernetes) DeployELK() error {
 											try {
 												var msg = JSON.parse(message)
 												Object.keys(msg).forEach(function(k) {msg[k] = msg[k].toString()})
-												event.Put("message", JSON.stringify(msg));
-											} catch(e) {}
+												msg.name = event.Get('kubernetes.labels.name')
+												delete msg.T
+
+												Object.keys(msg).forEach(function(k) { event.Put(k, msg[k]) })
+												event.Delete("message")
+												//event.Put("message", JSON.stringify(msg));
+											} catch(e) {
+												event.Put("name", event.Get('kubernetes.labels.name'))
+											}
 										}
+							- drop_fields:
+									fields: ["log", "cloud", "ecs", "agent", "input", "tags", "docker", "container", "host", "kubernetes"]
 						filebeat:
 							autodiscover.providers:
 								- type: kubernetes
@@ -298,8 +223,17 @@ func (k8s *Kubernetes) DeployELK() error {
 												- type: docker
 													containers.ids:
 														- "${data.kubernetes.container.id}"
-						output.logstash:
-							hosts: 'logstash-logstash:5044'
+						output.elasticsearch:
+							host: '${NODE_NAME}'
+							hosts: '${ELASTICSEARCH_HOSTS:elasticsearch-master:9200}'
+							username: "${ELASTICSEARCH_USERNAME}"
+							password: "${ELASTICSEARCH_PASSWORD}"
+							index: "sm-%{+YYYY.MM.dd}"
+							worker: 3
+							bulk_max_size: 1000
+						setup.template.name: "sm"
+						setup.template.pattern: "sm-*"
+						setup.ilm.enabled: false
 		`),
 	}
 
