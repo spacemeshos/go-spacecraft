@@ -64,6 +64,10 @@ func init() {
 	createNetworkCmd.Flags().StringVar(&config.LogsExpiry, "logs-expiry", config.LogsExpiry, "number of days after which logs are deleted automatically")
 	createNetworkCmd.Flags().BoolVar(&config.OldAPIExists, "old-api-exists", config.OldAPIExists, "does the go-spacemesh build support the old API")
 	createNetworkCmd.Flags().BoolVar(&config.AdjustHare, "adjust-hare", config.AdjustHare, "adjust hare parameters according to number of miners")
+	createNetworkCmd.Flags().StringVar(&config.PyroscopeImage, "pyroscope-image", config.PyroscopeImage, "docker image url of pyroscope")
+	createNetworkCmd.Flags().StringVar(&config.PyroscopeCPU, "pyroscope-cpu", config.PyroscopeCPU, "vCPUs to allocate to pyroscope")
+	createNetworkCmd.Flags().StringVar(&config.PyroscopeMemory, "pyroscope-memory", config.PyroscopeMemory, "memory to allocate to pyroscope")
+	createNetworkCmd.Flags().BoolVar(&config.DeployPyroscope, "deploy-pyroscope", config.DeployPyroscope, "deploy pyroscope profiler")
 
 	err := viper.BindPFlags(createNetworkCmd.Flags())
 	if err != nil {

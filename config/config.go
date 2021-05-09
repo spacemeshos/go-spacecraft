@@ -39,6 +39,10 @@ type Configuration struct {
 	OldAPIExists       bool   `mapstructure:"old-api-exists"`
 	AdjustHare         bool   `mapstructure:"adjust-hare"`
 	Host               string `mapstructure:"host"`
+	PyroscopeImage     string `mapstructure:"pyroscope-image"`
+	PyroscopeCPU       string `mapstructure:"pyroscope-cpu"`
+	PyroscopeMemory    string `mapstructure:"pyroscope-memory"`
+	DeployPyroscope    bool   `mapstructure:"deploy-pyroscope"`
 }
 
 var Config = Configuration{
@@ -80,4 +84,8 @@ var Config = Configuration{
 	OldAPIExists:       true,
 	AdjustHare:         true,
 	Host:               "",
+	PyroscopeImage:     "pyroscope/pyroscope:latest",
+	PyroscopeCPU:       "1",
+	PyroscopeMemory:    "2",
+	DeployPyroscope:    false,
 }

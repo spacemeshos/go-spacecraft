@@ -321,7 +321,6 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 		"--json-port=7000",
 		"--mem-profile=/root/data/mem.prof",
 		"--cpu-profile=/root/data/cpu.prof",
-		"--profiler",
 		"--pprof-server",
 	}
 
@@ -331,6 +330,17 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 		command = append(command, "--grpc-port=8000")
 	} else {
 		command = append(command, "--grpc-port=6000")
+	}
+
+	if config.DeployPyroscope == true {
+		pyroscopeURL, err := k8s.GetPyroscopeURL()
+
+		if err != nil {
+			channel.Err <- err
+			return
+		}
+
+		command = append(command, "--profile-url="+pyroscopeURL)
 	}
 
 	command = append(command, "; sleep 100000000")

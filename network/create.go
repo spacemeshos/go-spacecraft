@@ -38,6 +38,12 @@ func Create() error {
 
 	kubernetes := k8s.Kubernetes{Client: k8sClient, RestConfig: k8sRestConfig}
 
+	if config.DeployPyroscope == true {
+		if err = kubernetes.DeployPyroscope(); err != nil {
+			return err
+		}
+	}
+
 	if err = kubernetes.DeployELK(); err != nil {
 		return err
 	}
@@ -262,6 +268,16 @@ func Create() error {
 	log.Info.Println("Kibana URL: http://" + kibanaURL)
 	log.Info.Println("Kibana Username: elastic")
 	log.Info.Println("Kibana Password: " + kubernetes.Password)
+
+	if confif.DeployPyroscope == true {
+		pyroscopeURL, err := kubernetes.GetPyroscopeURL()
+
+		if err != nil {
+			return err
+		}
+
+		log.Info.Println("Pyroscope URL: http://" + pyroscopeURL)
+	}
 
 	return nil
 }
