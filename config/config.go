@@ -28,9 +28,11 @@ type Configuration struct {
 	RestartWaitTime    int    `mapstructure:"restart-wait-time"`
 	Bootstrap          bool   `mapstructure:"bootstrap"`
 	KibanaSavedObjects string `mapstructure:"kibana-saved-objects"`
+	ESCert             string `mapstructure:"es-cert"`
 	ESDiskSize         string `mapstructure:"es-disk-size"`
 	ESMemory           string `mapstructure:"es-memory"`
 	ESCPU              string `mapstructure:"es-cpu"`
+	ESHeapMemory       string `mapstructure:"es-heap-memory"`
 	KibanaMemory       string `mapstructure:"kibana-memory"`
 	KibanaCPU          string `mapstructure:"kibana-cpu"`
 	LogsExpiry         string `mapstructure:"logs-expiry"`
@@ -67,8 +69,10 @@ var Config = Configuration{
 	RestartWaitTime:    2,
 	Bootstrap:          true,
 	KibanaSavedObjects: "./artifacts/elk/kibana.ndjson",
+	ESCert:             "./artifacts/elk/elastic-certificates.p12",
 	ESDiskSize:         "10",
 	ESMemory:           "2",
+	ESHeapMemory:       "1",
 	ESCPU:              "1",
 	KibanaMemory:       "2",
 	KibanaCPU:          "1",

@@ -37,6 +37,7 @@ func init() {
 
 	createNetworkCmd.Flags().StringVar(&config.GoSmConfig, "go-sm-config", config.GoSmConfig, "config file for go-spacemesh")
 	createNetworkCmd.Flags().StringVar(&config.KibanaSavedObjects, "kibana-saved-objects", config.KibanaSavedObjects, "path of file exported using kibana export API")
+	createNetworkCmd.Flags().StringVar(&config.ESCert, "es-cert", config.ESCert, "path to p12 file for elasticsearch ssl")
 	createNetworkCmd.Flags().IntVarP(&config.NumberOfMiners, "miners", "m", config.NumberOfMiners, "number of miners")
 	createNetworkCmd.Flags().IntVarP(&config.NumberOfPoets, "poets", "p", config.NumberOfPoets, "number of poets")
 	createNetworkCmd.Flags().StringVar(&config.MinerMemory, "miner-ram", config.MinerMemory, "RAM for each miner")
@@ -57,6 +58,7 @@ func init() {
 	createNetworkCmd.Flags().StringVar(&config.ESDiskSize, "es-disk-size", config.ESDiskSize, "disk size to allocate to elasticsearch")
 	createNetworkCmd.Flags().StringVar(&config.ESCPU, "es-cpu", config.ESCPU, "vCPUs to allocate to elasticsearch")
 	createNetworkCmd.Flags().StringVar(&config.ESMemory, "es-memory", config.ESMemory, "RAM to allocate to elasticsearch")
+	createNetworkCmd.Flags().StringVar(&config.ESHeapMemory, "es-heap-memory", config.ESHeapMemory, "memory to allocate to elasticsearch heap (should be less than total memory allocated")
 	createNetworkCmd.Flags().StringVar(&config.KibanaCPU, "kibana-cpu", config.KibanaCPU, "vCPUs to allocate to kibana")
 	createNetworkCmd.Flags().StringVar(&config.KibanaMemory, "kibana-memory", config.KibanaMemory, "RAM to allocate to kibana")
 	createNetworkCmd.Flags().StringVar(&config.LogsExpiry, "logs-expiry", config.LogsExpiry, "number of days after which logs are deleted automatically")

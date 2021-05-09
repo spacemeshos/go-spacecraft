@@ -78,6 +78,26 @@ func (k8s *Kubernetes) DeployELK() error {
 		return err
 	}
 
+	certData, err := ioutil.ReadFile(config.ESCert)
+
+	if err != nil {
+		return err
+	}
+
+	secret = &apiv1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: "elastic-certificates",
+		},
+		Data: map[string][]byte{
+			"elastic-certificates.p12": certData,
+		},
+	}
+	_, err = secretsClient.Create(context.Background(), secret, metav1.CreateOptions{})
+
+	if err != nil {
+		return err
+	}
+
 	elasticSearchSpec := helm.ChartSpec{
 		ReleaseName: "elasticsearch",
 		ChartName:   "elastic/elasticsearch",
@@ -105,8 +125,20 @@ func (k8s *Kubernetes) DeployELK() error {
 			esConfig:
 				elasticsearch.yml: |
 					xpack.security.enabled: true
+					xpack.security.transport.ssl.enabled: true
+					xpack.security.transport.ssl.verification_mode: certificate
+					xpack.security.transport.ssl.keystore.path: /usr/share/elasticsearch/config/certs/elastic-certificates.p12
+					xpack.security.transport.ssl.truststore.path: /usr/share/elasticsearch/config/certs/elastic-certificates.p12
 			imageTag: "7.12.1"
+			secretMounts:
+			- name: elastic-certificates
+				secretName: elastic-certificates
+				path: /usr/share/elasticsearch/config/certs
 			extraEnvs:
+				- name: ES_HEAP_SIZE
+					value: %sg
+				- name: ES_JAVA_OPTS
+					value: -Xmx%sg -Xms%sg
 				- name: ELASTIC_PASSWORD
 					valueFrom:
 						secretKeyRef:
@@ -117,7 +149,7 @@ func (k8s *Kubernetes) DeployELK() error {
 						secretKeyRef:
 							name: elastic-credentials
 							key: username
-		`, config.ESDiskSize, config.ESCPU, config.ESMemory, config.ESCPU, config.ESMemory)),
+		`, config.ESDiskSize, config.ESCPU, config.ESMemory, config.ESCPU, config.ESMemory, config.ESHeapMemory, config.ESHeapMemory, config.ESHeapMemory)),
 	}
 
 	if err = client.InstallOrUpgradeChart(context.Background(), &elasticSearchSpec); err != nil {

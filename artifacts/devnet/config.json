@@ -18,6 +18,7 @@
   "genesis-delay": 10,
   "es-disk-size": "2048",
   "es-memory": "16",
+  "es-heap-memory": "8",
   "es-cpu": "4",
   "logs-expiry": "7"
 }
