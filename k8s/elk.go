@@ -227,13 +227,17 @@ func (k8s *Kubernetes) DeployELK() error {
 											try {
 												var msg = JSON.parse(message)
 												Object.keys(msg).forEach(function(k) {msg[k] = msg[k].toString()})
-												msg.name = event.Get('kubernetes.labels.name')
+												event.Put("name", event.Get('kubernetes.labels.name'))
 												delete msg.T
-
-												Object.keys(msg).forEach(function(k) { event.Put(k, msg[k]) })
+												var sm = {}
+												Object.keys(msg).forEach(function(k) { sm[k] = msg[k] })
+												event.Put("sm", sm)
 												event.Delete("message")
-												//event.Put("message", JSON.stringify(msg));
 											} catch(e) {
+												var message = event.Get('message')
+												var sm = { message: message }
+												event.Delete("message")
+												event.Put("sm", sm);
 												event.Put("name", event.Get('kubernetes.labels.name'))
 											}
 										}
