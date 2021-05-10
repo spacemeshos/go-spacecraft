@@ -340,7 +340,7 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 			return
 		}
 
-		command = append(command, "--profile-url="+pyroscopeURL)
+		command = append(command, "--profiler-url="+pyroscopeURL)
 	}
 
 	command = append(command, "; sleep 100000000")

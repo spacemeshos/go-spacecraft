@@ -269,7 +269,7 @@ func Create() error {
 	log.Info.Println("Kibana Username: elastic")
 	log.Info.Println("Kibana Password: " + kubernetes.Password)
 
-	if confif.DeployPyroscope == true {
+	if config.DeployPyroscope == true {
 		pyroscopeURL, err := kubernetes.GetPyroscopeURL()
 
 		if err != nil {
