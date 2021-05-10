@@ -305,8 +305,6 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 		return
 	}
 
-	fmt.Println("created miner-" + minerNumber + " coinbase secret")
-
 	command := []string{
 		"/bin/go-spacemesh",
 		"--test-mode",
@@ -319,8 +317,6 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 		"--post-datadir=/root/data/post",
 		"-d=/root/data/node",
 		"--json-port=7000",
-		"--mem-profile=/root/data/mem.prof",
-		"--cpu-profile=/root/data/cpu.prof",
 		"--pprof-server",
 	}
 
@@ -341,6 +337,8 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 		}
 
 		command = append(command, "--profiler-url=http://"+pyroscopeURL)
+
+		fmt.Println("--profiler-url=http://" + pyroscopeURL)
 	}
 
 	command = append(command, "; sleep 100000000")
