@@ -267,8 +267,7 @@ func (k8s *Kubernetes) DeployELK() error {
 							index: "sm-%{+YYYY.MM.dd}"
 							worker: 3
 							bulk_max_size: 1000
-						setup.template.name: "sm"
-						setup.template.pattern: "sm-*"
+						setup.template.enabled: false
 						setup.ilm.enabled: false
 		`),
 	}
