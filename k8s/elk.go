@@ -229,20 +229,25 @@ func (k8s *Kubernetes) DeployELK() error {
 												Object.keys(msg).forEach(function(k) {msg[k] = msg[k].toString()})
 												event.Put("name", event.Get('kubernetes.labels.name'))
 												delete msg.T
-												var sm = {}
-												Object.keys(msg).forEach(function(k) { sm[k] = msg[k] })
-												event.Put("sm", sm)
+												event.Put("sm", JSON.stringify(msg))
 												event.Delete("message")
 											} catch(e) {
 												var message = event.Get('message')
 												var sm = { message: message }
 												event.Delete("message")
-												event.Put("sm", sm);
+												event.Put("sm", JSON.stringify(sm));
 												event.Put("name", event.Get('kubernetes.labels.name'))
 											}
 										}
 							- drop_fields:
 									fields: ["log", "cloud", "ecs", "agent", "input", "tags", "docker", "container", "host", "kubernetes"]
+							- decode_json_fields:
+									fields: ["sm"]
+									target: "sm"
+									process_array: false
+									max_depth: 2
+									overwrite_keys: true
+									add_error_key: true
 						filebeat:
 							autodiscover.providers:
 								- type: kubernetes
