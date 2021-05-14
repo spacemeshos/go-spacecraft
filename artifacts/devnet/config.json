@@ -17,8 +17,11 @@
   "gcp-machine-memory": 64,
   "genesis-delay": 10,
   "es-disk-size": "2048",
-  "es-memory": "16",
-  "es-heap-memory": "8",
-  "es-cpu": "4",
-  "logs-expiry": "7"
+  "es-memory": "32",
+  "es-heap-memory": "4",
+  "es-cpu": "8",
+  "logs-expiry": "7",
+  "deploy-pyroscope": true,
+  "pyroscope-cpu": "2",
+  "pyroscope-memory": "8"
 }
