@@ -121,6 +121,9 @@ func CreateKubernetesCluster() error {
 		Cluster: &containerpb.Cluster{
 			Name:      config.NetworkName,
 			NodePools: nodePools,
+			ReleaseChannel: &containerpb.ReleaseChannel{
+				Channel: containerpb.ReleaseChannel_STABLE,
+			},
 		},
 		Parent: "projects/" + config.GCPProject + "/locations/" + config.GCPLocation,
 	}
