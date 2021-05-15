@@ -116,7 +116,7 @@ func CreateKubernetesCluster() error {
 			Locations: []string{config.GCPZone},
 			Management: &containerpb.NodeManagement{
 				AutoUpgrade: false,
-				AutoRepair:  true,
+				AutoRepair:  false,
 			},
 		},
 	}
