@@ -22,5 +22,9 @@
   "es-cpu": "4",
   "es-replicas": "3",
   "es-master-nodes": "2",
-  "logs-expiry": "7"
+  "logs-expiry": "7",
+  "deploy-pyroscope": true,
+  "pyroscope-memory": "8",
+  "pyroscope-cpu": "2",
+  "metrics": true
 }
