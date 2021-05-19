@@ -76,7 +76,8 @@ func CreateKubernetesCluster() error {
 	poetCPUInt, _ := strconv.ParseInt(config.PoetCPU, 10, 8)
 	esCPUInt, _ := strconv.ParseInt(config.ESCPU, 10, 8)
 	kibanaCPUInt, _ := strconv.ParseInt(config.KibanaCPU, 10, 8)
-	totalCPURequired := (minerCPUInt * int64(config.NumberOfMiners)) + (poetCPUInt * int64(config.NumberOfPoets)) + kibanaCPUInt + esCPUInt
+	pyroscopeCPUInt, _ := strconv.ParseInt(config.PyroscopeCPU, 10, 8)
+	totalCPURequired := (minerCPUInt * int64(config.NumberOfMiners)) + (poetCPUInt * int64(config.NumberOfPoets)) + kibanaCPUInt + esCPUInt + pyroscopeCPUInt
 	totalCPUInstanceHas := int64(config.GCPMachineCPU)
 
 	nodeCount1 := int(math.Ceil((float64(totalCPURequired) / float64(totalCPUInstanceHas))))
@@ -85,7 +86,8 @@ func CreateKubernetesCluster() error {
 	poetMemoryInt, _ := strconv.ParseInt(config.PoetMemory, 10, 8)
 	esMemoryInt, _ := strconv.ParseInt(config.ESMemory, 10, 8)
 	kibanaMemoryInt, _ := strconv.ParseInt(config.KibanaMemory, 10, 8)
-	totalMemoryRequired := (minerMemoryInt * int64(config.NumberOfMiners)) + (poetMemoryInt * int64(config.NumberOfPoets)) + kibanaMemoryInt + esMemoryInt
+	pyroscopeMemoryInt, _ := strconv.ParseInt(config.PyroscopeMemory, 10, 8)
+	totalMemoryRequired := (minerMemoryInt * int64(config.NumberOfMiners)) + (poetMemoryInt * int64(config.NumberOfPoets)) + kibanaMemoryInt + esMemoryInt + pyroscopeMemoryInt
 	totalMemoryInstanceHas := int64(config.GCPMachineMemory)
 
 	nodeCount2 := int(math.Ceil((float64(totalMemoryRequired) / float64(totalMemoryInstanceHas))))
