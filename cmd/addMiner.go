@@ -50,6 +50,7 @@ func init() {
 	addMinerCmd.Flags().StringVar(&config.MinerCPU, "miner-cpu", config.MinerCPU, "vCPUs for each miner")
 	addMinerCmd.Flags().StringVar(&config.GoSmImage, "go-sm-image", config.GoSmImage, "docker image for go-spacemesh build")
 	addMinerCmd.Flags().StringVar(&config.MinerDiskSize, "miner-disk-size", config.MinerDiskSize, "Disk size of miner in GB")
+	addMinerCmd.Flags().BoolVar(&config.Metrics, "metrics", config.Metrics, "enable go-sm metrics collection")
 
 	err := viper.BindPFlags(addMinerCmd.Flags())
 	if err != nil {

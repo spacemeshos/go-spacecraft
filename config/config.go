@@ -45,6 +45,7 @@ type Configuration struct {
 	PyroscopeCPU       string `mapstructure:"pyroscope-cpu"`
 	PyroscopeMemory    string `mapstructure:"pyroscope-memory"`
 	DeployPyroscope    bool   `mapstructure:"deploy-pyroscope"`
+	Metrics            bool   `mapstructure:"metrics"`
 }
 
 var Config = Configuration{
@@ -92,4 +93,5 @@ var Config = Configuration{
 	PyroscopeCPU:       "1",
 	PyroscopeMemory:    "2",
 	DeployPyroscope:    false,
+	Metrics:            false,
 }

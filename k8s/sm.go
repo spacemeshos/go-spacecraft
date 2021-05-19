@@ -340,6 +340,10 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 		command = append(command, "--profiler-name=miner-"+minerNumber)
 	}
 
+	if config.Metrics == true {
+		command = append(command, "--metrics")
+	}
+
 	command = append(command, "; sleep 100000000")
 
 	deployment := &appsv1.Deployment{

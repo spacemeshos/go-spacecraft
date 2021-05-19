@@ -70,6 +70,7 @@ func init() {
 	createNetworkCmd.Flags().StringVar(&config.PyroscopeCPU, "pyroscope-cpu", config.PyroscopeCPU, "vCPUs to allocate to pyroscope")
 	createNetworkCmd.Flags().StringVar(&config.PyroscopeMemory, "pyroscope-memory", config.PyroscopeMemory, "memory to allocate to pyroscope")
 	createNetworkCmd.Flags().BoolVar(&config.DeployPyroscope, "deploy-pyroscope", config.DeployPyroscope, "deploy pyroscope profiler")
+	createNetworkCmd.Flags().BoolVar(&config.Metrics, "metrics", config.Metrics, "enable go-sm metrics collection")
 
 	err := viper.BindPFlags(createNetworkCmd.Flags())
 	if err != nil {
