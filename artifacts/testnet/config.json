@@ -1,7 +1,7 @@
 {
   "network-name": "tweedlelite",
   "miners": 100,
-  "poets": 2,
+  "poets": 5,
   "miner-ram": "8",
   "miner-cpu": "2",
   "poet-ram": "32",
