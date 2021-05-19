@@ -33,6 +33,8 @@ type Configuration struct {
 	ESMemory           string `mapstructure:"es-memory"`
 	ESCPU              string `mapstructure:"es-cpu"`
 	ESHeapMemory       string `mapstructure:"es-heap-memory"`
+	ESReplicas         string `mapstructure:"es-replicas"`
+	ESMasterNodes      string `mapstructure:"es-master-nodes"`
 	KibanaMemory       string `mapstructure:"kibana-memory"`
 	KibanaCPU          string `mapstructure:"kibana-cpu"`
 	LogsExpiry         string `mapstructure:"logs-expiry"`
@@ -78,6 +80,8 @@ var Config = Configuration{
 	ESMemory:           "2",
 	ESHeapMemory:       "1",
 	ESCPU:              "1",
+	ESReplicas:         "1",
+	ESMasterNodes:      "1",
 	KibanaMemory:       "2",
 	KibanaCPU:          "1",
 	LogsExpiry:         "1",

@@ -59,6 +59,8 @@ func init() {
 	createNetworkCmd.Flags().StringVar(&config.ESCPU, "es-cpu", config.ESCPU, "vCPUs to allocate to elasticsearch")
 	createNetworkCmd.Flags().StringVar(&config.ESMemory, "es-memory", config.ESMemory, "RAM to allocate to elasticsearch")
 	createNetworkCmd.Flags().StringVar(&config.ESHeapMemory, "es-heap-memory", config.ESHeapMemory, "memory to allocate to elasticsearch heap (should be less than total memory allocated")
+	createNetworkCmd.Flags().StringVar(&config.ESReplicas, "es-replicas", config.ESReplicas, "number of ES nodes")
+	createNetworkCmd.Flags().StringVar(&config.ESMasterNodes, "es-master-nodes", config.ESMasterNodes, "number of master nodes out of total nodes")
 	createNetworkCmd.Flags().StringVar(&config.KibanaCPU, "kibana-cpu", config.KibanaCPU, "vCPUs to allocate to kibana")
 	createNetworkCmd.Flags().StringVar(&config.KibanaMemory, "kibana-memory", config.KibanaMemory, "RAM to allocate to kibana")
 	createNetworkCmd.Flags().StringVar(&config.LogsExpiry, "logs-expiry", config.LogsExpiry, "number of days after which logs are deleted automatically")

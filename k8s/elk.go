@@ -98,6 +98,12 @@ func (k8s *Kubernetes) DeployELK() error {
 		return err
 	}
 
+	clusterHealthCheckParams := "clusterHealthCheckParams: 'wait_for_status=yellow&timeout=1s'"
+
+	if config.ESReplicas != "1" {
+		clusterHealthCheckParams = ""
+	}
+
 	elasticSearchSpec := helm.ChartSpec{
 		ReleaseName: "elasticsearch",
 		ChartName:   "elastic/elasticsearch",
@@ -105,9 +111,9 @@ func (k8s *Kubernetes) DeployELK() error {
 		Wait:        true,
 		Force:       true,
 		ValuesYaml: sanitizeYaml(fmt.Sprintf(`
-			replicas: 1
-			minimumMasterNodes: 1
-			clusterHealthCheckParams: 'wait_for_status=yellow&timeout=1s'
+			replicas: %s
+			minimumMasterNodes: %s
+			%s
 			service:
 				type: NodePort
 			volumeClaimTemplate:
@@ -135,8 +141,6 @@ func (k8s *Kubernetes) DeployELK() error {
 				secretName: elastic-certificates
 				path: /usr/share/elasticsearch/config/certs
 			extraEnvs:
-				- name: ES_HEAP_SIZE
-					value: %sg
 				- name: ES_JAVA_OPTS
 					value: -Xmx%sg -Xms%sg
 				- name: ELASTIC_PASSWORD
@@ -149,7 +153,7 @@ func (k8s *Kubernetes) DeployELK() error {
 						secretKeyRef:
 							name: elastic-credentials
 							key: username
-		`, config.ESDiskSize, config.ESCPU, config.ESMemory, config.ESCPU, config.ESMemory, config.ESHeapMemory, config.ESHeapMemory, config.ESHeapMemory)),
+		`, config.ESReplicas, config.ESMasterNodes, clusterHealthCheckParams, config.ESDiskSize, config.ESCPU, config.ESMemory, config.ESCPU, config.ESMemory, config.ESHeapMemory, config.ESHeapMemory)),
 	}
 
 	if err = client.InstallOrUpgradeChart(context.Background(), &elasticSearchSpec); err != nil {

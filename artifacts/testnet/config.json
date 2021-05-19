@@ -16,9 +16,11 @@
   "gcp-machine-cpu": 16,
   "gcp-machine-memory": 64,
   "genesis-delay": 10,
-  "es-disk-size": "5000",
+  "es-disk-size": "1500",
   "es-memory": "16",
-  "es-heap-memory": "8",
+  "es-heap-memory": "4",
   "es-cpu": "4",
+  "es-replicas": "3",
+  "es-master-nodes": "2",
   "logs-expiry": "7"
 }
