@@ -123,8 +123,9 @@ func CreateKubernetesCluster() error {
 
 	req := &containerpb.CreateClusterRequest{
 		Cluster: &containerpb.Cluster{
-			Name:      config.NetworkName,
-			NodePools: nodePools,
+			Name:                  config.NetworkName,
+			NodePools:             nodePools,
+			InitialClusterVersion: "1.18.17-gke.100",
 			ReleaseChannel: &containerpb.ReleaseChannel{
 				Channel: containerpb.ReleaseChannel_UNSPECIFIED,
 			},
