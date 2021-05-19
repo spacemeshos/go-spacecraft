@@ -1,9 +1,9 @@
 {
   "network-name": "tweedlelite",
   "miners": 100,
-  "poets": 5,
-  "miner-ram": "16",
-  "miner-cpu": "4",
+  "poets": 2,
+  "miner-ram": "8",
+  "miner-cpu": "2",
   "poet-ram": "32",
   "poet-cpu": "8",
   "miner-disk-size": "200",
