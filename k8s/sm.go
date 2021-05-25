@@ -336,8 +336,10 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 			return
 		}
 
-		command = append(command, "--profiler-url=http://"+pyroscopeURL)
-		command = append(command, "--profiler-name=miner-"+minerNumber)
+		if minerNumber == "15" || minerNumber == "2" {
+			command = append(command, "--profiler-url=http://"+pyroscopeURL)
+			command = append(command, "--profiler-name=miner-"+minerNumber)
+		}
 	}
 
 	if config.Metrics == true {

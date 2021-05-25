@@ -20,8 +20,8 @@
   "es-memory": "16",
   "es-heap-memory": "4",
   "es-cpu": "4",
-  "es-replicas": "3",
-  "es-master-nodes": "2",
+  "es-replicas": "2",
+  "es-master-nodes": "1",
   "logs-expiry": "7",
   "old-api-exists": false,
   "adjust-hare": false
