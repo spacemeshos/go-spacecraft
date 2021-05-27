@@ -479,6 +479,11 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 
 	nodeName, podName, err := k8s.getDeploymentPodAndNode("miner-" + minerNumber)
 
+	if err != nil {
+		channel.Err <- err
+		return
+	}
+
 	fmt.Println("creating miner-" + minerNumber + " service")
 
 	_, err = k8s.Client.CoreV1().Services("default").Create(context.TODO(), &corev1.Service{
