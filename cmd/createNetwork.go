@@ -71,6 +71,8 @@ func init() {
 	createNetworkCmd.Flags().StringVar(&config.PyroscopeMemory, "pyroscope-memory", config.PyroscopeMemory, "memory to allocate to pyroscope")
 	createNetworkCmd.Flags().BoolVar(&config.DeployPyroscope, "deploy-pyroscope", config.DeployPyroscope, "deploy pyroscope profiler")
 	createNetworkCmd.Flags().BoolVar(&config.Metrics, "metrics", config.Metrics, "enable go-sm metrics collection")
+	createNetworkCmd.Flags().BoolVar(&config.EnableJsonAPI, "enable-json-api", config.EnableJsonAPI, "enables JSON api in all nodes")
+	createNetworkCmd.Flags().IntVar(&config.MaxConcurrentDeployments, "max-concurrent-deployments", config.MaxConcurrentDeployments, "number of miners that can be deployed concurrently")
 
 	err := viper.BindPFlags(createNetworkCmd.Flags())
 	if err != nil {

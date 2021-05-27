@@ -47,6 +47,7 @@ type Configuration struct {
 	DeployPyroscope          bool   `mapstructure:"deploy-pyroscope"`
 	Metrics                  bool   `mapstructure:"metrics"`
 	MaxConcurrentDeployments int    `mapstructure:"max-concurrent-deployments"`
+	EnableJsonAPI            bool   `mapstructure:"enable-json-api"`
 }
 
 var Config = Configuration{
@@ -96,4 +97,5 @@ var Config = Configuration{
 	DeployPyroscope:          false,
 	Metrics:                  false,
 	MaxConcurrentDeployments: 100,
+	EnableJsonAPI:            true,
 }

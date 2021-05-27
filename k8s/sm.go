@@ -316,7 +316,10 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 		"--config=/etc/config/config.json",
 		"--post-datadir=/root/data/post",
 		"-d=/root/data/node",
-		"--json-port=7000",
+	}
+
+	if config.EnableJsonAPI == true {
+		command = append(command, "--json-port=7000")
 	}
 
 	if config.OldAPIExists == true {
@@ -488,7 +491,10 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 
 	ports := []corev1.ServicePort{
 		corev1.ServicePort{Name: "grpcport", Port: 6000, TargetPort: intstr.FromInt(6000)},
-		corev1.ServicePort{Name: "jsonport", Port: 7000, TargetPort: intstr.FromInt(7000)},
+	}
+
+	if config.EnableJsonAPI == true {
+		ports = append(ports, corev1.ServicePort{Name: "jsonport", Port: 7000, TargetPort: intstr.FromInt(7000)})
 	}
 
 	if config.OldAPIExists == true {
