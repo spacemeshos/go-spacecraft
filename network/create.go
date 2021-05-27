@@ -208,18 +208,32 @@ func Create() error {
 		start = config.BootnodeAmount
 		end = config.NumberOfMiners
 	}
-	for i := start; i < end; i++ {
-		minerConfigJson.SetP(nextPoet(), "main.poet-server")
-		go kubernetes.DeployMiner(true, strconv.Itoa(i+1), minerConfigJson.String(), "", minerChan)
-	}
+
+	remainingMinerNumbers := []int{}
 
 	for i := start; i < end; i++ {
-		select {
-		case err := <-minerChan.Err:
-			return err
-		case miner := <-minerChan.Done:
-			miners = append(miners, miner.TcpURL)
-			minerGRPCURls = append(minerGRPCURls, miner.GrpcURL)
+		remainingMinerNumbers = append(remainingMinerNumbers, i)
+	}
+
+	minersChunks := chunkSlice(remainingMinerNumbers, config.MaxConcurrentDeployments)
+
+	for i := 0; i < len(minersChunks); i++ {
+		start := minersChunks[i][0]
+		end := minersChunks[i][len(minersChunks[i])-1]
+
+		for i := start; i <= end; i++ {
+			minerConfigJson.SetP(nextPoet(), "main.poet-server")
+			go kubernetes.DeployMiner(true, strconv.Itoa(i+1), minerConfigJson.String(), "", minerChan)
+		}
+
+		for i := start; i <= end; i++ {
+			select {
+			case err := <-minerChan.Err:
+				return err
+			case miner := <-minerChan.Done:
+				miners = append(miners, miner.TcpURL)
+				minerGRPCURls = append(minerGRPCURls, miner.GrpcURL)
+			}
 		}
 	}
 
@@ -280,4 +294,21 @@ func Create() error {
 	}
 
 	return nil
+}
+
+func chunkSlice(slice []int, chunkSize int) [][]int {
+	var chunks [][]int
+	for i := 0; i < len(slice); i += chunkSize {
+		end := i + chunkSize
+
+		// necessary check to avoid slicing beyond
+		// slice capacity
+		if end > len(slice) {
+			end = len(slice)
+		}
+
+		chunks = append(chunks, slice[i:end])
+	}
+
+	return chunks
 }
