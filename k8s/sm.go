@@ -330,11 +330,14 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 
 	if config.DeployPyroscope == true {
 		pyroscopeURL, err := k8s.GetPyroscopeURL()
-
 		if err != nil {
 			channel.Err <- err
 			return
 		}
+
+		command = append(command, "--profiler-url=http://"+pyroscopeURL)
+		command = append(command, "--profiler-name=miner-"+minerNumber)
+
 	}
 
 	if config.Metrics == true {
