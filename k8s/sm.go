@@ -486,6 +486,19 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 
 	fmt.Println("creating miner-" + minerNumber + " service")
 
+	ports := []corev1.ServicePort{
+		corev1.ServicePort{Name: "grpcport", Port: 6000, TargetPort: intstr.FromInt(6000)},
+		corev1.ServicePort{Name: "jsonport", Port: 7000, TargetPort: intstr.FromInt(7000)},
+	}
+
+	if config.OldAPIExists == true {
+		ports = append(ports, corev1.ServicePort{Name: "oldapiport", Port: 8000, TargetPort: intstr.FromInt(8000)})
+	}
+
+	if config.DeployPyroscope == true {
+		ports = append(ports, corev1.ServicePort{Name: "pprof", Port: 6060, TargetPort: intstr.FromInt(6060)})
+	}
+
 	_, err = k8s.Client.CoreV1().Services("default").Create(context.TODO(), &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: "miner-" + minerNumber,
@@ -494,26 +507,7 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 			},
 		},
 		Spec: corev1.ServiceSpec{
-			Ports: []corev1.ServicePort{
-				// corev1.ServicePort{
-				// 	Name:       "tcpport",
-				// 	Port:       bindPort,
-				// 	TargetPort: intstr.FromInt(int(bindPort)),
-				// 	Protocol:   corev1.ProtocolTCP,
-				// 	//NodePort:   30000 + int32(mn),
-				// },
-				// corev1.ServicePort{
-				// 	Name:       "udpport",
-				// 	Port:       bindPort,
-				// 	TargetPort: intstr.FromInt(int(bindPort)),
-				// 	Protocol:   corev1.ProtocolUDP,
-				// 	//NodePort:   30000 + int32(mn),
-				// },
-				corev1.ServicePort{Name: "grpcport", Port: 6000, TargetPort: intstr.FromInt(6000)},
-				corev1.ServicePort{Name: "jsonport", Port: 7000, TargetPort: intstr.FromInt(7000)},
-				corev1.ServicePort{Name: "oldapiport", Port: 8000, TargetPort: intstr.FromInt(8000)},
-				corev1.ServicePort{Name: "pprof", Port: 6060, TargetPort: intstr.FromInt(6060)},
-			},
+			Ports: ports,
 			Selector: map[string]string{
 				"name": "miner-" + minerNumber,
 			},
