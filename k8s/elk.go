@@ -135,7 +135,7 @@ func (k8s *Kubernetes) DeployELK() error {
 					xpack.security.transport.ssl.verification_mode: certificate
 					xpack.security.transport.ssl.keystore.path: /usr/share/elasticsearch/config/certs/elastic-certificates.p12
 					xpack.security.transport.ssl.truststore.path: /usr/share/elasticsearch/config/certs/elastic-certificates.p12
-			imageTag: "7.12.1"
+			imageTag: "7.13.0"
 			secretMounts:
 			- name: elastic-certificates
 				secretName: elastic-certificates
@@ -171,7 +171,7 @@ func (k8s *Kubernetes) DeployELK() error {
 		ValuesYaml: sanitizeYaml(fmt.Sprintf(`
 			service:
 				type: LoadBalancer
-
+			imageTag: "7.13.0"
 			resources:
 				requests:
 					cpu: "%s"
@@ -219,6 +219,7 @@ func (k8s *Kubernetes) DeployELK() error {
 							name: elastic-credentials
 							key: password
 				resources: {}
+				imageTag: "7.13.0"
 				filebeatConfig:
 					filebeat.yml: |
 						processors:
