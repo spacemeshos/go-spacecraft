@@ -317,7 +317,6 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 		"--post-datadir=/root/data/post",
 		"-d=/root/data/node",
 		"--json-port=7000",
-		"--pprof-server",
 	}
 
 	if config.OldAPIExists == true {
@@ -335,6 +334,7 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 			return
 		}
 
+		command = append(command, "--pprof-server")
 		command = append(command, "--profiler-url=http://"+pyroscopeURL)
 		command = append(command, "--profiler-name=miner-"+minerNumber)
 
