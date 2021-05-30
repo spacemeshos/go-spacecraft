@@ -176,22 +176,6 @@ func (k8s *Kubernetes) getDeploymentPodAndNode(name string) (string, string, err
 	return "", "", errors.New("pod not found")
 }
 
-func (k8s *Kubernetes) getDeploymentClusterIP(name string) (string, error) {
-	pods, err := k8s.Client.CoreV1().Pods("default").List(context.TODO(), metav1.ListOptions{})
-
-	if err != nil {
-		return "", err
-	}
-
-	for _, pod := range pods.Items {
-		if strings.Contains(pod.Name, name) {
-			return pod.Status.PodIP, nil
-		}
-	}
-
-	return "", errors.New("pod not found")
-}
-
 func (k8s *Kubernetes) NextNode() (string, error) {
 	nodes, err := k8s.Client.CoreV1().Nodes().List(context.Background(), metav1.ListOptions{})
 
