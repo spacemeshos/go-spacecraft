@@ -329,6 +329,7 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 
 	if config.Metrics == true {
 		command = append(command, "--metrics")
+		command = append(command, "--metrics-port=1010")
 	}
 
 	command = append(command, "; sleep 100000000")
@@ -352,6 +353,7 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 					Labels: map[string]string{
 						"name":    "miner-" + minerNumber,
 						"restart": "false",
+						"app":     "miner",
 					},
 				},
 				Spec: apiv1.PodSpec{
@@ -383,6 +385,9 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 								},
 								{
 									ContainerPort: 6060,
+								},
+								{
+									ContainerPort: 1010,
 								},
 							},
 							Resources: apiv1.ResourceRequirements{
@@ -508,6 +513,33 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 	if err != nil {
 		channel.Err <- err
 		return
+	}
+
+	if config.Metrics == true {
+		ports = []corev1.ServicePort{
+			corev1.ServicePort{Name: "metrics", Port: 1010, TargetPort: intstr.FromInt(1010)},
+		}
+
+		_, err = k8s.Client.CoreV1().Services("default").Create(context.TODO(), &corev1.Service{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: "miner-" + minerNumber + "-metric",
+				Labels: map[string]string{
+					"name": "miner-" + minerNumber,
+				},
+			},
+			Spec: corev1.ServiceSpec{
+				Ports: ports,
+				Selector: map[string]string{
+					"name": "miner-" + minerNumber,
+				},
+				Type: apiv1.ServiceTypeClusterIP,
+			},
+		}, metav1.CreateOptions{})
+
+		if err != nil {
+			channel.Err <- err
+			return
+		}
 	}
 
 	fmt.Println("created miner-" + minerNumber + " service")
