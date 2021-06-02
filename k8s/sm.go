@@ -322,9 +322,12 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 		}
 
 		command = append(command, "--pprof-server")
-		command = append(command, "--profiler-url=http://"+pyroscopeURL)
-		command = append(command, "--profiler-name=miner-"+minerNumber)
 
+		// when pyroscope scaling is done remove this if condition
+		if minerNumber == "10" || minerNumber == "20" {
+			command = append(command, "--profiler-url=http://"+pyroscopeURL)
+			command = append(command, "--profiler-name=miner-"+minerNumber)
+		}
 	}
 
 	if config.Metrics == true {
