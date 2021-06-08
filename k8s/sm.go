@@ -341,7 +341,7 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 
 	if config.EnableGoDebug == true {
 		envs = append(envs, apiv1.EnvVar{
-			Name: "GODEBUG",
+			Name:  "GODEBUG",
 			Value: "gctrace=1,scavtrace=1,gcpacertrace=1",
 		})
 	}
@@ -375,7 +375,7 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 							Image:   config.GoSmImage,
 							Command: []string{"/bin/sh", "-c"},
 							Args:    []string{strings.Join(command[:], " ")},
-							Env: envs,
+							Env:     envs,
 							Ports: []apiv1.ContainerPort{
 								{
 									ContainerPort: bindPort,
