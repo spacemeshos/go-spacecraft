@@ -48,6 +48,7 @@ type Configuration struct {
 	Metrics                  bool   `mapstructure:"metrics"`
 	MaxConcurrentDeployments int    `mapstructure:"max-concurrent-deployments"`
 	EnableJsonAPI            bool   `mapstructure:"enable-json-api"`
+	EnableGoDebug            bool   `mapstructure:"enable-go-debug"`
 }
 
 var Config = Configuration{
@@ -98,4 +99,5 @@ var Config = Configuration{
 	Metrics:                  false,
 	MaxConcurrentDeployments: 100,
 	EnableJsonAPI:            true,
+	EnableGoDebug:            false,
 }

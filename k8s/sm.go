@@ -337,6 +337,15 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 
 	command = append(command, "; sleep 100000000")
 
+	envs := []apiv1.EnvVar{}
+
+	if config.EnableGoDebug == true {
+		envs = append(envs, apiv1.EnvVar{
+			Name: "GODEBUG",
+			Value: "gctrace=1,scavtrace=1,gcpacertrace=1",
+		})
+	}
+
 	deployment := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: "miner-" + minerNumber,
@@ -366,6 +375,7 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 							Image:   config.GoSmImage,
 							Command: []string{"/bin/sh", "-c"},
 							Args:    []string{strings.Join(command[:], " ")},
+							Env: envs,
 							Ports: []apiv1.ContainerPort{
 								{
 									ContainerPort: bindPort,
@@ -528,6 +538,7 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 				Name: "miner-" + minerNumber + "-metric",
 				Labels: map[string]string{
 					"name": "miner-" + minerNumber,
+					"app":  "miner",
 				},
 			},
 			Spec: corev1.ServiceSpec{

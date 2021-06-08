@@ -73,6 +73,7 @@ func init() {
 	createNetworkCmd.Flags().BoolVar(&config.Metrics, "metrics", config.Metrics, "enable go-sm metrics collection")
 	createNetworkCmd.Flags().BoolVar(&config.EnableJsonAPI, "enable-json-api", config.EnableJsonAPI, "enables JSON api in all nodes")
 	createNetworkCmd.Flags().IntVar(&config.MaxConcurrentDeployments, "max-concurrent-deployments", config.MaxConcurrentDeployments, "number of miners that can be deployed concurrently")
+	createNetworkCmd.Flags().BoolVar(&config.EnableGoDebug, "enable-go-debug", config.EnableGoDebug, "start miners with GODEBUG=\"gctrace=1,scavtrace=1,gcpacertrace=1\" env")
 
 	err := viper.BindPFlags(createNetworkCmd.Flags())
 	if err != nil {
