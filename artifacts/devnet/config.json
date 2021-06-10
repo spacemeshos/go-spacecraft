@@ -30,5 +30,6 @@
   "go-sm-image": "spacemeshos/go-spacemesh:develop",
   "poet-image": "spacemeshos/poet:develop",
   "old-api-exists": false,
-  "adjust-hare": false
+  "adjust-hare": false,
+  "enable-go-debug": true
 }

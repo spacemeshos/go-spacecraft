@@ -4,7 +4,7 @@
       "layer-average-size": 50,
       "layers-per-epoch": 288,
       "block-cache-size": 20,
-      "sync-request-timeout": 60000,
+      "sync-request-timeout": 10000,
       "sync-interval": 10,
       "sync-validation-delta": 30,
       "hdist": 10,
@@ -13,7 +13,7 @@
   "p2p": {
       "dial-timeout": "1m",
       "conn-keepalive": "48h",
-      "response-timeout": "60s",
+      "response-timeout": "10s",
       "session-timeout": "15s",
       "max-pending-connections": 100,
       "outbound-target": 10,

@@ -50,7 +50,8 @@
     "sync-interval": 10,
     "sync-validation-delta": 30,
     "hdist": 10,
-    "atxs-per-block": 25
+    "atxs-per-block": 25,
+    "gc-trace": true
   },
   "p2p": {
     "dial-timeout": "1m",
