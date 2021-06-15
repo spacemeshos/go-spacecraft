@@ -12,6 +12,7 @@ import (
 
 	container "cloud.google.com/go/container/apiv1"
 	cfg "github.com/spacemeshos/go-spacecraft/config"
+	compute "google.golang.org/api/compute/v1"
 	containerpb "google.golang.org/genproto/googleapis/container/v1"
 	"k8s.io/client-go/kubernetes"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
@@ -221,7 +222,52 @@ func GetKubernetesClient() (*restclient.Config, *kubernetes.Clientset, error) {
 	return cfg, k8s, nil
 }
 
-func DeleteKubernetesCluster() error {
+func DeleteKubernetesCluster(volumes []string) error {
+
+	ctx := context.Background()
+	computeService, err := compute.NewService(ctx)
+
+	if err != nil {
+		return err
+	}
+
+	pageToken := ""
+
+	volumesToDelete := []string{}
+
+	for {
+		disks := computeService.Disks.List(config.GCPProject, config.GCPZone)
+		if pageToken != "" {
+			disks = disks.PageToken(pageToken)
+		} else {
+			disks.MaxResults(100)
+		}
+
+		list, err := disks.Do()
+
+		if err != nil {
+			return err
+		}
+
+		for _, disk := range list.Items {
+			str := strings.Split(disk.Name, "pvc")
+
+			if len(str) == 2 {
+				volumeName := "pvc" + str[1]
+
+				if contains(volumes, volumeName) == true {
+					volumesToDelete = append(volumesToDelete, disk.Name)
+				}
+			}
+		}
+
+		if list.NextPageToken != "" {
+			pageToken = list.NextPageToken
+		} else {
+			break
+		}
+	}
+
 	client, err := getClient()
 
 	if err != nil {
@@ -234,9 +280,43 @@ func DeleteKubernetesCluster() error {
 
 	_, err = client.DeleteCluster(context.Background(), req)
 
+	fmt.Println("started deleting cluster")
+
 	if err != nil {
 		return err
 	}
 
+	for range time.Tick(time.Duration(10) * time.Second) {
+		_, err = getCluster()
+
+		if err != nil {
+			break
+		}
+
+		fmt.Println("waiting for cluster to delete")
+	}
+
+	fmt.Println("cluster deleted")
+
+	for _, name := range volumesToDelete {
+		fmt.Println("deleting disk: " + name)
+		disk := computeService.Disks.Delete(config.GCPProject, config.GCPZone, name)
+		_, err := disk.Do()
+
+		if err != nil {
+			return err
+		}
+	}
+
 	return nil
+}
+
+func contains(s []string, str string) bool {
+	for _, v := range s {
+		if v == str {
+			return true
+		}
+	}
+
+	return false
 }

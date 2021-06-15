@@ -1,5 +1,5 @@
 {
-  "network-name": "devnet",
+  "network-name": "tortoisebeacon",
   "miners": 50,
   "poets": 1,
   "miner-ram": "4",
@@ -27,7 +27,7 @@
   "pyroscope-cpu": "2",
   "pyroscope-memory": "8",
   "metrics": true,
-  "go-sm-image": "spacemeshos/go-spacemesh:develop",
+  "go-sm-image": "spacemeshos/go-spacemesh-dev:tortoise-ticker",
   "poet-image": "spacemeshos/poet:develop",
   "old-api-exists": false,
   "adjust-hare": false,

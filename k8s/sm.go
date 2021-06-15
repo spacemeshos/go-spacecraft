@@ -154,6 +154,22 @@ func (k8s *Kubernetes) createPVC(name string, size string) error {
 	return nil
 }
 
+func (k8s *Kubernetes) GetPVCs() ([]string, error) {
+	pvcs, err := k8s.Client.CoreV1().PersistentVolumeClaims("default").List(context.TODO(), metav1.ListOptions{})
+
+	if err != nil {
+		return []string{}, err
+	}
+
+	volumes := []string{}
+
+	for _, pvc := range pvcs.Items {
+		volumes = append(volumes, pvc.Spec.VolumeName)
+	}
+
+	return volumes, nil
+}
+
 func (k8s *Kubernetes) getDeploymentPodAndNode(name string) (string, string, error) {
 	pods, err := k8s.Client.CoreV1().Pods("default").List(context.TODO(), metav1.ListOptions{})
 
