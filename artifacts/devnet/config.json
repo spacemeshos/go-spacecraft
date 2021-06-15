@@ -1,5 +1,5 @@
 {
-  "network-name": "tortoisebeacon",
+  "network-name": "devnet",
   "miners": 50,
   "poets": 1,
   "miner-ram": "4",
