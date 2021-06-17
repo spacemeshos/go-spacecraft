@@ -128,7 +128,7 @@ func CreateKubernetesCluster() error {
 		Cluster: &containerpb.Cluster{
 			Name:                  config.NetworkName,
 			NodePools:             nodePools,
-			InitialClusterVersion: "1.18.17-gke.100",
+			InitialClusterVersion: "1.18.17-gke.1901",
 			ReleaseChannel: &containerpb.ReleaseChannel{
 				Channel: containerpb.ReleaseChannel_UNSPECIFIED,
 			},
