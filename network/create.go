@@ -8,7 +8,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strconv"
-	"strings"
 	"time"
 
 	gabs "github.com/Jeffail/gabs/v2"
@@ -17,10 +16,6 @@ import (
 	"github.com/spacemeshos/go-spacecraft/gcp"
 	k8s "github.com/spacemeshos/go-spacecraft/k8s"
 )
-
-func sanitizeYaml(yaml string) string {
-	return strings.ReplaceAll(yaml, "	", "  ")
-}
 
 func Create() error {
 
@@ -271,6 +266,12 @@ func Create() error {
 	err = kubernetes.SetupLogDeletionPolicy()
 	if err != nil {
 		return err
+	}
+
+	if config.Metrics == true {
+		if err = kubernetes.DeployPrometheus(); err != nil {
+			return err
+		}
 	}
 
 	kibanaURL, err := kubernetes.GetKibanaURL()
