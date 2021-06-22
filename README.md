@@ -42,11 +42,9 @@ go build
 The final step is to create the network. Run the below command to create a devnet:
 
 ```
-./go-spacecraft createNetwork --config=./artifacts/devnet/config.json --go-sm-image=spacemeshos/go-spacemesh:v0.1.26 --poet-image=spacemeshos/poet:73488d6 --network-name=devnettest
+./go-spacecraft createNetwork --config=./artifacts/devnet/config.json
 ```
 
 This command will take around ~10min to finish and at the end you should see the kibana URL. The generated config file is uploaded to GCP storage. 
-
-An important point to note than if the go-spacemesh docker build doesn't support the old API then add the flag `--old-api-exists=false` otherwise network creation will fail.
 
 Note that its not recommended to move the `go-spacecraft` binary outside the repository as it looks for files in artifcats directory. In case you want to move it then make sure you provide the artifacts directory path in the required CLI flags.
