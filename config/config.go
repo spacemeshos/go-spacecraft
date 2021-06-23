@@ -49,6 +49,8 @@ type Configuration struct {
 	MaxConcurrentDeployments int    `mapstructure:"max-concurrent-deployments"`
 	EnableJsonAPI            bool   `mapstructure:"enable-json-api"`
 	EnableGoDebug            bool   `mapstructure:"enable-go-debug"`
+	PrometheusMemory         string `mapstructure:"prometheus-memory"`
+	PrometheusCPU            string `mapstructure:"prometheus-cpu"`
 }
 
 var Config = Configuration{
@@ -100,4 +102,6 @@ var Config = Configuration{
 	MaxConcurrentDeployments: 100,
 	EnableJsonAPI:            true,
 	EnableGoDebug:            false,
+	PrometheusMemory:         "1",
+	PrometheusCPU:            "1",
 }

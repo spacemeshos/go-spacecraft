@@ -31,5 +31,7 @@
   "poet-image": "spacemeshos/poet:develop",
   "old-api-exists": false,
   "adjust-hare": false,
-  "enable-go-debug": true
+  "enable-go-debug": true,
+  "prometheus-memory": "2",
+  "prometheus-cpu": "2"
 }

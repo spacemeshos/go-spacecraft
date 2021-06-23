@@ -26,5 +26,7 @@
   "deploy-pyroscope": true,
   "pyroscope-memory": "8",
   "pyroscope-cpu": "2",
-  "metrics": true
+  "metrics": true,
+  "prometheus-memory": "2",
+  "prometheus-cpu": "2"
 }

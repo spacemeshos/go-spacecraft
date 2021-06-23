@@ -78,20 +78,26 @@ func (k8s *Kubernetes) DeployPrometheus() error {
 			  alertmanager:
 				ingress:
 				  hosts:
-					- alertmanager-132.spacemesh.io
+					- alertmanager-%s.spacemesh.io
 			  grafana:
 				ingress:
 				  hosts:
-					- grafana-132.spacemesh.io
+					- grafana-%s.spacemesh.io
 			  prometheus:
 				ingress:
 				  hosts:
-					- prometheus-132.spacemesh.io
+					- prometheus-%s.spacemesh.io
+				prometheusSpec:
+				  resources:
+					requests:
+					  memory: %sGi
+					  cpu: %s
+			
 			prometheus-pushgateway:
 			  ingress:
 				hosts:
-				  - pushgateway-132.spacemesh.io
-		`)),
+				  - pushgateway-%s.spacemesh.io
+		`, config.NetworkName, config.NetworkName, config.NetworkName, config.PrometheusMemory, config.PrometheusCPU, config.NetworkName)),
 	}
 
 	if err = client.InstallOrUpgradeChart(context.Background(), &promSpec); err != nil {
