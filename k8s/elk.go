@@ -156,7 +156,7 @@ func (k8s *Kubernetes) DeployELK() error {
 		`, config.ESReplicas, config.ESMasterNodes, clusterHealthCheckParams, config.ESDiskSize, config.ESCPU, config.ESMemory, config.ESCPU, config.ESMemory, config.ESHeapMemory, config.ESHeapMemory)),
 	}
 
-	if err = client.InstallOrUpgradeChart(context.Background(), &elasticSearchSpec); err != nil {
+	if _, err = client.InstallOrUpgradeChart(context.Background(), &elasticSearchSpec); err != nil {
 		return err
 	}
 
@@ -193,7 +193,7 @@ func (k8s *Kubernetes) DeployELK() error {
 		`, config.KibanaCPU, config.KibanaMemory, config.KibanaCPU, config.KibanaMemory)),
 	}
 
-	if err = client.InstallOrUpgradeChart(context.Background(), &kibanaSpec); err != nil {
+	if _, err = client.InstallOrUpgradeChart(context.Background(), &kibanaSpec); err != nil {
 		if !strings.Contains(err.Error(), "failed to replace object") {
 			return err
 		}
@@ -282,7 +282,7 @@ func (k8s *Kubernetes) DeployELK() error {
 		`),
 	}
 
-	if err = client.InstallOrUpgradeChart(context.Background(), &filebeatSpec); err != nil {
+	if _, err = client.InstallOrUpgradeChart(context.Background(), &filebeatSpec); err != nil {
 		return err
 	}
 
