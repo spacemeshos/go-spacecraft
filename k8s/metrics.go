@@ -42,7 +42,7 @@ func (k8s *Kubernetes) DeployPrometheus() error {
 		Force:       true,
 	}
 
-	if _, err = client.InstallOrUpgradeChart(context.Background(), &elasticSearchSpec); err != nil {
+	if err = client.InstallOrUpgradeChart(context.Background(), &elasticSearchSpec); err != nil {
 		return err
 	}
 
@@ -100,7 +100,7 @@ func (k8s *Kubernetes) DeployPrometheus() error {
 		`, config.NetworkName, config.NetworkName, config.NetworkName, config.PrometheusMemory, config.PrometheusCPU, config.NetworkName)),
 	}
 
-	if _, err = client.InstallOrUpgradeChart(context.Background(), &promSpec); err != nil {
+	if err = client.InstallOrUpgradeChart(context.Background(), &promSpec); err != nil {
 		return err
 	}
 
