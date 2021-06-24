@@ -77,15 +77,15 @@ func (k8s *Kubernetes) DeployPrometheus() error {
 				alertmanager:
 					ingress:
 				  		hosts:
-							- alertmanager-%s.spacemesh.io
+								- alertmanager-%s.spacemesh.io
 				grafana:
 					ingress:
 						hosts:
 							- grafana-%s.spacemesh.io
-			  	prometheus:
+				prometheus:
 					ingress:
-				  		hosts:
-							- prometheus-%s.spacemesh.io
+							hosts:
+								- prometheus-%s.spacemesh.io
 					prometheusSpec:
 						resources:
 							requests:
