@@ -71,8 +71,6 @@ func (k8s *Kubernetes) DeployPrometheus() error {
 		ReleaseName: "prom",
 		ChartName:   "spacemesh/sm-prom",
 		Namespace:   "monitoring",
-		Wait:        true,
-		Force:       true,
 		ValuesYaml: sanitizeYaml(fmt.Sprintf(`
 			kube-prometheus-stack:
 			  alertmanager:
