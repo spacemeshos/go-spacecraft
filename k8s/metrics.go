@@ -12,10 +12,23 @@ import (
 )
 
 func (k8s *Kubernetes) DeployPrometheus() error {
+	namespaceClient := k8s.Client.CoreV1().Namespaces()
+
+	namespace := &apiv1.Namespace{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: "monitoring",
+		},
+	}
+
+	if _, err := namespaceClient.Create(context.TODO(), namespace, metav1.CreateOptions{}); err != nil {
+		return err
+	}
+
 	opt := &helm.RestConfClientOptions{
 		Options: &helm.Options{
-			Debug:   true,
-			Linting: true,
+			Debug:     true,
+			Linting:   true,
+			Namespace: "monitoring",
 		},
 		RestConfig: k8s.RestConfig,
 	}
@@ -46,18 +59,6 @@ func (k8s *Kubernetes) DeployPrometheus() error {
 		return err
 	}
 
-	namespaceClient := k8s.Client.CoreV1().Namespaces()
-
-	namespace := &apiv1.Namespace{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: "monitoring",
-		},
-	}
-
-	if _, err = namespaceClient.Create(context.TODO(), namespace, metav1.CreateOptions{}); err != nil {
-		return err
-	}
-
 	chartRepo = repo.Entry{
 		Name: "spacemesh",
 		URL:  "https://spacemeshos.github.io/ws-helm-charts",
@@ -73,28 +74,28 @@ func (k8s *Kubernetes) DeployPrometheus() error {
 		Namespace:   "monitoring",
 		ValuesYaml: sanitizeYaml(fmt.Sprintf(`
 			kube-prometheus-stack:
-			  alertmanager:
-				ingress:
-				  hosts:
-					- alertmanager-%s.spacemesh.io
-			  grafana:
-				ingress:
-				  hosts:
-					- grafana-%s.spacemesh.io
-			  prometheus:
-				ingress:
-				  hosts:
-					- prometheus-%s.spacemesh.io
-				prometheusSpec:
-				  resources:
-					requests:
-					  memory: %sGi
-					  cpu: %s
-			
+				alertmanager:
+					ingress:
+				  		hosts:
+							- alertmanager-%s.spacemesh.io
+				grafana:
+					ingress:
+						hosts:
+							- grafana-%s.spacemesh.io
+			  	prometheus:
+					ingress:
+				  		hosts:
+							- prometheus-%s.spacemesh.io
+					prometheusSpec:
+						resources:
+							requests:
+								memory: %sGi
+								cpu: %s
+
 			prometheus-pushgateway:
-			  ingress:
-				hosts:
-				  - pushgateway-%s.spacemesh.io
+				ingress:
+					hosts:
+						- pushgateway-%s.spacemesh.io
 		`, config.NetworkName, config.NetworkName, config.NetworkName, config.PrometheusMemory, config.PrometheusCPU, config.NetworkName)),
 	}
 
