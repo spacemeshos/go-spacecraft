@@ -105,6 +105,15 @@ func CreateKubernetesCluster() error {
 		nodeCount = 1
 	}
 
+	accelerators := []*containerpb.AcceleratorConfig{}
+
+	if config.AcceletatorType != "" {
+		accelerators = append(accelerators, &containerpb.AcceleratorConfig{
+			AcceleratorCount: config.AcceleratorCount,
+			AcceleratorType:  config.AcceletatorType,
+		})
+	}
+
 	nodePools := [](*containerpb.NodePool){
 		&containerpb.NodePool{
 			Name:             "default",
@@ -114,7 +123,8 @@ func CreateKubernetesCluster() error {
 				MaxNodeCount: 1000,
 			},
 			Config: &containerpb.NodeConfig{
-				MachineType: config.GCPMachineType,
+				MachineType:  config.GCPMachineType,
+				Accelerators: accelerators,
 			},
 			Locations: []string{config.GCPZone},
 			Management: &containerpb.NodeManagement{

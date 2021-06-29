@@ -51,6 +51,9 @@ type Configuration struct {
 	EnableGoDebug            bool   `mapstructure:"enable-go-debug"`
 	PrometheusMemory         string `mapstructure:"prometheus-memory"`
 	PrometheusCPU            string `mapstructure:"prometheus-cpu"`
+	AcceleratorCount         int64  `mapstructure:"accelerator-count"`
+	AcceletatorType          string `mapstructure:"accelerator-type"`
+	ImageType                string `mapstructure:"image-type"`
 }
 
 var Config = Configuration{
@@ -104,4 +107,7 @@ var Config = Configuration{
 	EnableGoDebug:            false,
 	PrometheusMemory:         "1",
 	PrometheusCPU:            "1",
+	AcceleratorCount:         0,
+	AcceletatorType:          "",
+	ImageType:                "ubuntu-2010-groovy-v20210622a",
 }
