@@ -180,10 +180,26 @@ func CreateKubernetesCluster() error {
 }
 
 func GetKubernetesClient() (*restclient.Config, *kubernetes.Clientset, error) {
+	clientCfg, err := GetClientConfig()
+	if err != nil {
+		return nil, nil, err
+	}
+	cfg, err := clientCfg.ClientConfig()
+	if err != nil {
+		return nil, nil, err
+	}
+	k8s, err := kubernetes.NewForConfig(cfg)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to create Kubernetes client cluster %w", err)
+	}
+	return cfg, k8s, nil
+}
+
+func GetClientConfig() (clientcmd.ClientConfig, error) {
 	cluster, err := getCluster()
 
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
 	ret := api.Config{
@@ -197,7 +213,7 @@ func GetKubernetesClient() (*restclient.Config, *kubernetes.Clientset, error) {
 	cert, err := base64.StdEncoding.DecodeString(cluster.MasterAuth.ClusterCaCertificate)
 
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
 	ret.Clusters[name] = &api.Cluster{
@@ -218,18 +234,7 @@ func GetKubernetesClient() (*restclient.Config, *kubernetes.Clientset, error) {
 			},
 		},
 	}
-
-	cfg, err := clientcmd.NewNonInteractiveClientConfig(ret, name, &clientcmd.ConfigOverrides{CurrentContext: name}, nil).ClientConfig()
-	if err != nil {
-		return nil, nil, fmt.Errorf("failed to create Kubernetes configuration cluster=%s: %w", name, err)
-	}
-
-	k8s, err := kubernetes.NewForConfig(cfg)
-	if err != nil {
-		return nil, nil, fmt.Errorf("failed to create Kubernetes client cluster=%s: %w", name, err)
-	}
-
-	return cfg, k8s, nil
+	return clientcmd.NewNonInteractiveClientConfig(ret, name, &clientcmd.ConfigOverrides{CurrentContext: name}, nil), nil
 }
 
 func DeleteKubernetesCluster(volumes []string) error {
