@@ -8,7 +8,7 @@
   "poet-cpu": "2",
   "miner-disk-size": "20",
   "poet-disk-size": "20",
-  "gcp-machine-type": "n1-standard-64",
+  "gcp-machine-type": "e2-standard-16",
   "go-sm-config": "./artifacts/post/miner/config.json",
   "init-phase-shift": 0,
   "poet-gateway-amount": 4,
