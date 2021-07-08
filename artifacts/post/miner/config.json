@@ -86,7 +86,7 @@
     "smeshing-start": true,
     "smeshing-coinbase": "1",
     "smeshing-opts": {
-      "smeshing-opts-datadir": "/Users/x/dev/postdata",
+      "smeshing-opts-datadir": "/root/data/post",
       "smeshing-opts-numunits": 2,
       "smeshing-opts-numfiles": 1,
       "smeshing-opts-provider": 0,

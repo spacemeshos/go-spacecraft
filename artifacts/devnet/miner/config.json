@@ -50,7 +50,8 @@
     "sync-interval": 10,
     "sync-validation-delta": 30,
     "hdist": 10,
-    "atxs-per-block": 25
+    "atxs-per-block": 25,
+    "start-mining": true
   },
   "p2p": {
     "dial-timeout": "1m",
@@ -71,7 +72,8 @@
   },
   "post": {
     "post-space": 1048576,
-    "post-labels": 10
+    "post-labels": 10,
+    "post-datadir": "/root/data/post"
   },
   "time": {
     "max-allowed-time-drift": "10s",

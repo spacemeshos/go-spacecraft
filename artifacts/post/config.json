@@ -9,7 +9,7 @@
   "miner-disk-size": "20",
   "poet-disk-size": "20",
   "gcp-machine-type": "n1-standard-64",
-  "go-sm-config": "./artifacts/devnet/miner/config.json",
+  "go-sm-config": "./artifacts/post/miner/config.json",
   "init-phase-shift": 0,
   "poet-gateway-amount": 4,
   "bootnode-amount": 6,
@@ -27,13 +27,11 @@
   "pyroscope-cpu": "2",
   "pyroscope-memory": "8",
   "metrics": true,
-  "go-sm-image": "spacemeshos/go-spacemesh:develop",
+  "go-sm-image": "spacemeshos/go-spacemesh-dev:playground-gpu-post-dirty",
   "poet-image": "spacemeshos/poet:develop",
   "old-api-exists": false,
   "adjust-hare": false,
   "enable-go-debug": true,
   "prometheus-memory": "2",
-  "prometheus-cpu": "2",
-  "accelerator-type": "nvidia-tesla-t4",
-  "accelerator-count": "1"
+  "prometheus-cpu": "2"
 }
