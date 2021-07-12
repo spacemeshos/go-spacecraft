@@ -26,7 +26,7 @@
   "deploy-pyroscope": true,
   "pyroscope-cpu": "2",
   "pyroscope-memory": "8",
-  "metrics": true,
+  "metrics": false,
   "go-sm-image": "spacemeshos/go-spacemesh-dev:playground-gpu-post-dirty",
   "poet-image": "spacemeshos/poet:develop",
   "old-api-exists": false,
