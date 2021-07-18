@@ -42,7 +42,7 @@ func ListHosts() error {
 
 		fmt.Println(miner + ":" + ip + ":" + port)
 
-		apiURLs = append(apiURLs, ip+":"+port)
+		apiURLs = append(apiURLs, ip+":"+port+"/"+miner)
 	}
 
 	log.Info.Println("Spacemesh Watch: ")
