@@ -110,6 +110,7 @@ func (k8s *Kubernetes) DeployELK() error {
 		Namespace:   "default",
 		Wait:        true,
 		Force:       true,
+		Version:     "7.13.4",
 		ValuesYaml: sanitizeYaml(fmt.Sprintf(`
 			replicas: %s
 			minimumMasterNodes: %s
@@ -168,6 +169,7 @@ func (k8s *Kubernetes) DeployELK() error {
 		Force:       true,
 		SkipCRDs:    true,
 		UpgradeCRDs: false,
+		Version:     "7.13.4",
 		ValuesYaml: sanitizeYaml(fmt.Sprintf(`
 			service:
 				type: LoadBalancer
@@ -205,6 +207,7 @@ func (k8s *Kubernetes) DeployELK() error {
 		Namespace:   "default",
 		Wait:        true,
 		Force:       true,
+		Version:     "7.13.4",
 		ValuesYaml: sanitizeYaml(`
 			daemonset:
 				extraEnvs:
