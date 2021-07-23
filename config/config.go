@@ -66,7 +66,7 @@ var Config = Configuration{
 	PoetCPU:                  "1",
 	MinerDiskSize:            "10", //200
 	PoetDiskSize:             "10", //50
-	GoSmImage:                "spacemeshos/go-spacemesh:v0.1.41",
+	GoSmImage:                "spacemeshos/go-spacemesh:v0.1.45",
 	PoetImage:                "spacemeshos/poet:73488d6",
 	GCPProject:               "",
 	GCPLocation:              "",

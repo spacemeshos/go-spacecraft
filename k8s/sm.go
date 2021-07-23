@@ -311,11 +311,10 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 		"--tcp-port=" + bindPortStr,
 		"--acquire-port=0",
 		"--json-server=true",
-		"--start-mining",
-		"--coinbase=" + publicKeyHex[2:],
 		"--config=/etc/config/config.json",
-		"--post-datadir=/root/data/post",
 		"-d=/root/data/node",
+		//replace this with --smeshing-coinbase after PoST branch is merged
+		"--coinbase=" + publicKeyHex[2:],
 	}
 
 	if config.EnableJsonAPI == true {
