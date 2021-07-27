@@ -49,8 +49,7 @@
     "sync-interval": 10,
     "sync-validation-delta": 30,
     "hdist": 10,
-    "atxs-per-block": 25,
-    "start-mining": true
+    "atxs-per-block": 25
   },
   "p2p": {
     "dial-timeout": "1m",
@@ -70,9 +69,12 @@
     "network-id": 20
   },
   "post": {
-    "post-space": 1048576,
-    "post-labels": 10,
-    "post-datadir": "/root/data/post"
+    "post-bits-per-label": 8,
+    "post-labels-per-unit": 1024,
+    "post-min-numunits": 2,
+    "post-max-numunits": 4,
+    "post-k1": 2000,
+    "post-k2": 1800
   },
   "time": {
     "max-allowed-time-drift": "10s",
@@ -92,5 +94,16 @@
     "tortoise-beacon-theta": 0.25,
     "tortoise-beacon-votes-limit": 100,
     "tortoise-beacon-wait-after-epoch-start-ms": 10000
+  },
+  "smeshing": {
+    "smeshing-start": true,
+    "smeshing-coinbase": "1",
+    "smeshing-opts": {
+      "smeshing-opts-datadir": "/root/data/post",
+      "smeshing-opts-numunits": 2,
+      "smeshing-opts-numfiles": 1,
+      "smeshing-opts-provider": 1,
+      "smeshing-opts-throttle": true
+    }
   }
 }
