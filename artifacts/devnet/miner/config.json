@@ -82,19 +82,19 @@
     "default-timeout-latency": "10s",
     "refresh-ntp-interval": "30m"
   },
-  "tortoise-beacon" : {
-    "tortoise-beacon-kappa": 400000,
-    "tortoise-beacon-q": "1/3",
-    "tortoise-beacon-rounds-number": 300,
-    "tortoise-beacon-grace-period-duration-ms": 120000,
-    "tortoise-beacon-proposal-duration-ms": 120000,
-    "tortoise-beacon-first-voting-round-duration-ms": 3600000,
-    "tortoise-beacon-voting-round-duration-ms": 1800000,
-    "tortoise-beacon-weak-coin-round-duration-ms": 60000,
-    "tortoise-beacon-theta": 0.25,
-    "tortoise-beacon-votes-limit": 100,
-    "tortoise-beacon-wait-after-epoch-start-ms": 10000
-  },
+  "tortoise-beacon": {
+		"tortoise-beacon-first-voting-round-duration-ms": 60000,
+		"tortoise-beacon-grace-period-duration-ms": 10000,
+		"tortoise-beacon-kappa": 400000,
+		"tortoise-beacon-proposal-duration-ms": 30000,
+		"tortoise-beacon-q": "1/3",
+		"tortoise-beacon-rounds-number": 6,
+		"tortoise-beacon-theta": 0.00004,
+		"tortoise-beacon-votes-limit": 100,
+		"tortoise-beacon-voting-round-duration-ms": 50000,
+		"tortoise-beacon-wait-after-epoch-start-ms": 1000,
+		"tortoise-beacon-weak-coin-round-duration-ms": 1000
+	},
   "smeshing": {
     "smeshing-start": true,
     "smeshing-coinbase": "1",
