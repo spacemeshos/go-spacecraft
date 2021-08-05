@@ -29,6 +29,10 @@ spacecraft kubeconfig devnet101`,
 		if err != nil {
 			return err
 		}
+		for name := range raw.Contexts {
+			raw.CurrentContext = name
+			break
+		}
 		if len(args) == 1 {
 			return clientcmd.WriteToFile(raw, args[0])
 		}
