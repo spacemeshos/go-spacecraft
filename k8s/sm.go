@@ -313,8 +313,7 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 		"--json-server=true",
 		"--config=/etc/config/config.json",
 		"-d=/root/data/node",
-		//replace this with --smeshing-coinbase after PoST branch is merged
-		"--coinbase=" + publicKeyHex[2:],
+		"--smeshing-coinbase=" + publicKeyHex[2:],
 	}
 
 	if config.EnableJsonAPI == true {
