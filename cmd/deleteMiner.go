@@ -32,6 +32,7 @@ func init() {
 	deleteMinerCmd.Flags().StringVar(&config.MinerNumber, "miner-number", config.MinerNumber, "miner to delete")
 	deleteMinerCmd.Flags().StringVar(&config.SlackToken, "slack-token", config.SlackToken, "slack API token to post alerts")
 	deleteMinerCmd.Flags().StringVar(&config.SlackChannelId, "slack-channel-id", config.SlackChannelId, "slack channel ID to post alerts")
+	deleteMinerCmd.Flags().BoolVar(&config.EnableSlackAlerts, "enable-slack-alerts", config.EnableSlackAlerts, "deploy spacemesh-watch")
 
 	err := viper.BindPFlags(deleteMinerCmd.Flags())
 	if err != nil {

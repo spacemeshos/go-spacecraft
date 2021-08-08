@@ -274,10 +274,12 @@ func Create() error {
 		}
 	}
 
-	err = kubernetes.DeploySpacemeshWatch()
+	if config.EnableSlackAlerts == true {
+		err = kubernetes.DeploySpacemeshWatch()
 
-	if err != nil {
-		return err
+		if err != nil {
+			return err
+		}
 	}
 
 	kibanaURL, err := kubernetes.GetKibanaURL()

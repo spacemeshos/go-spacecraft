@@ -81,6 +81,7 @@ func init() {
 	createNetworkCmd.Flags().StringVar(&config.GCPMachineType, "gcp-machine-type", config.GCPMachineType, "VM machine type")
 	createNetworkCmd.Flags().StringVar(&config.SlackToken, "slack-token", config.SlackToken, "slack API token to post alerts")
 	createNetworkCmd.Flags().StringVar(&config.SlackChannelId, "slack-channel-id", config.SlackChannelId, "slack channel ID to post alerts")
+	createNetworkCmd.Flags().BoolVar(&config.EnableSlackAlerts, "enable-slack-alerts", config.EnableSlackAlerts, "deploy spacemesh-watch")
 
 	err := viper.BindPFlags(createNetworkCmd.Flags())
 	if err != nil {

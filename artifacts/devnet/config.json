@@ -33,5 +33,6 @@
   "adjust-hare": false,
   "enable-go-debug": true,
   "prometheus-memory": "2",
-  "prometheus-cpu": "2"
+  "prometheus-cpu": "2",
+  "enable-slack-alerts": true
 }

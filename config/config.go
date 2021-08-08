@@ -57,6 +57,7 @@ type Configuration struct {
 	ImageType                string `mapstructure:"image-type"`
 	SlackChannelId           string `mapstructure:"slack-channel-id"`
 	SlackToken               string `mapstructure:"slack-token"`
+	EnableSlackAlerts        bool   `mapstructure:"enable-slack-alerts"`
 }
 
 var Config = Configuration{
@@ -116,4 +117,5 @@ var Config = Configuration{
 	ImageType:                "ubuntu-2010-groovy-v20210622a",
 	SlackChannelId:           "",
 	SlackToken:               "",
+	EnableSlackAlerts:        false,
 }
