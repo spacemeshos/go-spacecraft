@@ -51,6 +51,8 @@ func init() {
 	addMinerCmd.Flags().StringVar(&config.GoSmImage, "go-sm-image", config.GoSmImage, "docker image for go-spacemesh build")
 	addMinerCmd.Flags().StringVar(&config.MinerDiskSize, "miner-disk-size", config.MinerDiskSize, "Disk size of miner in GB")
 	addMinerCmd.Flags().BoolVar(&config.Metrics, "metrics", config.Metrics, "enable go-sm metrics collection")
+	addMinerCmd.Flags().StringVar(&config.SlackToken, "slack-token", config.SlackToken, "slack API token to post alerts")
+	addMinerCmd.Flags().StringVar(&config.SlackChannelId, "slack-channel-id", config.SlackChannelId, "slack channel ID to post alerts")
 
 	err := viper.BindPFlags(addMinerCmd.Flags())
 	if err != nil {

@@ -274,6 +274,12 @@ func Create() error {
 		}
 	}
 
+	err = kubernetes.DeploySpacemeshWatch()
+
+	if err != nil {
+		return err
+	}
+
 	kibanaURL, err := kubernetes.GetKibanaURL()
 
 	if err != nil {

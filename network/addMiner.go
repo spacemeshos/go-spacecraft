@@ -58,5 +58,17 @@ func AddMiner() error {
 		return nil
 	}
 
+	err = kubernetes.DeleteSpacemeshWatch()
+
+	if err != nil {
+		return err
+	}
+
+	err = kubernetes.DeploySpacemeshWatch()
+
+	if err != nil {
+		return err
+	}
+
 	return nil
 }

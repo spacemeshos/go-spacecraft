@@ -79,6 +79,8 @@ func init() {
 	createNetworkCmd.Flags().StringVar(&config.AcceletatorType, "accelerator-type", config.AcceletatorType, "VM GPU accelerator type (https://cloud.google.com/compute/docs/gpus)")
 	createNetworkCmd.Flags().Int64Var(&config.AcceleratorCount, "accelerator-count", config.AcceleratorCount, "number of accelerators")
 	createNetworkCmd.Flags().StringVar(&config.GCPMachineType, "gcp-machine-type", config.GCPMachineType, "VM machine type")
+	createNetworkCmd.Flags().StringVar(&config.SlackToken, "slack-token", config.SlackToken, "slack API token to post alerts")
+	createNetworkCmd.Flags().StringVar(&config.SlackChannelId, "slack-channel-id", config.SlackChannelId, "slack channel ID to post alerts")
 
 	err := viper.BindPFlags(createNetworkCmd.Flags())
 	if err != nil {

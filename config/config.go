@@ -12,6 +12,7 @@ type Configuration struct {
 	PoetDiskSize             string `mapstructure:"poet-disk-size"`
 	GoSmImage                string `mapstructure:"go-sm-image"`
 	PoetImage                string `mapstructure:"poet-image"`
+	SpacemeshWatchImage      string `mapstructure:"sw-image"`
 	GCPProject               string `mapstructure:"gcp-project"`
 	GCPLocation              string `mapstructure:"gcp-location"`
 	GCPZone                  string `mapstructure:"gcp-zone"`
@@ -54,6 +55,8 @@ type Configuration struct {
 	AcceleratorCount         int64  `mapstructure:"accelerator-count"`
 	AcceletatorType          string `mapstructure:"accelerator-type"`
 	ImageType                string `mapstructure:"image-type"`
+	SlackChannelId           string `mapstructure:"slack-channel-id"`
+	SlackToken               string `mapstructure:"slack-token"`
 }
 
 var Config = Configuration{
@@ -68,6 +71,7 @@ var Config = Configuration{
 	PoetDiskSize:             "10", //50
 	GoSmImage:                "spacemeshos/go-spacemesh:v0.1.45",
 	PoetImage:                "spacemeshos/poet:73488d6",
+	SpacemeshWatchImage:      "spacemeshos/spacemesh-watch:latest",
 	GCPProject:               "",
 	GCPLocation:              "",
 	GCPZone:                  "",
@@ -110,4 +114,6 @@ var Config = Configuration{
 	AcceleratorCount:         0,
 	AcceletatorType:          "",
 	ImageType:                "ubuntu-2010-groovy-v20210622a",
+	SlackChannelId:           "",
+	SlackToken:               "",
 }
