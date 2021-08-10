@@ -53,6 +53,7 @@ func (k8s *Kubernetes) DeployPrometheus() error {
 		Namespace:   "kube-system",
 		Wait:        true,
 		Force:       true,
+		Version:     "3.32.0",
 	}
 
 	if err = client.InstallOrUpgradeChart(context.Background(), &elasticSearchSpec); err != nil {
