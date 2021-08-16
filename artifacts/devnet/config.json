@@ -27,7 +27,7 @@
   "pyroscope-cpu": "2",
   "pyroscope-memory": "8",
   "metrics": true,
-  "go-sm-image": "spacemeshos/go-spacemesh:develop",
+  "go-sm-image": "spacemeshos/go-spacemesh:v0.2.0-rc3",
   "poet-image": "spacemeshos/poet:develop",
   "old-api-exists": false,
   "adjust-hare": false,

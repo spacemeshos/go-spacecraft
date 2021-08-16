@@ -66,7 +66,7 @@
       "alpha": 3,
       "randcon": 8
     },
-    "network-id": 20
+    "network-id": 201
   },
   "post": {
     "post-bits-per-label": 8,
