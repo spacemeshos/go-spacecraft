@@ -66,7 +66,7 @@
       "alpha": 3,
       "randcon": 8
     },
-    "network-id": 201
+    "network-id": 202
   },
   "post": {
     "post-bits-per-label": 8,
@@ -93,7 +93,7 @@
     "tortoise-beacon-votes-limit": 100,
     "tortoise-beacon-voting-round-duration": "50s",
     "tortoise-beacon-wait-after-epoch-start": "50s",
-    "tortoise-beacon-weak-coin-round-duration": "1s"
+    "tortoise-beacon-weak-coin-round-duration": "10s"
   },
   "smeshing": {
     "smeshing-start": true,
