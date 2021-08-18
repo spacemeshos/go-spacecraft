@@ -49,7 +49,8 @@
     "sync-interval": 10,
     "sync-validation-delta": 30,
     "hdist": 10,
-    "atxs-per-block": 25
+    "atxs-per-block": 25,
+    "tortoise-rerun-interval": 525600
   },
   "p2p": {
     "dial-timeout": "1m",
@@ -66,7 +67,7 @@
       "alpha": 3,
       "randcon": 8
     },
-    "network-id": 202
+    "network-id": 203
   },
   "post": {
     "post-bits-per-label": 8,
