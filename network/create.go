@@ -72,13 +72,6 @@ func Create() error {
 		genesisTime := time.Now().Add(time.Duration(genesisMinutes) * time.Minute).Format(time.RFC3339)
 		minerConfigJson.SetP(genesisTime, "main.genesis-time")
 		minerConfigJson.SetP(config.NumberOfMiners, "main.genesis-active-size")
-
-		if config.AdjustHare == true {
-			//should be less than total miners
-			minerConfigJson.SetP(int(((float64(config.NumberOfMiners) / 100) * 60)), "hare.hare-committee-size")
-			//should be half-1 of hare committee size
-			minerConfigJson.SetP(int((((float64(config.NumberOfMiners)/100)*60)/2)-1), "hare.hare-max-adversaries")
-		}
 	}
 
 	layerDurationSec, ok := minerConfigJson.Path("main.layer-duration-sec").Data().(float64)
@@ -291,6 +284,13 @@ func Create() error {
 	log.Info.Println("Kibana URL: http://" + kibanaURL)
 	log.Info.Println("Kibana Username: elastic")
 	log.Info.Println("Kibana Password: " + kubernetes.Password)
+
+	if config.Metrics == true {
+		log.Info.Println("Grafana URL: http://" + "grafana-" + config.NetworkName + ".spacemesh.io")
+		log.Info.Println("Grafana Username: admin")
+		log.Info.Println("Grafana Password: prom-operator")
+		log.Info.Println("Prometheus URL: http://" + "prometheus-" + config.NetworkName + ".spacemesh.io")
+	}
 
 	if config.DeployPyroscope == true {
 		pyroscopeURL, err := kubernetes.GetPyroscopeURL()

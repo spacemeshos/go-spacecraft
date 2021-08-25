@@ -7,11 +7,13 @@ import (
 	apiv1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
+	cloudflare "github.com/cloudflare/cloudflare-go"
 	helm "github.com/mittwald/go-helm-client"
 	"helm.sh/helm/v3/pkg/repo"
 )
 
 func (k8s *Kubernetes) DeployPrometheus() error {
+
 	namespaceClient := k8s.Client.CoreV1().Namespaces()
 
 	namespace := &apiv1.Namespace{
@@ -47,7 +49,7 @@ func (k8s *Kubernetes) DeployPrometheus() error {
 		return err
 	}
 
-	elasticSearchSpec := helm.ChartSpec{
+	ingressSpec := helm.ChartSpec{
 		ReleaseName: "ingress-nginx",
 		ChartName:   "ingress-nginx/ingress-nginx",
 		Namespace:   "kube-system",
@@ -56,7 +58,7 @@ func (k8s *Kubernetes) DeployPrometheus() error {
 		Version:     "3.34.0",
 	}
 
-	if err = client.InstallOrUpgradeChart(context.Background(), &elasticSearchSpec); err != nil {
+	if err = client.InstallOrUpgradeChart(context.Background(), &ingressSpec); err != nil {
 		return err
 	}
 
@@ -102,6 +104,95 @@ func (k8s *Kubernetes) DeployPrometheus() error {
 
 	if err = client.InstallOrUpgradeChart(context.Background(), &promSpec); err != nil {
 		return err
+	}
+
+	ingressClient := k8s.Client.ExtensionsV1beta1().Ingresses("monitoring")
+	ingress, err := ingressClient.Get(context.Background(), "prom-grafana", metav1.GetOptions{})
+
+	if err != nil {
+		return err
+	}
+
+	ip := ingress.Status.LoadBalancer.Ingress[0].IP
+
+	api, err := cloudflare.NewWithAPIToken(config.CloudflareAPIToken)
+
+	if err != nil {
+		return err
+	}
+
+	id, err := api.ZoneIDByName("spacemesh.io")
+
+	if err != nil {
+		return err
+	}
+
+	_, err = api.CreateDNSRecord(context.Background(), id, cloudflare.DNSRecord{
+		Type:    "A",
+		Name:    "prometheus-" + config.NetworkName + ".spacemesh.io",
+		Content: ip,
+	})
+
+	if err != nil {
+		return err
+	}
+
+	_, err = api.CreateDNSRecord(context.Background(), id, cloudflare.DNSRecord{
+		Type:    "A",
+		Name:    "grafana-" + config.NetworkName + ".spacemesh.io",
+		Content: ip,
+	})
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (k8s *Kubernetes) DeleteDNSRecords() error {
+	api, err := cloudflare.NewWithAPIToken(config.CloudflareAPIToken)
+
+	if err != nil {
+		return err
+	}
+
+	id, err := api.ZoneIDByName("spacemesh.io")
+
+	if err != nil {
+		return err
+	}
+
+	records, err := api.DNSRecords(context.Background(), id, cloudflare.DNSRecord{
+		Name: "grafana-" + config.NetworkName + ".spacemesh.io",
+	})
+
+	if err != nil {
+		return err
+	}
+
+	if len(records) == 1 {
+		err = api.DeleteDNSRecord(context.Background(), id, records[0].ID)
+
+		if err != nil {
+			return err
+		}
+	}
+
+	records, err = api.DNSRecords(context.Background(), id, cloudflare.DNSRecord{
+		Name: "prometheus-" + config.NetworkName + ".spacemesh.io",
+	})
+
+	if err != nil {
+		return err
+	}
+
+	if len(records) == 1 {
+		err = api.DeleteDNSRecord(context.Background(), id, records[0].ID)
+
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil

@@ -39,8 +39,6 @@ type Configuration struct {
 	KibanaMemory             string `mapstructure:"kibana-memory"`
 	KibanaCPU                string `mapstructure:"kibana-cpu"`
 	LogsExpiry               string `mapstructure:"logs-expiry"`
-	OldAPIExists             bool   `mapstructure:"old-api-exists"`
-	AdjustHare               bool   `mapstructure:"adjust-hare"`
 	Host                     string `mapstructure:"host"`
 	PyroscopeImage           string `mapstructure:"pyroscope-image"`
 	PyroscopeCPU             string `mapstructure:"pyroscope-cpu"`
@@ -58,6 +56,7 @@ type Configuration struct {
 	SlackChannelId           string `mapstructure:"slack-channel-id"`
 	SlackToken               string `mapstructure:"slack-token"`
 	EnableSlackAlerts        bool   `mapstructure:"enable-slack-alerts"`
+	CloudflareAPIToken       string `mapstructure:"cloudflare-api-token"`
 }
 
 var Config = Configuration{
@@ -70,8 +69,8 @@ var Config = Configuration{
 	PoetCPU:                  "1",
 	MinerDiskSize:            "10", //200
 	PoetDiskSize:             "10", //50
-	GoSmImage:                "spacemeshos/go-spacemesh:v0.1.45",
-	PoetImage:                "spacemeshos/poet:73488d6",
+	GoSmImage:                "spacemeshos/go-spacemesh:develop",
+	PoetImage:                "spacemeshos/poet:develop",
 	SpacemeshWatchImage:      "spacemeshos/spacemesh-watch:latest",
 	GCPProject:               "",
 	GCPLocation:              "",
@@ -99,8 +98,6 @@ var Config = Configuration{
 	KibanaMemory:             "2",
 	KibanaCPU:                "1",
 	LogsExpiry:               "1",
-	OldAPIExists:             true,
-	AdjustHare:               true,
 	Host:                     "",
 	PyroscopeImage:           "pyroscope/pyroscope:latest",
 	PyroscopeCPU:             "1",
@@ -118,4 +115,5 @@ var Config = Configuration{
 	SlackChannelId:           "",
 	SlackToken:               "",
 	EnableSlackAlerts:        false,
+	CloudflareAPIToken:       "",
 }

@@ -29,8 +29,6 @@
   "metrics": true,
   "go-sm-image": "spacemeshos/go-spacemesh:v0.2.0-rc4",
   "poet-image": "spacemeshos/poet:develop",
-  "old-api-exists": false,
-  "adjust-hare": false,
   "enable-go-debug": true,
   "prometheus-memory": "2",
   "prometheus-cpu": "2",

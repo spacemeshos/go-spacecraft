@@ -320,13 +320,7 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 		command = append(command, "--json-port=7000")
 	}
 
-	if config.OldAPIExists == true {
-		command = append(command, "--grpc-port-new=6000")
-		command = append(command, "--grpc-server")
-		command = append(command, "--grpc-port=8000")
-	} else {
-		command = append(command, "--grpc-port=6000")
-	}
+	command = append(command, "--grpc-port=6000")
 
 	if config.DeployPyroscope == true {
 		pyroscopeURL, err := k8s.GetPyroscopeURL()
@@ -513,10 +507,6 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 		ports = append(ports, corev1.ServicePort{Name: "jsonport", Port: 7000, TargetPort: intstr.FromInt(7000)})
 	}
 
-	if config.OldAPIExists == true {
-		ports = append(ports, corev1.ServicePort{Name: "oldapiport", Port: 8000, TargetPort: intstr.FromInt(8000)})
-	}
-
 	if config.DeployPyroscope == true {
 		ports = append(ports, corev1.ServicePort{Name: "pprof", Port: 6060, TargetPort: intstr.FromInt(6060)})
 	}
@@ -586,20 +576,11 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 
 	apiPort := ""
 
-	if config.OldAPIExists == false {
-		grpcport, err := k8s.GetExternalPort("miner-"+minerNumber, "grpcport")
-		apiPort = grpcport
-		if err != nil {
-			channel.Err <- err
-			return
-		}
-	} else {
-		grpcport, err := k8s.GetExternalPort("miner-"+minerNumber, "oldapiport")
-		apiPort = grpcport
-		if err != nil {
-			channel.Err <- err
-			return
-		}
+	grpcport, err := k8s.GetExternalPort("miner-"+minerNumber, "grpcport")
+	apiPort = grpcport
+	if err != nil {
+		channel.Err <- err
+		return
 	}
 
 	nodeId, err := k8s.getNodeId(podName)

@@ -64,8 +64,6 @@ func init() {
 	createNetworkCmd.Flags().StringVar(&config.KibanaCPU, "kibana-cpu", config.KibanaCPU, "vCPUs to allocate to kibana")
 	createNetworkCmd.Flags().StringVar(&config.KibanaMemory, "kibana-memory", config.KibanaMemory, "RAM to allocate to kibana")
 	createNetworkCmd.Flags().StringVar(&config.LogsExpiry, "logs-expiry", config.LogsExpiry, "number of days after which logs are deleted automatically")
-	createNetworkCmd.Flags().BoolVar(&config.OldAPIExists, "old-api-exists", config.OldAPIExists, "does the go-spacemesh build support the old API")
-	createNetworkCmd.Flags().BoolVar(&config.AdjustHare, "adjust-hare", config.AdjustHare, "adjust hare parameters according to number of miners")
 	createNetworkCmd.Flags().StringVar(&config.PyroscopeImage, "pyroscope-image", config.PyroscopeImage, "docker image url of pyroscope")
 	createNetworkCmd.Flags().StringVar(&config.PyroscopeCPU, "pyroscope-cpu", config.PyroscopeCPU, "vCPUs to allocate to pyroscope")
 	createNetworkCmd.Flags().StringVar(&config.PyroscopeMemory, "pyroscope-memory", config.PyroscopeMemory, "memory to allocate to pyroscope")
@@ -82,6 +80,7 @@ func init() {
 	createNetworkCmd.Flags().StringVar(&config.SlackToken, "slack-token", config.SlackToken, "slack API token to post alerts")
 	createNetworkCmd.Flags().StringVar(&config.SlackChannelId, "slack-channel-id", config.SlackChannelId, "slack channel ID to post alerts")
 	createNetworkCmd.Flags().BoolVar(&config.EnableSlackAlerts, "enable-slack-alerts", config.EnableSlackAlerts, "deploy spacemesh-watch")
+	createNetworkCmd.Flags().StringVar(&config.CloudflareAPIToken, "cloudflare-api-token", config.CloudflareAPIToken, "cloudflare API token")
 
 	err := viper.BindPFlags(createNetworkCmd.Flags())
 	if err != nil {
