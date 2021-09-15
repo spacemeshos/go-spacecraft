@@ -1,6 +1,6 @@
 {
   "api": {
-    "grpc": "gateway,node,mesh,globalstate,transaction,smesher"
+    "grpc": "gateway,node,mesh,globalstate,transaction,smesher,debug"
   },
   "hare-eligibility": {
     "eligibility-confidence-param": "25",
@@ -50,7 +50,7 @@
     "sync-validation-delta": 30,
     "hdist": 10,
     "atxs-per-block": 25,
-    "tortoise-rerun-interval": 525600
+    "tortoise-rerun-interval": 10080
   },
   "p2p": {
     "dial-timeout": "1m",
