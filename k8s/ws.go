@@ -131,5 +131,44 @@ func (k8s *Kubernetes) DeployWS() error {
 		return err
 	}
 
+	spacemeshExplorerSpec := helm.ChartSpec{
+		ReleaseName: "spacemesh-explorer",
+		ChartName:   "spacemesh/spacemesh-explorer",
+		Namespace:   "ws",
+		ValuesYaml: sanitizeYaml(fmt.Sprintf(`
+			apiServer:
+				ingress:
+					domain: explorer-api.spacemesh.io
+			node:
+				image:
+					repository: %s
+					tag: %s
+				netID: %s
+				config: |
+					%s
+				peers: |
+					%s
+		`, respository, tag, fmt.Sprint(networkId), strings.ReplaceAll(minerConfigStr, "\n", ""), minerPeersStr)),
+	}
+
+	if err = client.InstallOrUpgradeChart(context.Background(), &spacemeshExplorerSpec); err != nil {
+		return err
+	}
+
+	spacemeshDashSpec := helm.ChartSpec{
+		ReleaseName: "spacemesh-dash",
+		ChartName:   "spacemesh/spacemesh-dash",
+		Namespace:   "ws",
+		ValuesYaml: sanitizeYaml(`
+			mongo: mongodb://spacemesh-explorer-mongo
+			ingress:
+				domain: dash-api.spacemesh.io
+		`),
+	}
+
+	if err = client.InstallOrUpgradeChart(context.Background(), &spacemeshDashSpec); err != nil {
+		return err
+	}
+
 	return nil
 }
