@@ -136,6 +136,7 @@ func (k8s *Kubernetes) DeployWS() error {
 		ChartName:   "spacemesh/spacemesh-explorer",
 		Namespace:   "ws",
 		ValuesYaml: sanitizeYaml(fmt.Sprintf(`
+			imageTag: %s
 			apiServer:
 				ingress:
 					domain: explorer-api.spacemesh.io
@@ -148,7 +149,7 @@ func (k8s *Kubernetes) DeployWS() error {
 					%s
 				peers: |
 					%s
-		`, respository, tag, fmt.Sprint(networkId), strings.ReplaceAll(minerConfigStr, "\n", ""), minerPeersStr)),
+		`, config.ExplorerVersion, respository, tag, fmt.Sprint(networkId), strings.ReplaceAll(minerConfigStr, "\n", ""), minerPeersStr)),
 	}
 
 	if err = client.InstallOrUpgradeChart(context.Background(), &spacemeshExplorerSpec); err != nil {
@@ -159,11 +160,13 @@ func (k8s *Kubernetes) DeployWS() error {
 		ReleaseName: "spacemesh-dash",
 		ChartName:   "spacemesh/spacemesh-dash",
 		Namespace:   "ws",
-		ValuesYaml: sanitizeYaml(`
+		ValuesYaml: sanitizeYaml(fmt.Sprintf(`
 			mongo: mongodb://spacemesh-explorer-mongo
 			ingress:
 				domain: dash-api.spacemesh.io
-		`),
+			image:
+				tag: %s
+		`, config.DashboardVersion)),
 	}
 
 	if err = client.InstallOrUpgradeChart(context.Background(), &spacemeshDashSpec); err != nil {

@@ -58,6 +58,8 @@ type Configuration struct {
 	SlackToken               string `mapstructure:"slack-token"`
 	EnableSlackAlerts        bool   `mapstructure:"enable-slack-alerts"`
 	CloudflareAPIToken       string `mapstructure:"cloudflare-api-token"`
+	DashboardVersion         string `mapstructure:"dash-version"`
+	ExplorerVersion          string `mapstructure:"explorer-version"`
 }
 
 var Config = Configuration{
@@ -118,4 +120,6 @@ var Config = Configuration{
 	EnableSlackAlerts:        false,
 	CloudflareAPIToken:       "",
 	PeersFile:                "",
+	DashboardVersion:         "v0.0.2",
+	ExplorerVersion:          "v0.0.9",
 }
