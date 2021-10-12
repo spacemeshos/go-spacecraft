@@ -26,7 +26,6 @@ type Configuration struct {
 	GenesisDelay             int    `mapstructure:"genesis-delay"`
 	MinerNumber              string `mapstructure:"miner-number"`
 	MinerGoSmConfig          string `mapstructure:"miner-go-sm-config"`
-	PeersFile                string `mapstructure:"miner-go-sm-peers"`
 	RestartWaitTime          int    `mapstructure:"restart-wait-time"`
 	Bootstrap                bool   `mapstructure:"bootstrap"`
 	KibanaSavedObjects       string `mapstructure:"kibana-saved-objects"`
@@ -119,7 +118,6 @@ var Config = Configuration{
 	SlackToken:               "",
 	EnableSlackAlerts:        false,
 	CloudflareAPIToken:       "",
-	PeersFile:                "",
 	DashboardVersion:         "v0.0.2",
 	ExplorerVersion:          "v0.0.9",
 }
