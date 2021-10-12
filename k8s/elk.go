@@ -110,7 +110,7 @@ func (k8s *Kubernetes) DeployELK() error {
 		Namespace:   "default",
 		Wait:        true,
 		Force:       true,
-		Version:     "7.13.4",
+		Version:     "7.15.0",
 		ValuesYaml: sanitizeYaml(fmt.Sprintf(`
 			replicas: %s
 			minimumMasterNodes: %s
@@ -136,7 +136,6 @@ func (k8s *Kubernetes) DeployELK() error {
 					xpack.security.transport.ssl.verification_mode: certificate
 					xpack.security.transport.ssl.keystore.path: /usr/share/elasticsearch/config/certs/elastic-certificates.p12
 					xpack.security.transport.ssl.truststore.path: /usr/share/elasticsearch/config/certs/elastic-certificates.p12
-			imageTag: "7.13.0"
 			secretMounts:
 			- name: elastic-certificates
 				secretName: elastic-certificates
@@ -169,11 +168,10 @@ func (k8s *Kubernetes) DeployELK() error {
 		Force:       true,
 		SkipCRDs:    true,
 		UpgradeCRDs: false,
-		Version:     "7.13.4",
+		Version:     "7.15.0",
 		ValuesYaml: sanitizeYaml(fmt.Sprintf(`
 			service:
 				type: LoadBalancer
-			imageTag: "7.13.0"
 			resources:
 				requests:
 					cpu: "%s"
@@ -207,7 +205,7 @@ func (k8s *Kubernetes) DeployELK() error {
 		Namespace:   "default",
 		Wait:        true,
 		Force:       true,
-		Version:     "7.13.4",
+		Version:     "7.15.0",
 		ValuesYaml: sanitizeYaml(`
 			daemonset:
 				extraEnvs:
@@ -222,7 +220,6 @@ func (k8s *Kubernetes) DeployELK() error {
 							name: elastic-credentials
 							key: password
 				resources: {}
-				imageTag: "7.13.0"
 				filebeatConfig:
 					filebeat.yml: |
 						processors:
@@ -258,20 +255,20 @@ func (k8s *Kubernetes) DeployELK() error {
 									add_error_key: true
 						filebeat:
 							autodiscover.providers:
-								- type: kubernetes
-									templates:
-										- condition.contains:
-												kubernetes.container.name: miner
-											config:
-												- type: docker
-													containers.ids:
-														- "${data.kubernetes.container.id}"
-										- condition.contains:
-												kubernetes.container.name: poet
-											config:
-												- type: docker
-													containers.ids:
-														- "${data.kubernetes.container.id}"
+							- type: kubernetes
+								templates:
+									- condition.contains:
+											kubernetes.container.name: miner
+										config:
+											- type: container
+												paths:
+													- /var/log/containers/*-${data.kubernetes.container.id}.log
+									- condition.contains:
+											kubernetes.container.name: poet
+										config:
+											- type: container
+												paths:
+													- /var/log/containers/*-${data.kubernetes.container.id}.log
 						output.elasticsearch:
 							host: '${NODE_NAME}'
 							hosts: '${ELASTICSEARCH_HOSTS:elasticsearch-master:9200}'
@@ -375,6 +372,8 @@ func (k8s *Kubernetes) GetESURL() (string, error) {
 
 func (k8s *Kubernetes) SetupLogDeletionPolicy() error {
 	esURL, err := k8s.GetESURL()
+
+	fmt.Println(esURL)
 
 	httpClient := &http.Client{}
 
