@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"strings"
+	"time"
 
 	apiv1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -155,70 +156,78 @@ func (k8s *Kubernetes) DeployWS() error {
 	if config.CloudflareAPIToken != "" {
 		ingressClient := k8s.Client.ExtensionsV1beta1().Ingresses("ws")
 
-		ingress, err := ingressClient.Get(context.Background(), "spacemesh-api-"+config.NetworkName, metav1.GetOptions{})
+		for range time.Tick(5 * time.Second) {
+			ingress, err := ingressClient.Get(context.Background(), "spacemesh-api", metav1.GetOptions{})
 
-		if err != nil {
-			return err
-		}
+			if err != nil {
+				return err
+			}
 
-		ip := ingress.Status.LoadBalancer.Ingress[0].IP
+			fmt.Println("waiting for ingress")
 
-		api, err := cloudflare.NewWithAPIToken(config.CloudflareAPIToken)
+			if len(ingress.Status.LoadBalancer.Ingress) == 1 {
+				ip := ingress.Status.LoadBalancer.Ingress[0].IP
 
-		if err != nil {
-			return err
-		}
+				api, err := cloudflare.NewWithAPIToken(config.CloudflareAPIToken)
 
-		id, err := api.ZoneIDByName("spacemesh.io")
+				if err != nil {
+					return err
+				}
 
-		if err != nil {
-			return err
-		}
+				id, err := api.ZoneIDByName("spacemesh.io")
 
-		proxied := true
+				if err != nil {
+					return err
+				}
 
-		_, err = api.CreateDNSRecord(context.Background(), id, cloudflare.DNSRecord{
-			Type:    "A",
-			Name:    "api-json-" + config.NetworkName + ".spacemesh.io",
-			Content: ip,
-			Proxied: &proxied,
-		})
+				proxied := true
 
-		if err != nil {
-			return err
-		}
+				_, err = api.CreateDNSRecord(context.Background(), id, cloudflare.DNSRecord{
+					Type:    "A",
+					Name:    "api-json-" + config.NetworkName + ".spacemesh.io",
+					Content: ip,
+					Proxied: &proxied,
+				})
 
-		_, err = api.CreateDNSRecord(context.Background(), id, cloudflare.DNSRecord{
-			Type:    "A",
-			Name:    "api-" + config.NetworkName + ".spacemesh.io",
-			Content: ip,
-			Proxied: &proxied,
-		})
+				if err != nil {
+					return err
+				}
 
-		if err != nil {
-			return err
-		}
+				_, err = api.CreateDNSRecord(context.Background(), id, cloudflare.DNSRecord{
+					Type:    "A",
+					Name:    "api-" + config.NetworkName + ".spacemesh.io",
+					Content: ip,
+					Proxied: &proxied,
+				})
 
-		_, err = api.CreateDNSRecord(context.Background(), id, cloudflare.DNSRecord{
-			Type:    "A",
-			Name:    "dash-api-" + config.NetworkName + ".spacemesh.io",
-			Content: ip,
-			Proxied: &proxied,
-		})
+				if err != nil {
+					return err
+				}
 
-		if err != nil {
-			return err
-		}
+				_, err = api.CreateDNSRecord(context.Background(), id, cloudflare.DNSRecord{
+					Type:    "A",
+					Name:    "dash-api-" + config.NetworkName + ".spacemesh.io",
+					Content: ip,
+					Proxied: &proxied,
+				})
 
-		_, err = api.CreateDNSRecord(context.Background(), id, cloudflare.DNSRecord{
-			Type:    "A",
-			Name:    "explorer-api-" + config.NetworkName + ".spacemesh.io",
-			Content: ip,
-			Proxied: &proxied,
-		})
+				if err != nil {
+					return err
+				}
 
-		if err != nil {
-			return err
+				_, err = api.CreateDNSRecord(context.Background(), id, cloudflare.DNSRecord{
+					Type:    "A",
+					Name:    "explorer-api-" + config.NetworkName + ".spacemesh.io",
+					Content: ip,
+					Proxied: &proxied,
+				})
+
+				if err != nil {
+					return err
+				}
+
+				break
+			}
 		}
 	}
 
