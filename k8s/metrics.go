@@ -152,7 +152,7 @@ func (k8s *Kubernetes) DeployPrometheus() error {
 	return nil
 }
 
-func (k8s *Kubernetes) DeleteDNSRecords() error {
+func (k8s *Kubernetes) DeleteMetricsDNSRecords() error {
 	if config.CloudflareAPIToken != "" {
 		api, err := cloudflare.NewWithAPIToken(config.CloudflareAPIToken)
 

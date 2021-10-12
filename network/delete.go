@@ -22,7 +22,13 @@ func Delete() error {
 		return err
 	}
 
-	err = kubernetes.DeleteDNSRecords()
+	err = kubernetes.DeleteMetricsDNSRecords()
+
+	if err != nil {
+		return err
+	}
+
+	err = kubernetes.DeleteELKDNSRecords()
 
 	if err != nil {
 		return err

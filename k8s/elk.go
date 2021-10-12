@@ -18,6 +18,7 @@ import (
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
+	cloudflare "github.com/cloudflare/cloudflare-go"
 	helm "github.com/mittwald/go-helm-client"
 	"github.com/sethvargo/go-password/password"
 	"helm.sh/helm/v3/pkg/repo"
@@ -364,6 +365,42 @@ func (k8s *Kubernetes) DeployELK() error {
 		return err
 	}
 
+	if config.CloudflareAPIToken != "" {
+		ingressClient := k8s.Client.ExtensionsV1beta1().Ingresses("default")
+		ingress, err := ingressClient.Get(context.Background(), "kibana-kibana", metav1.GetOptions{})
+
+		if err != nil {
+			return err
+		}
+
+		ip := ingress.Status.LoadBalancer.Ingress[0].IP
+
+		api, err := cloudflare.NewWithAPIToken(config.CloudflareAPIToken)
+
+		if err != nil {
+			return err
+		}
+
+		id, err := api.ZoneIDByName("spacemesh.io")
+
+		if err != nil {
+			return err
+		}
+
+		proxied := true
+
+		_, err = api.CreateDNSRecord(context.Background(), id, cloudflare.DNSRecord{
+			Type:    "A",
+			Name:    "kibana-" + config.NetworkName + ".spacemesh.io",
+			Content: ip,
+			Proxied: &proxied,
+		})
+
+		if err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
@@ -470,6 +507,40 @@ func (k8s *Kubernetes) SetupLogDeletionPolicy() error {
 		}
 
 		return errors.New(string(body))
+	}
+
+	return nil
+}
+
+func (k8s *Kubernetes) DeleteELKDNSRecords() error {
+	if config.CloudflareAPIToken != "" {
+		api, err := cloudflare.NewWithAPIToken(config.CloudflareAPIToken)
+
+		if err != nil {
+			return err
+		}
+
+		id, err := api.ZoneIDByName("spacemesh.io")
+
+		if err != nil {
+			return err
+		}
+
+		records, err := api.DNSRecords(context.Background(), id, cloudflare.DNSRecord{
+			Name: "kibana-" + config.NetworkName + ".spacemesh.io",
+		})
+
+		if err != nil {
+			return err
+		}
+
+		if len(records) == 1 {
+			err = api.DeleteDNSRecord(context.Background(), id, records[0].ID)
+
+			if err != nil {
+				return err
+			}
+		}
 	}
 
 	return nil
