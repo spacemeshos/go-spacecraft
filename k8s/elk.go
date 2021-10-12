@@ -70,6 +70,28 @@ func (k8s *Kubernetes) DeployELK() error {
 	}
 
 	chartRepo := repo.Entry{
+		Name: "ingress-nginx",
+		URL:  "https://kubernetes.github.io/ingress-nginx",
+	}
+
+	if err := client.AddOrUpdateChartRepo(chartRepo); err != nil {
+		return err
+	}
+
+	ingressSpec := helm.ChartSpec{
+		ReleaseName: "ingress-nginx",
+		ChartName:   "ingress-nginx/ingress-nginx",
+		Namespace:   "kube-system",
+		Wait:        true,
+		Force:       true,
+		Version:     "3.34.0",
+	}
+
+	if err = client.InstallOrUpgradeChart(context.Background(), &ingressSpec); err != nil {
+		return err
+	}
+
+	chartRepo = repo.Entry{
 		Name: "elastic",
 		URL:  "https://helm.elastic.co",
 	}
@@ -190,7 +212,15 @@ func (k8s *Kubernetes) DeployELK() error {
 						secretKeyRef:
 							name: elastic-credentials
 							key: password
-		`, config.KibanaCPU, config.KibanaMemory, config.KibanaCPU, config.KibanaMemory)),
+			ingress:
+				enabled: true
+				annotations:
+					kubernetes.io/ingress.class: nginx
+				hosts:
+					- host: kibana-%s.spacemesh.io
+						paths:
+							- path: /
+		`, config.KibanaCPU, config.KibanaMemory, config.KibanaCPU, config.KibanaMemory, config.NetworkName)),
 	}
 
 	if err = client.InstallOrUpgradeChart(context.Background(), &kibanaSpec); err != nil {
