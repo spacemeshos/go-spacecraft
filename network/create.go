@@ -280,10 +280,10 @@ func Create() error {
 	log.Info.Println("Kibana Password: " + kubernetes.Password)
 
 	if config.Metrics {
-		log.Info.Println("Grafana URL: http://" + "grafana-" + config.NetworkName + ".spacemesh.io")
+		log.Info.Println("Grafana URL: https://" + "grafana-" + config.NetworkName + ".spacemesh.io")
 		log.Info.Println("Grafana Username: admin")
 		log.Info.Println("Grafana Password: prom-operator")
-		log.Info.Println("Prometheus URL: http://" + "prometheus-" + config.NetworkName + ".spacemesh.io")
+		log.Info.Println("Prometheus URL: https://" + "prometheus-" + config.NetworkName + ".spacemesh.io")
 	}
 
 	if config.DeployPyroscope {
