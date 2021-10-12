@@ -9,6 +9,7 @@ import (
 	apiv1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
+	cloudflare "github.com/cloudflare/cloudflare-go"
 	helm "github.com/mittwald/go-helm-client"
 	"helm.sh/helm/v3/pkg/repo"
 )
@@ -120,14 +121,14 @@ func (k8s *Kubernetes) DeployWS() error {
 			imageTag: %s
 			apiServer:
 				ingress:
-					domain: explorer-api.spacemesh.io
+					domain: explorer-api-%s.spacemesh.io
 			node:
 				image:
 					repository: %s
 					tag: %s
 				config: |
 					%s
-		`, config.ExplorerVersion, respository, tag, strings.ReplaceAll(minerConfigStr, "\n", ""))),
+		`, config.ExplorerVersion, config.NetworkName, respository, tag, strings.ReplaceAll(minerConfigStr, "\n", ""))),
 	}
 
 	if err = client.InstallOrUpgradeChart(context.Background(), &spacemeshExplorerSpec); err != nil {
@@ -141,135 +142,167 @@ func (k8s *Kubernetes) DeployWS() error {
 		ValuesYaml: sanitizeYaml(fmt.Sprintf(`
 			mongo: mongodb://spacemesh-explorer-mongo
 			ingress:
-				domain: dash-api.spacemesh.io
+				domain: dash-api-%s.spacemesh.io
 			image:
 				tag: %s
-		`, config.DashboardVersion)),
+		`, config.NetworkName, config.DashboardVersion)),
 	}
 
 	if err = client.InstallOrUpgradeChart(context.Background(), &spacemeshDashSpec); err != nil {
 		return err
 	}
 
-	// if config.CloudflareAPIToken != "" {
-	// 	ingressClient := k8s.Client.ExtensionsV1beta1().Ingresses("ws")
+	if config.CloudflareAPIToken != "" {
+		ingressClient := k8s.Client.ExtensionsV1beta1().Ingresses("ws")
 
-	// 	ingress, err := ingressClient.Get(context.Background(), "spacemesh-api-"+fmt.Sprint(networkId), metav1.GetOptions{})
+		ingress, err := ingressClient.Get(context.Background(), "spacemesh-api-"+config.NetworkName, metav1.GetOptions{})
 
-	// 	if err != nil {
-	// 		return err
-	// 	}
+		if err != nil {
+			return err
+		}
 
-	// 	ip := ingress.Status.LoadBalancer.Ingress[0].IP
+		ip := ingress.Status.LoadBalancer.Ingress[0].IP
 
-	// 	api, err := cloudflare.NewWithAPIToken(config.CloudflareAPIToken)
+		api, err := cloudflare.NewWithAPIToken(config.CloudflareAPIToken)
 
-	// 	if err != nil {
-	// 		return err
-	// 	}
+		if err != nil {
+			return err
+		}
 
-	// 	id, err := api.ZoneIDByName("spacemesh.io")
+		id, err := api.ZoneIDByName("spacemesh.io")
 
-	// 	if err != nil {
-	// 		return err
-	// 	}
+		if err != nil {
+			return err
+		}
 
-	// 	proxied := true
+		proxied := true
 
-	// 	_, err = api.CreateDNSRecord(context.Background(), id, cloudflare.DNSRecord{
-	// 		Type:    "A",
-	// 		Name:    "spacemesh-api-" + fmt.Sprint(networkId) + ".spacemesh.io",
-	// 		Content: ip,
-	// 		Proxied: &proxied,
-	// 	})
+		_, err = api.CreateDNSRecord(context.Background(), id, cloudflare.DNSRecord{
+			Type:    "A",
+			Name:    "api-json-" + config.NetworkName + ".spacemesh.io",
+			Content: ip,
+			Proxied: &proxied,
+		})
 
-	// 	if err != nil {
-	// 		return err
-	// 	}
+		if err != nil {
+			return err
+		}
 
-	// 	_, err = api.CreateDNSRecord(context.Background(), id, cloudflare.DNSRecord{
-	// 		Type:    "A",
-	// 		Name:    "api-" + fmt.Sprint(networkId) + ".spacemesh.io",
-	// 		Content: ip,
-	// 		Proxied: &proxied,
-	// 	})
+		_, err = api.CreateDNSRecord(context.Background(), id, cloudflare.DNSRecord{
+			Type:    "A",
+			Name:    "api-" + config.NetworkName + ".spacemesh.io",
+			Content: ip,
+			Proxied: &proxied,
+		})
 
-	// 	if err != nil {
-	// 		return err
-	// 	}
+		if err != nil {
+			return err
+		}
 
-	// 	_, err = api.CreateDNSRecord(context.Background(), id, cloudflare.DNSRecord{
-	// 		Type:    "A",
-	// 		Name:    "spacemesh-dash-" + fmt.Sprint(networkId) + ".spacemesh.io",
-	// 		Content: ip,
-	// 		Proxied: &proxied,
-	// 	})
+		_, err = api.CreateDNSRecord(context.Background(), id, cloudflare.DNSRecord{
+			Type:    "A",
+			Name:    "dash-api-" + config.NetworkName + ".spacemesh.io",
+			Content: ip,
+			Proxied: &proxied,
+		})
 
-	// 	if err != nil {
-	// 		return err
-	// 	}
+		if err != nil {
+			return err
+		}
 
-	// 	_, err = api.CreateDNSRecord(context.Background(), id, cloudflare.DNSRecord{
-	// 		Type:    "A",
-	// 		Name:    "spacemesh-explorer-" + fmt.Sprint(networkId) + ".spacemesh.io",
-	// 		Content: ip,
-	// 		Proxied: &proxied,
-	// 	})
+		_, err = api.CreateDNSRecord(context.Background(), id, cloudflare.DNSRecord{
+			Type:    "A",
+			Name:    "explorer-api-" + config.NetworkName + ".spacemesh.io",
+			Content: ip,
+			Proxied: &proxied,
+		})
 
-	// 	if err != nil {
-	// 		return err
-	// 	}
-	// }
+		if err != nil {
+			return err
+		}
+	}
 
 	return nil
 }
 
-// func (k8s *Kubernetes) DeleteWSDNSRecords() error {
-// 	if config.CloudflareAPIToken != "" {
-// 		api, err := cloudflare.NewWithAPIToken(config.CloudflareAPIToken)
+func (k8s *Kubernetes) DeleteWSDNSRecords() error {
+	if config.CloudflareAPIToken != "" {
+		api, err := cloudflare.NewWithAPIToken(config.CloudflareAPIToken)
 
-// 		if err != nil {
-// 			return err
-// 		}
+		if err != nil {
+			return err
+		}
 
-// 		id, err := api.ZoneIDByName("spacemesh.io")
+		id, err := api.ZoneIDByName("spacemesh.io")
 
-// 		if err != nil {
-// 			return err
-// 		}
+		if err != nil {
+			return err
+		}
 
-// 		records, err := api.DNSRecords(context.Background(), id, cloudflare.DNSRecord{
-// 			Name: "grafana-" + config.NetworkName + ".spacemesh.io",
-// 		})
+		records, err := api.DNSRecords(context.Background(), id, cloudflare.DNSRecord{
+			Name: "api-json-" + config.NetworkName + ".spacemesh.io",
+		})
 
-// 		if err != nil {
-// 			return err
-// 		}
+		if err != nil {
+			return err
+		}
 
-// 		if len(records) == 1 {
-// 			err = api.DeleteDNSRecord(context.Background(), id, records[0].ID)
+		if len(records) == 1 {
+			err = api.DeleteDNSRecord(context.Background(), id, records[0].ID)
 
-// 			if err != nil {
-// 				return err
-// 			}
-// 		}
+			if err != nil {
+				return err
+			}
+		}
 
-// 		records, err = api.DNSRecords(context.Background(), id, cloudflare.DNSRecord{
-// 			Name: "prometheus-" + config.NetworkName + ".spacemesh.io",
-// 		})
+		records, err = api.DNSRecords(context.Background(), id, cloudflare.DNSRecord{
+			Name: "api-" + config.NetworkName + ".spacemesh.io",
+		})
 
-// 		if err != nil {
-// 			return err
-// 		}
+		if err != nil {
+			return err
+		}
 
-// 		if len(records) == 1 {
-// 			err = api.DeleteDNSRecord(context.Background(), id, records[0].ID)
+		if len(records) == 1 {
+			err = api.DeleteDNSRecord(context.Background(), id, records[0].ID)
 
-// 			if err != nil {
-// 				return err
-// 			}
-// 		}
-// 	}
+			if err != nil {
+				return err
+			}
+		}
 
-// 	return nil
-// }
+		records, err = api.DNSRecords(context.Background(), id, cloudflare.DNSRecord{
+			Name: "dash-api-" + config.NetworkName + ".spacemesh.io",
+		})
+
+		if err != nil {
+			return err
+		}
+
+		if len(records) == 1 {
+			err = api.DeleteDNSRecord(context.Background(), id, records[0].ID)
+
+			if err != nil {
+				return err
+			}
+		}
+
+		records, err = api.DNSRecords(context.Background(), id, cloudflare.DNSRecord{
+			Name: "explorer-api-" + config.NetworkName + ".spacemesh.io",
+		})
+
+		if err != nil {
+			return err
+		}
+
+		if len(records) == 1 {
+			err = api.DeleteDNSRecord(context.Background(), id, records[0].ID)
+
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}

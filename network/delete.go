@@ -34,5 +34,11 @@ func Delete() error {
 		return err
 	}
 
+	err = kubernetes.DeleteWSDNSRecords()
+
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
