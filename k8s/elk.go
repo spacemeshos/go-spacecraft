@@ -171,7 +171,7 @@ func (k8s *Kubernetes) DeployELK() error {
 		Version:     "7.15.0",
 		ValuesYaml: sanitizeYaml(fmt.Sprintf(`
 			service:
-				type: LoadBalancer
+				type: NodePort
 			resources:
 				requests:
 					cpu: "%s"
@@ -338,19 +338,19 @@ func (k8s *Kubernetes) DeployELK() error {
 }
 
 func (k8s *Kubernetes) GetKibanaURL() (string, error) {
-	services, err := k8s.Client.CoreV1().Services("default").List(context.TODO(), metav1.ListOptions{})
+	port, err := k8s.GetExternalPort("kibana-kibana", "http")
 
 	if err != nil {
 		return "", err
 	}
 
-	for _, svc := range services.Items {
-		if svc.Name == "kibana-kibana" {
-			return svc.Status.LoadBalancer.Ingress[0].IP + ":5601", nil
-		}
+	ip, err := k8s.GetExternalIP()
+
+	if err != nil {
+		return "", err
 	}
 
-	return "", errors.New("Kibana URL not found")
+	return ip + ":" + port, nil
 }
 
 func (k8s *Kubernetes) GetESURL() (string, error) {
@@ -372,8 +372,6 @@ func (k8s *Kubernetes) GetESURL() (string, error) {
 
 func (k8s *Kubernetes) SetupLogDeletionPolicy() error {
 	esURL, err := k8s.GetESURL()
-
-	fmt.Println(esURL)
 
 	httpClient := &http.Client{}
 
