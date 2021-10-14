@@ -104,7 +104,7 @@ func (k8s *Kubernetes) getNodeId(podName string) (string, error) {
 			return resFinal, nil
 		} else {
 
-			res = strings.SplitAfter(str, "\",\"key\":\"")
+			res = strings.SplitAfter(str, "\",\"identity\":\"")
 
 			if len(res) >= 2 {
 				res = strings.SplitAfter(res[1], "\"")
@@ -308,8 +308,7 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 	command := []string{
 		"/bin/go-spacemesh",
 		"--test-mode",
-		"--tcp-port=" + bindPortStr,
-		"--acquire-port=0",
+		fmt.Sprintf("--listen=/ip4/0.0.0.0/tcp/%s", bindPortStr),
 		"--json-server=true",
 		"--config=/etc/config/config.json",
 		"-d=/root/data/node",
@@ -590,7 +589,7 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 		return
 	}
 	channel.Done <- &MinerDeploymentData{
-		"spacemesh://" + nodeId + "@" + externalIP + ":" + bindPortStr,
+		fmt.Sprintf("/ip4/%s/tcp/%s/p2p/%s", externalIP, bindPortStr, nodeId),
 		externalIP + ":" + apiPort,
 	}
 }
