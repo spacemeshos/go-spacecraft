@@ -97,10 +97,10 @@
     "tortoise-beacon-sync-num-blocks": "30"
   },
   "smeshing": {
-    "smeshing-start": true,
+    "smeshing-start": false,
     "smeshing-coinbase": "1",
     "smeshing-opts": {
-      "smeshing-opts-datadir": "/root/data/post",
+      "smeshing-opts-datadir": "./",
       "smeshing-opts-numunits": 2,
       "smeshing-opts-numfiles": 1,
       "smeshing-opts-provider": 1,
