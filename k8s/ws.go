@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"strings"
 	"time"
 
@@ -108,13 +107,11 @@ func (k8s *Kubernetes) DeployWS() error {
 
 	respository := imageSplit[0]
 
-	minerConfigBuf, err := ioutil.ReadFile(config.MinerGoSmConfig)
+	minerConfigStr, err := gcp.ReadConfig()
 
 	if err != nil {
 		return err
 	}
-
-	minerConfigStr := string(minerConfigBuf)
 
 	spacemeshAPISpec := helm.ChartSpec{
 		ReleaseName: "spacemesh-api",

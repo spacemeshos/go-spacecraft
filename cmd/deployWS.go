@@ -27,7 +27,6 @@ var deployWSCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(deployWSCmd)
 
-	deployWSCmd.Flags().StringVar(&config.MinerGoSmConfig, "miner-go-sm-config", config.MinerGoSmConfig, "config file location (example \"./config.json\")")
 	deployWSCmd.Flags().StringVar(&config.GoSmImage, "go-sm-image", config.GoSmImage, "docker image for go-spacemesh build")
 	deployWSCmd.Flags().StringVar(&config.DashboardVersion, "dash-version", config.DashboardVersion, "docker image tag for spacemeshos/dash-backend")
 	deployWSCmd.Flags().StringVar(&config.ExplorerVersion, "explorer-version", config.ExplorerVersion, "docker image tag for spacemeshos/explorer-apiserver and spacemeshos/explorer-collector")
