@@ -118,6 +118,10 @@ func (k8s *Kubernetes) DeployWS() error {
 		ChartName:   "spacemesh/spacemesh-api",
 		Namespace:   "ws",
 		ValuesYaml: sanitizeYaml(fmt.Sprintf(`
+			resources:
+				requests:
+					memory: %sGi
+					cpu: %s
 			image:
 				repository: %s
 				tag: %s
@@ -127,7 +131,7 @@ func (k8s *Kubernetes) DeployWS() error {
 				jsonRpcDomain: api-json-%s.spacemesh.io
 			config: |
 				%s
-		`, respository, tag, config.NetworkName, config.NetworkName, strings.ReplaceAll(minerConfigStr, "\n", ""))),
+		`, config.MinerMemory, config.MinerCPU, respository, tag, config.NetworkName, config.NetworkName, strings.ReplaceAll(minerConfigStr, "\n", ""))),
 	}
 
 	if err = client.InstallOrUpgradeChart(context.Background(), &spacemeshAPISpec); err != nil {
@@ -139,6 +143,10 @@ func (k8s *Kubernetes) DeployWS() error {
 		ChartName:   "spacemesh/spacemesh-explorer",
 		Namespace:   "ws",
 		ValuesYaml: sanitizeYaml(fmt.Sprintf(`
+			resources:
+				requests:
+					memory: %sGi
+					cpu: %s
 			imageTag: %s
 			apiServer:
 				ingress:
@@ -149,7 +157,7 @@ func (k8s *Kubernetes) DeployWS() error {
 					tag: %s
 				config: |
 					%s
-		`, config.ExplorerVersion, config.NetworkName, respository, tag, strings.ReplaceAll(minerConfigStr, "\n", ""))),
+		`, config.MinerMemory, config.MinerCPU, config.ExplorerVersion, config.NetworkName, respository, tag, strings.ReplaceAll(minerConfigStr, "\n", ""))),
 	}
 
 	if err = client.InstallOrUpgradeChart(context.Background(), &spacemeshExplorerSpec); err != nil {
