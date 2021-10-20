@@ -2,11 +2,13 @@ package k8s
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"strings"
 	"time"
 
+	"github.com/spacemeshos/go-spacecraft/gcp"
 	apiv1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -14,6 +16,27 @@ import (
 	helm "github.com/mittwald/go-helm-client"
 	"helm.sh/helm/v3/pkg/repo"
 )
+
+type Network struct {
+	NetName              string `json:"netName"`
+	Conf                 string `json:"conf"`
+	GrpcApi              string `json:"grpcAPI"`
+	JsonApi              string `json:"jsonAPI"`
+	Explorer             string `json:"explorer"`
+	ExplorerAPI          string `json:"explorerAPI"`
+	ExplorerVersion      string `json:"explorerVersion"`
+	ExplorerConf         string `json:"explorerConf"`
+	Dash                 string `json:"dash"`
+	DashApi              string `json:"dashAPI"`
+	DashVersion          string `json:"dashVersion"`
+	Repository           string `json:"repository"`
+	MinNodeVersion       string `json:"minNodeVersion"`
+	MaxNodeVersion       string `json:"maxNodeVersion"`
+	MinSmappRelease      string `json:"minSmappRelease"`
+	LatestSmappRelease   string `json:"latestSmappRelease"`
+	SmappBaseDownloadUrl string `json:"smappBaseDownloadUrl"`
+	NodeBaseDownloadUrl  string `json:"nodeBaseDownloadUrl"`
+}
 
 func (k8s *Kubernetes) DeployWS() error {
 	namespaceClient := k8s.Client.CoreV1().Namespaces()
@@ -229,6 +252,100 @@ func (k8s *Kubernetes) DeployWS() error {
 				break
 			}
 		}
+	}
+
+	return nil
+}
+
+func (k8s *Kubernetes) AddToDiscovery() error {
+	networksConfig, err := gcp.ReadWSConfig()
+
+	if err != nil {
+		return err
+	}
+
+	var networks []Network
+
+	json.Unmarshal([]byte(networksConfig), &networks)
+
+	imageSplit := strings.Split(config.GoSmImage, ":")
+
+	tag := ""
+	image := ""
+
+	if len(imageSplit) == 2 {
+		image = imageSplit[0]
+		tag = imageSplit[1]
+	} else {
+		tag = "latest"
+	}
+
+	network := Network{
+		NetName:              config.NetworkName,
+		Conf:                 "https://storage.googleapis.com/spacecraft-data/" + config.NetworkName + "-archive/config.json",
+		GrpcApi:              "https://api-" + config.NetworkName + ".spacemesh.io/",
+		JsonApi:              "https://api-json-" + config.NetworkName + ".spacemesh.io/",
+		Explorer:             "https://explorer.spacemesh.io/",
+		ExplorerAPI:          "https://explorer-api-" + config.NetworkName + ".spacemesh.io/",
+		ExplorerVersion:      config.ExplorerVersion,
+		ExplorerConf:         "https://storage.googleapis.com/spacecraft-data/" + config.NetworkName + "-archive/config.json",
+		Dash:                 "https://dash.spacemesh.io/",
+		DashApi:              "wss://dash-api-" + config.NetworkName + ".spacemesh.io/ws",
+		DashVersion:          config.DashboardVersion,
+		Repository:           image,
+		MinNodeVersion:       tag,
+		MaxNodeVersion:       tag,
+		MinSmappRelease:      config.SmappVersion,
+		LatestSmappRelease:   config.SmappVersion,
+		SmappBaseDownloadUrl: "https://downloads.spacemesh.io",
+		NodeBaseDownloadUrl:  "https://downloads.spacemesh.io",
+	}
+
+	networks = append(networks, network)
+
+	json, err := json.MarshalIndent(networks, "", "  ")
+
+	if err != nil {
+		return err
+	}
+
+	err = gcp.UploadWSConfig(string(json))
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (k8s *Kubernetes) RemoveFromDiscovery() error {
+	networksConfig, err := gcp.ReadWSConfig()
+
+	if err != nil {
+		return err
+	}
+
+	var networks []Network
+	var newNetworks []Network
+
+	json.Unmarshal([]byte(networksConfig), &networks)
+
+	for _, network := range networks {
+		if network.NetName != config.NetworkName {
+			newNetworks = append(newNetworks, network)
+		}
+	}
+
+	json, err := json.MarshalIndent(newNetworks, "", "  ")
+
+	if err != nil {
+		return err
+	}
+
+	err = gcp.UploadWSConfig(string(json))
+
+	if err != nil {
+		return err
 	}
 
 	return nil

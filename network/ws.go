@@ -20,5 +20,11 @@ func DeployWS() error {
 		return err
 	}
 
+	err = kubernetes.AddToDiscovery()
+
+	if err != nil {
+		return err
+	}
+
 	return nil
 }

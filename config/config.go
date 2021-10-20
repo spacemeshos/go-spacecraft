@@ -59,6 +59,7 @@ type Configuration struct {
 	CloudflareAPIToken       string `mapstructure:"cloudflare-api-token"`
 	DashboardVersion         string `mapstructure:"dash-version"`
 	ExplorerVersion          string `mapstructure:"explorer-version"`
+	SmappVersion             string `mapstructure:"smapp-version"`
 }
 
 var Config = Configuration{
@@ -120,4 +121,5 @@ var Config = Configuration{
 	CloudflareAPIToken:       "",
 	DashboardVersion:         "v0.0.2",
 	ExplorerVersion:          "v0.0.9",
+	SmappVersion:             "0.1.25",
 }

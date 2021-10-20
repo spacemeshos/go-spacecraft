@@ -44,5 +44,11 @@ func Delete() error {
 		return err
 	}
 
+	err = kubernetes.RemoveFromDiscovery()
+
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
