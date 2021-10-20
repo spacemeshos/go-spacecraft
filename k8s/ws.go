@@ -339,10 +339,18 @@ func (k8s *Kubernetes) RemoveFromDiscovery() error {
 		return err
 	}
 
-	err = gcp.UploadWSConfig(string(json))
+	if string(json) == "null" {
+		err = gcp.UploadWSConfig(string("[]"))
 
-	if err != nil {
-		return err
+		if err != nil {
+			return err
+		}
+	} else {
+		err = gcp.UploadWSConfig(string(json))
+
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
