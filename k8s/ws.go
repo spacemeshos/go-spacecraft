@@ -3,10 +3,12 @@ package k8s
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strings"
 	"time"
 
+	"github.com/Jeffail/gabs/v2"
 	"github.com/spacemeshos/go-spacecraft/gcp"
 	apiv1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -17,24 +19,25 @@ import (
 )
 
 type Network struct {
-	NetName              string `json:"netName"`
-	Conf                 string `json:"conf"`
-	GrpcApi              string `json:"grpcAPI"`
-	JsonApi              string `json:"jsonAPI"`
-	Explorer             string `json:"explorer"`
-	ExplorerAPI          string `json:"explorerAPI"`
-	ExplorerVersion      string `json:"explorerVersion"`
-	ExplorerConf         string `json:"explorerConf"`
-	Dash                 string `json:"dash"`
-	DashApi              string `json:"dashAPI"`
-	DashVersion          string `json:"dashVersion"`
-	Repository           string `json:"repository"`
-	MinNodeVersion       string `json:"minNodeVersion"`
-	MaxNodeVersion       string `json:"maxNodeVersion"`
-	MinSmappRelease      string `json:"minSmappRelease"`
-	LatestSmappRelease   string `json:"latestSmappRelease"`
-	SmappBaseDownloadUrl string `json:"smappBaseDownloadUrl"`
-	NodeBaseDownloadUrl  string `json:"nodeBaseDownloadUrl"`
+	NetName              string  `json:"netName"`
+	NetID                float64 `json:"netID"`
+	Conf                 string  `json:"conf"`
+	GrpcApi              string  `json:"grpcAPI"`
+	JsonApi              string  `json:"jsonAPI"`
+	Explorer             string  `json:"explorer"`
+	ExplorerAPI          string  `json:"explorerAPI"`
+	ExplorerVersion      string  `json:"explorerVersion"`
+	ExplorerConf         string  `json:"explorerConf"`
+	Dash                 string  `json:"dash"`
+	DashApi              string  `json:"dashAPI"`
+	DashVersion          string  `json:"dashVersion"`
+	Repository           string  `json:"repository"`
+	MinNodeVersion       string  `json:"minNodeVersion"`
+	MaxNodeVersion       string  `json:"maxNodeVersion"`
+	MinSmappRelease      string  `json:"minSmappRelease"`
+	LatestSmappRelease   string  `json:"latestSmappRelease"`
+	SmappBaseDownloadUrl string  `json:"smappBaseDownloadUrl"`
+	NodeBaseDownloadUrl  string  `json:"nodeBaseDownloadUrl"`
 }
 
 func (k8s *Kubernetes) DeployWS() error {
@@ -285,8 +288,27 @@ func (k8s *Kubernetes) AddToDiscovery() error {
 		tag = "latest"
 	}
 
+	minerConfigStr, err := gcp.ReadConfig()
+
+	if err != nil {
+		return err
+	}
+
+	minerConfigJson, err := gabs.ParseJSON([]byte(minerConfigStr))
+
+	if err != nil {
+		return err
+	}
+
+	netID, ok := minerConfigJson.Path("p2p.network-id").Data().(float64)
+
+	if !ok {
+		return errors.New("cannot read p2p.network-id from config file")
+	}
+
 	network := Network{
 		NetName:              config.NetworkName,
+		NetID:                netID,
 		Conf:                 "https://storage.googleapis.com/spacecraft-data/" + config.NetworkName + "-archive/config.json",
 		GrpcApi:              "https://api-" + config.NetworkName + ".spacemesh.io/",
 		JsonApi:              "https://api-json-" + config.NetworkName + ".spacemesh.io/",
