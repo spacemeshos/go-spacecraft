@@ -27,6 +27,8 @@ var deployWSCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(deployWSCmd)
 
+	deployWSCmd.Flags().StringVar(&config.TLSCert, "tls-crt", config.TLSCert, "TLS certificate")
+	deployWSCmd.Flags().StringVar(&config.TLSKey, "tls-key", config.TLSKey, "TLS private key")
 	deployWSCmd.Flags().StringVar(&config.MinerMemory, "miner-ram", config.MinerMemory, "RAM for each miner")
 	deployWSCmd.Flags().StringVar(&config.MinerCPU, "miner-cpu", config.MinerCPU, "vCPUs for each miner")
 	deployWSCmd.Flags().StringVar(&config.GoSmImage, "go-sm-image", config.GoSmImage, "docker image for go-spacemesh build")

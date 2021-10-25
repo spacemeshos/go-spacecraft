@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"strings"
 	"time"
 
@@ -38,6 +39,36 @@ type Network struct {
 }
 
 func (k8s *Kubernetes) DeployWS() error {
+	certData, err := ioutil.ReadFile(config.TLSCert)
+
+	if err != nil {
+		return err
+	}
+
+	keyData, err := ioutil.ReadFile(config.TLSKey)
+
+	if err != nil {
+		return err
+	}
+
+	tlsSecret := &apiv1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: "tls",
+		},
+		Data: map[string][]byte{
+			"tls.crt": certData,
+			"tls.key": keyData,
+		},
+		Type: "kubernetes.io/tls",
+	}
+
+	secretsClient := k8s.Client.CoreV1().Secrets("ws")
+	_, err = secretsClient.Create(context.Background(), tlsSecret, metav1.CreateOptions{})
+
+	if err != nil {
+		return err
+	}
+
 	namespaceClient := k8s.Client.CoreV1().Namespaces()
 
 	namespace := &apiv1.Namespace{
@@ -208,13 +239,10 @@ func (k8s *Kubernetes) DeployWS() error {
 					return err
 				}
 
-				proxied := true
-
 				_, err = api.CreateDNSRecord(context.Background(), id, cloudflare.DNSRecord{
 					Type:    "A",
 					Name:    "api-json-" + config.NetworkName + ".spacemesh.io",
 					Content: ip,
-					Proxied: &proxied,
 				})
 
 				if err != nil {
@@ -225,12 +253,13 @@ func (k8s *Kubernetes) DeployWS() error {
 					Type:    "A",
 					Name:    "api-" + config.NetworkName + ".spacemesh.io",
 					Content: ip,
-					Proxied: &proxied,
 				})
 
 				if err != nil {
 					return err
 				}
+
+				proxied := true
 
 				_, err = api.CreateDNSRecord(context.Background(), id, cloudflare.DNSRecord{
 					Type:    "A",

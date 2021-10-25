@@ -60,6 +60,8 @@ type Configuration struct {
 	DashboardVersion         string `mapstructure:"dash-version"`
 	ExplorerVersion          string `mapstructure:"explorer-version"`
 	SmappVersion             string `mapstructure:"smapp-version"`
+	TLSKey                   string `mapstructure:"tls-key"`
+	TLSCert                  string `mapstructure:"tls-cert"`
 }
 
 var Config = Configuration{
@@ -122,4 +124,6 @@ var Config = Configuration{
 	DashboardVersion:         "v0.0.2",
 	ExplorerVersion:          "v0.0.9",
 	SmappVersion:             "0.1.25",
+	TLSKey:                   "./artifacts/ws/tls.key",
+	TLSCert:                  "./artifacts/ws/tls.crt",
 }
