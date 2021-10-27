@@ -128,10 +128,13 @@ func (k8s *Kubernetes) DeployPrometheus() error {
 			return err
 		}
 
+		proxied := true
+
 		_, err = api.CreateDNSRecord(context.Background(), id, cloudflare.DNSRecord{
 			Type:    "A",
 			Name:    "prometheus-" + config.NetworkName + ".spacemesh.io",
 			Content: ip,
+			Proxied: &proxied,
 		})
 
 		if err != nil {
@@ -142,6 +145,7 @@ func (k8s *Kubernetes) DeployPrometheus() error {
 			Type:    "A",
 			Name:    "grafana-" + config.NetworkName + ".spacemesh.io",
 			Content: ip,
+			Proxied: &proxied,
 		})
 
 		if err != nil {
@@ -152,7 +156,7 @@ func (k8s *Kubernetes) DeployPrometheus() error {
 	return nil
 }
 
-func (k8s *Kubernetes) DeleteDNSRecords() error {
+func (k8s *Kubernetes) DeleteMetricsDNSRecords() error {
 	if config.CloudflareAPIToken != "" {
 		api, err := cloudflare.NewWithAPIToken(config.CloudflareAPIToken)
 

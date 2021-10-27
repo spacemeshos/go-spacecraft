@@ -33,7 +33,7 @@ func Create() error {
 
 	kubernetes := k8s.Kubernetes{Client: k8sClient, RestConfig: k8sRestConfig}
 
-	if config.DeployPyroscope == true {
+	if config.DeployPyroscope {
 		if err = kubernetes.DeployPyroscope(); err != nil {
 			return err
 		}
@@ -260,13 +260,13 @@ func Create() error {
 		return err
 	}
 
-	if config.Metrics == true {
+	if config.Metrics {
 		if err = kubernetes.DeployPrometheus(); err != nil {
 			return err
 		}
 	}
 
-	if config.EnableSlackAlerts == true {
+	if config.EnableSlackAlerts {
 		err = kubernetes.DeploySpacemeshWatch()
 
 		if err != nil {
@@ -274,24 +274,18 @@ func Create() error {
 		}
 	}
 
-	kibanaURL, err := kubernetes.GetKibanaURL()
-
-	if err != nil {
-		return err
-	}
-
-	log.Info.Println("Kibana URL: http://" + kibanaURL)
+	log.Info.Println("Kibana URL: https://kibana-" + config.NetworkName + ".spacemesh.io")
 	log.Info.Println("Kibana Username: elastic")
 	log.Info.Println("Kibana Password: " + kubernetes.Password)
 
-	if config.Metrics == true {
-		log.Info.Println("Grafana URL: http://" + "grafana-" + config.NetworkName + ".spacemesh.io")
+	if config.Metrics {
+		log.Info.Println("Grafana URL: https://" + "grafana-" + config.NetworkName + ".spacemesh.io")
 		log.Info.Println("Grafana Username: admin")
 		log.Info.Println("Grafana Password: prom-operator")
-		log.Info.Println("Prometheus URL: http://" + "prometheus-" + config.NetworkName + ".spacemesh.io")
+		log.Info.Println("Prometheus URL: https://" + "prometheus-" + config.NetworkName + ".spacemesh.io")
 	}
 
-	if config.DeployPyroscope == true {
+	if config.DeployPyroscope {
 		pyroscopeURL, err := kubernetes.GetPyroscopeURL()
 
 		if err != nil {

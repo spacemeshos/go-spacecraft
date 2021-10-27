@@ -80,13 +80,14 @@
     "tortoise-beacon-theta": "1/4",
     "tortoise-beacon-votes-limit": 100,
     "tortoise-beacon-voting-round-duration": "50s",
-    "tortoise-beacon-weak-coin-round-duration": "10s"
+    "tortoise-beacon-weak-coin-round-duration": "10s",
+    "tortoise-beacon-sync-num-blocks": "30"
   },
   "smeshing": {
-    "smeshing-start": true,
+    "smeshing-start": false,
     "smeshing-coinbase": "1",
     "smeshing-opts": {
-      "smeshing-opts-datadir": "/root/data/post",
+      "smeshing-opts-datadir": "./",
       "smeshing-opts-numunits": 2,
       "smeshing-opts-numfiles": 1,
       "smeshing-opts-provider": 1,

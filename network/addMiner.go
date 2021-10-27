@@ -57,20 +57,4 @@ func AddMiner() error {
 	case _ = <-minerChan.Done:
 		return nil
 	}
-
-	if config.EnableSlackAlerts == true {
-		err = kubernetes.DeleteSpacemeshWatch()
-
-		if err != nil {
-			return err
-		}
-
-		err = kubernetes.DeploySpacemeshWatch()
-
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
 }

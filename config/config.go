@@ -57,6 +57,11 @@ type Configuration struct {
 	SlackToken               string `mapstructure:"slack-token"`
 	EnableSlackAlerts        bool   `mapstructure:"enable-slack-alerts"`
 	CloudflareAPIToken       string `mapstructure:"cloudflare-api-token"`
+	DashboardVersion         string `mapstructure:"dash-version"`
+	ExplorerVersion          string `mapstructure:"explorer-version"`
+	SmappVersion             string `mapstructure:"smapp-version"`
+	TLSKey                   string `mapstructure:"tls-key"`
+	TLSCert                  string `mapstructure:"tls-cert"`
 }
 
 var Config = Configuration{
@@ -69,7 +74,7 @@ var Config = Configuration{
 	PoetCPU:                  "1",
 	MinerDiskSize:            "10", //200
 	PoetDiskSize:             "10", //50
-	GoSmImage:                "spacemeshos/go-spacemesh:develop",
+	GoSmImage:                "spacemeshos/go-spacemesh-dev:38056f5",
 	PoetImage:                "spacemeshos/poet:develop",
 	SpacemeshWatchImage:      "spacemeshos/spacemesh-watch:latest",
 	GCPProject:               "",
@@ -116,4 +121,9 @@ var Config = Configuration{
 	SlackToken:               "",
 	EnableSlackAlerts:        false,
 	CloudflareAPIToken:       "",
+	DashboardVersion:         "v0.0.2",
+	ExplorerVersion:          "v0.0.9",
+	SmappVersion:             "0.1.25",
+	TLSKey:                   "./artifacts/ws/tls.key",
+	TLSCert:                  "./artifacts/ws/tls.crt",
 }

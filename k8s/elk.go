@@ -18,6 +18,7 @@ import (
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
+	cloudflare "github.com/cloudflare/cloudflare-go"
 	helm "github.com/mittwald/go-helm-client"
 	"github.com/sethvargo/go-password/password"
 	"helm.sh/helm/v3/pkg/repo"
@@ -70,6 +71,28 @@ func (k8s *Kubernetes) DeployELK() error {
 	}
 
 	chartRepo := repo.Entry{
+		Name: "ingress-nginx",
+		URL:  "https://kubernetes.github.io/ingress-nginx",
+	}
+
+	if err := client.AddOrUpdateChartRepo(chartRepo); err != nil {
+		return err
+	}
+
+	ingressSpec := helm.ChartSpec{
+		ReleaseName: "ingress-nginx",
+		ChartName:   "ingress-nginx/ingress-nginx",
+		Namespace:   "kube-system",
+		Wait:        true,
+		Force:       true,
+		Version:     "3.34.0",
+	}
+
+	if err = client.InstallOrUpgradeChart(context.Background(), &ingressSpec); err != nil {
+		return err
+	}
+
+	chartRepo = repo.Entry{
 		Name: "elastic",
 		URL:  "https://helm.elastic.co",
 	}
@@ -110,7 +133,7 @@ func (k8s *Kubernetes) DeployELK() error {
 		Namespace:   "default",
 		Wait:        true,
 		Force:       true,
-		Version:     "7.13.4",
+		Version:     "7.15.0",
 		ValuesYaml: sanitizeYaml(fmt.Sprintf(`
 			replicas: %s
 			minimumMasterNodes: %s
@@ -136,7 +159,6 @@ func (k8s *Kubernetes) DeployELK() error {
 					xpack.security.transport.ssl.verification_mode: certificate
 					xpack.security.transport.ssl.keystore.path: /usr/share/elasticsearch/config/certs/elastic-certificates.p12
 					xpack.security.transport.ssl.truststore.path: /usr/share/elasticsearch/config/certs/elastic-certificates.p12
-			imageTag: "7.13.0"
 			secretMounts:
 			- name: elastic-certificates
 				secretName: elastic-certificates
@@ -169,11 +191,10 @@ func (k8s *Kubernetes) DeployELK() error {
 		Force:       true,
 		SkipCRDs:    true,
 		UpgradeCRDs: false,
-		Version:     "7.13.4",
+		Version:     "7.15.0",
 		ValuesYaml: sanitizeYaml(fmt.Sprintf(`
 			service:
-				type: LoadBalancer
-			imageTag: "7.13.0"
+				type: NodePort
 			resources:
 				requests:
 					cpu: "%s"
@@ -192,7 +213,15 @@ func (k8s *Kubernetes) DeployELK() error {
 						secretKeyRef:
 							name: elastic-credentials
 							key: password
-		`, config.KibanaCPU, config.KibanaMemory, config.KibanaCPU, config.KibanaMemory)),
+			ingress:
+				enabled: true
+				annotations:
+					kubernetes.io/ingress.class: nginx
+				hosts:
+					- host: kibana-%s.spacemesh.io
+						paths:
+							- path: /
+		`, config.KibanaCPU, config.KibanaMemory, config.KibanaCPU, config.KibanaMemory, config.NetworkName)),
 	}
 
 	if err = client.InstallOrUpgradeChart(context.Background(), &kibanaSpec); err != nil {
@@ -207,7 +236,7 @@ func (k8s *Kubernetes) DeployELK() error {
 		Namespace:   "default",
 		Wait:        true,
 		Force:       true,
-		Version:     "7.13.4",
+		Version:     "7.15.0",
 		ValuesYaml: sanitizeYaml(`
 			daemonset:
 				extraEnvs:
@@ -222,7 +251,6 @@ func (k8s *Kubernetes) DeployELK() error {
 							name: elastic-credentials
 							key: password
 				resources: {}
-				imageTag: "7.13.0"
 				filebeatConfig:
 					filebeat.yml: |
 						processors:
@@ -258,20 +286,20 @@ func (k8s *Kubernetes) DeployELK() error {
 									add_error_key: true
 						filebeat:
 							autodiscover.providers:
-								- type: kubernetes
-									templates:
-										- condition.contains:
-												kubernetes.container.name: miner
-											config:
-												- type: docker
-													containers.ids:
-														- "${data.kubernetes.container.id}"
-										- condition.contains:
-												kubernetes.container.name: poet
-											config:
-												- type: docker
-													containers.ids:
-														- "${data.kubernetes.container.id}"
+							- type: kubernetes
+								templates:
+									- condition.contains:
+											kubernetes.container.name: miner
+										config:
+											- type: container
+												paths:
+													- /var/log/containers/*-${data.kubernetes.container.id}.log
+									- condition.contains:
+											kubernetes.container.name: poet
+										config:
+											- type: container
+												paths:
+													- /var/log/containers/*-${data.kubernetes.container.id}.log
 						output.elasticsearch:
 							host: '${NODE_NAME}'
 							hosts: '${ELASTICSEARCH_HOSTS:elasticsearch-master:9200}'
@@ -337,23 +365,59 @@ func (k8s *Kubernetes) DeployELK() error {
 		return err
 	}
 
+	if config.CloudflareAPIToken != "" {
+		ingressClient := k8s.Client.ExtensionsV1beta1().Ingresses("default")
+		ingress, err := ingressClient.Get(context.Background(), "kibana-kibana", metav1.GetOptions{})
+
+		if err != nil {
+			return err
+		}
+
+		ip := ingress.Status.LoadBalancer.Ingress[0].IP
+
+		api, err := cloudflare.NewWithAPIToken(config.CloudflareAPIToken)
+
+		if err != nil {
+			return err
+		}
+
+		id, err := api.ZoneIDByName("spacemesh.io")
+
+		if err != nil {
+			return err
+		}
+
+		proxied := true
+
+		_, err = api.CreateDNSRecord(context.Background(), id, cloudflare.DNSRecord{
+			Type:    "A",
+			Name:    "kibana-" + config.NetworkName + ".spacemesh.io",
+			Content: ip,
+			Proxied: &proxied,
+		})
+
+		if err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
 func (k8s *Kubernetes) GetKibanaURL() (string, error) {
-	services, err := k8s.Client.CoreV1().Services("default").List(context.TODO(), metav1.ListOptions{})
+	port, err := k8s.GetExternalPort("kibana-kibana", "http")
 
 	if err != nil {
 		return "", err
 	}
 
-	for _, svc := range services.Items {
-		if svc.Name == "kibana-kibana" {
-			return svc.Status.LoadBalancer.Ingress[0].IP + ":5601", nil
-		}
+	ip, err := k8s.GetExternalIP()
+
+	if err != nil {
+		return "", err
 	}
 
-	return "", errors.New("Kibana URL not found")
+	return ip + ":" + port, nil
 }
 
 func (k8s *Kubernetes) GetESURL() (string, error) {
@@ -443,6 +507,40 @@ func (k8s *Kubernetes) SetupLogDeletionPolicy() error {
 		}
 
 		return errors.New(string(body))
+	}
+
+	return nil
+}
+
+func (k8s *Kubernetes) DeleteELKDNSRecords() error {
+	if config.CloudflareAPIToken != "" {
+		api, err := cloudflare.NewWithAPIToken(config.CloudflareAPIToken)
+
+		if err != nil {
+			return err
+		}
+
+		id, err := api.ZoneIDByName("spacemesh.io")
+
+		if err != nil {
+			return err
+		}
+
+		records, err := api.DNSRecords(context.Background(), id, cloudflare.DNSRecord{
+			Name: "kibana-" + config.NetworkName + ".spacemesh.io",
+		})
+
+		if err != nil {
+			return err
+		}
+
+		if len(records) == 1 {
+			err = api.DeleteDNSRecord(context.Background(), id, records[0].ID)
+
+			if err != nil {
+				return err
+			}
+		}
 	}
 
 	return nil

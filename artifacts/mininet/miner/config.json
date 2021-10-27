@@ -1,6 +1,6 @@
 {
   "api": {
-    "grpc": "gateway,node,mesh,globalstate,transaction,smesher"
+    "grpc": "gateway,node,mesh,globalstate,transaction,smesher,debug"
   },
   "hare-eligibility": {
     "eligibility-confidence-param": "25",
@@ -67,7 +67,7 @@
       "alpha": 3,
       "randcon": 8
     },
-    "network-id": 203
+    "network-id": 205
   },
   "post": {
     "post-bits-per-label": 8,
@@ -84,23 +84,23 @@
     "refresh-ntp-interval": "30m"
   },
   "tortoise-beacon": {
-    "tortoise-beacon-first-voting-round-duration": "60s",
+    "tortoise-beacon-first-voting-round-duration": "3m",
     "tortoise-beacon-grace-period-duration": "10s",
-    "tortoise-beacon-kappa": 400000,
+    "tortoise-beacon-kappa": 40,
     "tortoise-beacon-proposal-duration": "30s",
     "tortoise-beacon-q": "1/3",
     "tortoise-beacon-rounds-number": 6,
-    "tortoise-beacon-theta": "1/25000",
+    "tortoise-beacon-theta": "1/4",
     "tortoise-beacon-votes-limit": 100,
     "tortoise-beacon-voting-round-duration": "50s",
-    "tortoise-beacon-wait-after-epoch-start": "50s",
-    "tortoise-beacon-weak-coin-round-duration": "10s"
+    "tortoise-beacon-weak-coin-round-duration": "10s",
+    "tortoise-beacon-sync-num-blocks": "30"
   },
   "smeshing": {
-    "smeshing-start": true,
+    "smeshing-start": false,
     "smeshing-coinbase": "1",
     "smeshing-opts": {
-      "smeshing-opts-datadir": "/root/data/post",
+      "smeshing-opts-datadir": "./",
       "smeshing-opts-numunits": 2,
       "smeshing-opts-numfiles": 1,
       "smeshing-opts-provider": 1,
