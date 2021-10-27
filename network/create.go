@@ -157,9 +157,8 @@ func Create() error {
 	start, end := 0, 0
 
 	//Deploy bootnodes
-	minerConfigJson.SetP(true, "p2p.swarm.bootstrap")
 	if config.Bootstrap {
-		minerConfigJson.SetP(miners[0:1], "p2p.swarm.bootnodes")
+		minerConfigJson.SetP(miners[0:1], "p2p.bootnodes")
 		start = 1
 		end = config.BootnodeAmount
 	} else {
@@ -188,11 +187,11 @@ func Create() error {
 
 	//Deploy remaining miners
 	if config.Bootstrap {
-		minerConfigJson.SetP(miners[1:config.BootnodeAmount+1], "p2p.swarm.bootnodes")
+		minerConfigJson.SetP(miners[1:config.BootnodeAmount+1], "p2p.bootnodes")
 		start = config.BootnodeAmount + 1
 		end = config.NumberOfMiners
 	} else {
-		minerConfigJson.SetP(miners[0:config.BootnodeAmount], "p2p.swarm.bootnodes")
+		minerConfigJson.SetP(miners[0:config.BootnodeAmount], "p2p.bootnodes")
 		start = config.BootnodeAmount
 		end = config.NumberOfMiners
 	}

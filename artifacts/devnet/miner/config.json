@@ -53,21 +53,8 @@
     "tortoise-rerun-interval": 525600
   },
   "p2p": {
-    "dial-timeout": "1m",
-    "conn-keepalive": "48h",
-    "response-timeout": "60s",
-    "session-timeout": "15s",
-    "max-pending-connections": 100,
-    "outbound-target": 10,
-    "max-inbound": 32,
-    "buffer-size": 10000,
-    "msg-size-limit": 0,
-    "swarm": {
-      "bucketsize": 20,
-      "alpha": 3,
-      "randcon": 8
-    },
-    "network-id": 208
+    "network-id": 777,
+    "target-outbound": 20
   },
   "post": {
     "post-bits-per-label": 8,
