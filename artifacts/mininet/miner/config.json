@@ -50,7 +50,7 @@
     "sync-validation-delta": 30,
     "hdist": 10,
     "atxs-per-block": 25,
-    "tortoise-rerun-interval": 10080
+    "tortoise-rerun-interval": 525600
   },
   "p2p": {
     "dial-timeout": "1m",
