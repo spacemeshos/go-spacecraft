@@ -42,6 +42,18 @@ type Network struct {
 }
 
 func (k8s *Kubernetes) DeployWS() error {
+	namespaceClient := k8s.Client.CoreV1().Namespaces()
+
+	namespace := &apiv1.Namespace{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: "ws",
+		},
+	}
+
+	if _, err := namespaceClient.Create(context.TODO(), namespace, metav1.CreateOptions{}); err != nil {
+		return err
+	}
+	
 	certData, err := ioutil.ReadFile(config.TLSCert)
 
 	if err != nil {
@@ -69,18 +81,6 @@ func (k8s *Kubernetes) DeployWS() error {
 	_, err = secretsClient.Create(context.Background(), tlsSecret, metav1.CreateOptions{})
 
 	if err != nil {
-		return err
-	}
-
-	namespaceClient := k8s.Client.CoreV1().Namespaces()
-
-	namespace := &apiv1.Namespace{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: "ws",
-		},
-	}
-
-	if _, err := namespaceClient.Create(context.TODO(), namespace, metav1.CreateOptions{}); err != nil {
 		return err
 	}
 
