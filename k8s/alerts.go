@@ -42,6 +42,7 @@ func (k8s *Kubernetes) DeploySpacemeshWatch() error {
 	command := []string{
 		"/bin/spacemesh-watch",
 		"--nodes=" + strings.Join(apiURLs[:], ","),
+		"--network-name=" + config.NetworkName,
 	}
 
 	if config.SlackToken != "" && config.SlackChannelId != "" {
