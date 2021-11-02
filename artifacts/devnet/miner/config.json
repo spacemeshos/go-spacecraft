@@ -50,11 +50,12 @@
     "sync-validation-delta": 30,
     "hdist": 10,
     "atxs-per-block": 25,
-    "tortoise-rerun-interval": 525600
+    "tortoise-window-size": 30,
+    "tortoise-rerun-interval": 60
   },
   "p2p": {
     "network-id": 777,
-    "target-outbound": 20
+    "target-outbound": 10
   },
   "post": {
     "post-bits-per-label": 8,
