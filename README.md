@@ -117,3 +117,11 @@ Here is high level architecture diagram of the explorer backend components and t
 ![explorer_arch_chart.png](docs/explorer_arch_chart.png)
 
 Cloudflare is used as SSL proxy and for domain records for spacemesh public JSON API, explorer backend API and dashboard backend API. Whereas for spacemesh public GRPC API, k8s Ingress  is used as SSL proxy and cloudflare is used only for DNS record. The reason we do this for GRPC API is because cloudflare is capable to proxy GRPC connections currently. Due to this we store SSL cert and key in secrets.
+
+## Metrics
+
+If the `--metrics` flag is set during network deployment then prometheus and grafana is deployed to collect metrics. Prometheus and grafana is deployed using helm charts. These are deployed in `metrics` namespace. 
+
+Here is the architecture of the deployment:
+
+![metrics.png](docs/metrics.png)
