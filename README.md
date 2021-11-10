@@ -125,3 +125,5 @@ If the `--metrics` flag is set during network deployment then prometheus and gra
 Here is the architecture of the deployment:
 
 ![metrics.png](docs/metrics.png)
+
+The managed miners will start to push metrics to prometheus. The grafana URL is printed after the network is deployed.
