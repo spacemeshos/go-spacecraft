@@ -65,7 +65,7 @@ Now you can explore the CLI flags and sub-commands using:
 ./go-spacecraft --help
 ```
 
-Now you can refer to [devnet deployment guide](https://docs.google.com/document/d/1DUQbal7Jb8IVh9djEDtmuTo8svuF2nrPa0yr9RHSNaY) to understand how to use the CLI to deploy a new network and web services.
+Now you can refer to [devnet deployment guide](docs/devnet.md) to understand how to use the CLI to deploy a new network and web services.
 
 ## Network Deployment
 
