@@ -39,7 +39,7 @@ cd go-spacecraft
 go build
 ```
 
-And then inside the go-spacecraft run the below command to deploy a devnet:
+Then you can edit the network id in the ./artifacts/devnet/miner/config.json file and finally inside the go-spacecraft run the below command to deploy a devnet:
 
 ```
 ./go-spacecraft createNetwork --config=./artifacts/devnet/config.json --network-name=devnet
