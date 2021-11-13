@@ -27,6 +27,7 @@ func init() {
 	rootCmd.AddCommand(deleteNetworkCmd)
 
 	deleteNetworkCmd.Flags().StringVar(&config.CloudflareAPIToken, "cloudflare-api-token", config.CloudflareAPIToken, "cloudflare API token")
+	deleteNetworkCmd.Flags().BoolVar(&config.KeepLogsMetrics, "keep-logs-metrics", config.KeepLogsMetrics, "Delete everything except logs and metrics")
 
 	err := viper.BindPFlags(deleteNetworkCmd.Flags())
 	if err != nil {
