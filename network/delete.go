@@ -73,7 +73,11 @@ func Delete() error {
 			return err
 		}
 
-		//PENDING: resize cluster
+		err = gcp.ResizeKubernetesClusterForLogs()
+
+		if err != nil {
+			return err
+		}
 	}
 
 	err = kubernetes.DeleteWSDNSRecords()

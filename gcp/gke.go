@@ -330,3 +330,50 @@ func contains(s []string, str string) bool {
 
 	return false
 }
+
+func ResizeKubernetesClusterForLogs() error {
+	esCPUInt, _ := strconv.ParseInt(config.ESCPU, 10, 8)
+	kibanaCPUInt, _ := strconv.ParseInt(config.KibanaCPU, 10, 8)
+	pyroscopeCPUInt, _ := strconv.ParseInt(config.PyroscopeCPU, 10, 8)
+	totalCPURequired := kibanaCPUInt + esCPUInt + pyroscopeCPUInt
+	totalCPUInstanceHas := int64(config.GCPMachineCPU)
+
+	nodeCount1 := int(math.Ceil((float64(totalCPURequired) / float64(totalCPUInstanceHas))))
+
+	esMemoryInt, _ := strconv.ParseInt(config.ESMemory, 10, 8)
+	kibanaMemoryInt, _ := strconv.ParseInt(config.KibanaMemory, 10, 8)
+	pyroscopeMemoryInt, _ := strconv.ParseInt(config.PyroscopeMemory, 10, 8)
+	totalMemoryRequired := kibanaMemoryInt + esMemoryInt + pyroscopeMemoryInt
+	totalMemoryInstanceHas := int64(config.GCPMachineMemory)
+
+	nodeCount2 := int(math.Ceil((float64(totalMemoryRequired) / float64(totalMemoryInstanceHas))))
+
+	nodeCount := 0
+
+	if nodeCount1 > nodeCount2 {
+		nodeCount = nodeCount1
+	} else {
+		nodeCount = nodeCount2
+	}
+
+	if nodeCount == 0 {
+		nodeCount = 1
+	}
+
+	client, err := getClient()
+
+	if err != nil {
+		return err
+	}
+
+	_, err = client.SetNodePoolSize(context.TODO(), &containerpb.SetNodePoolSizeRequest{
+		NodeCount: int32(nodeCount),
+		Name:      "projects/" + config.GCPProject + "/locations/" + config.GCPLocation + "/clusters/" + config.NetworkName + "/nodePools/default",
+	})
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
