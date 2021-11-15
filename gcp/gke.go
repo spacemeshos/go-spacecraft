@@ -339,6 +339,7 @@ func ResizeKubernetesClusterForLogs() error {
 	}
 
 	_, err = client.SetNodePoolSize(context.TODO(), &containerpb.SetNodePoolSizeRequest{
+		//autoscaler kicks in
 		NodeCount: int32(1),
 		Name:      "projects/" + config.GCPProject + "/locations/" + config.GCPLocation + "/clusters/" + config.NetworkName + "/nodePools/default",
 	})
