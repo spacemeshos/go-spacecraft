@@ -102,6 +102,10 @@ To deploy filebeat, elasticsearh and kibana it uses helm charts by elastic ([htt
 
 Spacecraft deploys spacemesh-watch ([https://github.com/spacemeshos/spacemesh-watch](https://github.com/spacemeshos/spacemesh-watch)) service which uses GRPC API of the managed miners to monitor them. And when some issue is detected it send alerts in slack. 
 
+## Pyroscope
+
+Pyroscope is an continuous profiling platform. Spacecraft also deploys pyroscope for debugging performance related issues of miners. Pyroscope doesn't support horizontal scaling therefore we cannot collect data of all the miners so we only collect data of miner-10 and miner-20.
+
 ## Web Services
 
 Web services for a network is basically combination three things: dashboard, explorer and spacemesh public API.
