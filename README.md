@@ -1,8 +1,16 @@
 # Spacecraft
 
-Spacecraft is a CLI tool which lets us deploy Spacemesh networks in GCP. It uses kubernetes REST APIs and Helm charts for deployment of different services. 
+Spacecraft is a CLI tool which lets you deploy Spacemesh networks in GCP. It uses kubernetes REST APIs and Helm charts for deployment of different services. 
 
-It allows you to create a new network, add miner to existing network, delete a miner from an network, upgrade config or spacemesh release of a network, create a network network without bootstrap, calculate rewards of a network, deploy web services for a network.
+Features supported by spacecraft are the following: 
+
+- create a new network
+- add miner to existing network
+- delete a miner from an network
+- upgrade config or spacemesh release of a network
+- create a network without bootstrap i.e., it doesn't deploy a bootstrap node and instead connects to an existing network.
+- calculate rewards of a network
+- deploy web services for a network.
 
 Here is an high level architecture of a complete network deployed on GCP using spacecraft:
 
@@ -73,7 +81,7 @@ For creating a new network boostrap deploys one bootstrap node, multiple bootnod
 
 Spacecraft also allows you to create a network that actually extends another network i.e., deploys a network without bootstrap. In this case the bootnodes connect to the bootnodes of the other network and miners of this new network connect to the bootnodes of this new network. This can be useful when you want to delete all the managed miners and other deployments and create a fresh network that connects to an existing network. You can achieve this using the `--bootstrap=false` flag.
 
-Whenever a network is created it also deploys a N number of PoETs. The PoET are assigned to the nodes in round robin fashion. The first node is then added to the config file so home smeshers use the first PoET always. 
+Whenever a network is created it also deploys a N number of PoETs. The number of poets can be specified using CLI option.  The PoET are assigned to the nodes in round robin fashion using `poet-server` config of go-spacemesh. The first node is then added to the config file so home smeshers use the first PoET always. 
 
 The bootnodes are always tied to a particular k8s worker node in round robin fashion. There are mainly two reasons for doing this: 
 
@@ -82,7 +90,7 @@ The bootnodes are always tied to a particular k8s worker node in round robin fas
 
 Spacecraft calculates the total number of k8s nodes need to be created dynamically based on total pods and their resource size. 
 
-The GRPC and JSON API ports of all the managed miners are exposed as NodePort. You can get list of all the managed miners GRPC URLs using the `hosts` sub-command.
+The GRPC and JSON API ports of all the managed miners are exposed as separate NodePort. You can get list of all the managed miners GRPC URLs using the `hosts` sub-command.
 
 ## Logs
 
@@ -116,4 +124,4 @@ Here is high level architecture diagram of the explorer backend components and t
 
 ![explorer_arch_chart.png](docs/explorer_arch_chart.png)
 
-Cloudflare is used as SSL proxy and for domain records for spacemesh public JSON API, explorer backend API and dashboard backend API. Whereas for spacemesh public GRPC API, k8s Ingress  is used as SSL proxy and cloudflare is used only for DNS record. The reason we do this for GRPC API is because cloudflare is capable to proxy GRPC connections currently. Due to this we store SSL cert and key in secrets.
+Cloudflare is used as SSL proxy and for domain records for spacemesh public JSON API, explorer backend API and dashboard backend API. Whereas for spacemesh public GRPC API, k8s Ingress  is used as SSL proxy and cloudflare is used only for DNS record. The reason we do this for GRPC API is because cloudflare is not capable to proxy GRPC connections currently. Due to this we store SSL cert and key in secrets.
