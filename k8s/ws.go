@@ -53,7 +53,7 @@ func (k8s *Kubernetes) DeployWS() error {
 	if _, err := namespaceClient.Create(context.TODO(), namespace, metav1.CreateOptions{}); err != nil {
 		return err
 	}
-	
+
 	certData, err := ioutil.ReadFile(config.TLSCert)
 
 	if err != nil {
@@ -357,7 +357,7 @@ func (k8s *Kubernetes) AddToDiscovery() error {
 		NodeBaseDownloadUrl:  "https://downloads.spacemesh.io",
 	}
 
-	networks = append(networks, network)
+	networks = append([]Network{network}, networks...)
 
 	json, err := json.MarshalIndent(networks, "", "  ")
 
