@@ -18,7 +18,7 @@ Here is an high level architecture of a complete network deployed on GCP using s
 
 ## Service Integrations
 
-Spacecraft integrates with mainly 3 different services: GCP, Cloudflare and Slack. In GCP it uses, kubernetes engine, cloud storage and load balancer. 
+Spacecraft integrates with mainly 3 different services: GCP, Cloudflare, and Slack. In GCP it uses kubernetes engine, cloud storage, and load balancer. 
 
 It creates a new kubernetes cluster for every new network and stores the network go-sm config file in cloud storage. 
 
