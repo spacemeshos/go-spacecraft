@@ -104,7 +104,7 @@ Spacecraft deploys spacemesh-watch ([https://github.com/spacemeshos/spacemesh-wa
 
 ## Pyroscope
 
-Pyroscope is an continuous profiling platform. Spacecraft also deploys pyroscope for debugging performance related issues of miners. Pyroscope doesn't support horizontal scaling therefore we cannot collect data of all the miners so we only collect data of miner-10 and miner-20.
+Pyroscope is an continuous profiling platform. Spacecraft also deploys pyroscope for debugging performance related issues of miners. Pyroscope doesn't support horizontal scaling therefore we cannot collect data of all the miners so we only collect data of miner-10 and miner-20. In code it's hardcoded to collect data from these two miners only.
 
 ## Web Services
 
