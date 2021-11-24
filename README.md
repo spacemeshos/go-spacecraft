@@ -55,9 +55,6 @@ SPACECRAFT_TLS_KEY=
 
 If you don't want slack alerts or if you don't want to deploy web services then you can omit the slack and SSL ENVs respectively. 
 
-> All the secrets are stored in 1password and tagged as go-spacecraft.
-> 
-
 ## Using the CLI
 
 You can download and compile spacecraft using the following commands:
