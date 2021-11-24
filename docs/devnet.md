@@ -80,7 +80,8 @@ export SPACECRAFT_SLACK_CHANNEL_ID=
 export SPACECRAFT_SLACK_TOKEN=
 ```
 
-You can find the slack token in 1password and channel ID is the channel where you want to publish the alerts to.
+Channel ID is the channel where you want to publish the alerts to.
+
 
 ### Deploy Web Services
 
