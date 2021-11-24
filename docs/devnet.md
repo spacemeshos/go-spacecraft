@@ -4,7 +4,8 @@ This document explains the flow of deploying a devnet and web services.
 
 ### Authentication
 
-First you need to set up authentication to GCP. Download spacecraft-id-f8aeb7a6d337.json from 1password and place it in ~ and then set the following ENVs:
+First you need to set up authentication to GCP. 
+
 
 ```
 export SPACECRAFT_GCP_PROJECT=spacecraft-id
