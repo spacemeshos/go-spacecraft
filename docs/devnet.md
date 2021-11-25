@@ -85,7 +85,7 @@ Channel ID is the channel where you want to publish the alerts to.
 
 ### Deploy Web Services
 
-To deploy web services first you first need to place the secret `tls.key` and `tls.crt` files in ./artifacts/ws directory. These are the TLS secret and signed certificate files purchased from TLS certificate provider for spacemesh.io domain. 
+To deploy web services first you first need to place the secret `tls.key` and `tls.crt` files in ./artifacts/ws directory. These are the TLS secret and signed certificate files purchased from TLS certificate provider for spacemesh.io domain. These files are needed to secure GRPC connection of public go-spacemesh API with TLS. 
 
 
 Then you can run the below command:
