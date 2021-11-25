@@ -84,7 +84,11 @@ Now you can explore the CLI flags and sub-commands using:
 ./go-spacecraft --help
 ```
 
-Now you can refer to [devnet deployment guide](docs/devnet.md) to understand how to use the CLI to deploy a new network and web services.
+The default configuration of spacecraft deploys a mini neywork i.e., a network of 10 miners. This can be useful for testing code changes. Other than that it comes with configuration files for devnet and testnet. 
+
+Devnet is a network which is aimed to run the latest develop branch of go-spacemesh with 50 miners. It's usually meant for creating long running network for new features or bug fixes. You can refer to [devnet deployment guide](docs/devnet.md) to understand how to use the CLI to deploy a new network and web services.
+
+Whereas a testnet is aimed to run a stable release of go-spacemesh with 100 miners. It's usually meant for community to join the network. But when a stable release is not available then devnet is opened for community to join.
 
 ## Network Deployment
 
