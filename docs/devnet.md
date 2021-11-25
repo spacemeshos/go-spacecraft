@@ -82,6 +82,7 @@ export SPACECRAFT_SLACK_TOKEN=
 
 Channel ID is the channel where you want to publish the alerts to.
 
+You can learn more about how Slack alerts work [here](../README.md#monitor-and-alerts)
 
 ### Deploy Web Services
 
