@@ -78,7 +78,7 @@ For creating a new network boostrap deploys one bootstrap node, multiple bootnod
 
 Spacecraft also allows you to create a network that actually extends another network i.e., deploys a network without bootstrap. In this case the bootnodes connect to the bootnodes of the other network and miners of this new network connect to the bootnodes of this new network. This can be useful when you want to delete all the managed miners and other deployments and create a fresh network that connects to an existing network. You can achieve this using the `--bootstrap=false` flag.
 
-Whenever a network is created it also deploys a N number of PoETs. The number of poets can be specified using CLI option.  The PoET are assigned to the nodes in round robin fashion using `poet-server` config of go-spacemesh. The first node is then added to the config file so home smeshers use the first PoET always. 
+Whenever a network is created it also deploys a N number of PoETs. The number of poets can be specified using CLI option. The PoET are assigned to the nodes in round robin fashion using `poet-server` config of go-spacemesh. The first PoET is then added to the config file so home smeshers use the first PoET always. During activation of the PoETs the gatewayAddresses is the GRPC URLs of the first N miners where N is specified as `--poet-gateway-amount` CLI option. 
 
 The bootnodes are always tied to a particular k8s worker node in round robin fashion. There are mainly two reasons for doing this: 
 
