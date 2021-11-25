@@ -26,6 +26,20 @@ The discovery service ([https://discover.spacemesh.io/networks.json](https://dis
 
 Cloudflare is used for creating domain name records for every new network. the records point to various services deployed in kubernetes engine. Our cloudflare account is already configured with [spacemesh.io](http://spacemesh.io) nameservers therefore spacecraft can create the sub-domain records in it. Spacecraft currently doesn't allow us to provide root domain name as CLI option. It has spacemesh.io root domain hardcoded. 
 
+## Domains
+
+When a complete network with metrics and web services is deployed then these are the domain records created in cloudflare:
+
+```
+api-<network-name>.spacemesh.io
+api-json-<network-name>.spacemesh.io
+dash-api-<network-name>.spacemesh.io
+explorer-api-<network-name>.spacemesh.io
+grafana-<network-name>.spacemesh.io
+kibana-<network-name>.spacemesh.io
+prometheus-<network-name>.spacemesh.io
+```
+
 ## ENVs and Secrets
 
 To use spacecraft you need to have the following ENVs set:
