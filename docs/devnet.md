@@ -85,7 +85,8 @@ Channel ID is the channel where you want to publish the alerts to.
 
 ### Deploy Web Services
 
-To deploy web services first you need to download tls.key and tls.crt files from 1password and place it in ./artifacts/ws directory.
+To deploy web services first you first need to place the secret `tls.key` and `tls.crt` files in ./artifacts/ws directory.
+
 
 Then you can run the below command:
 
