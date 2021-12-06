@@ -54,7 +54,7 @@
     "tortoise-rerun-interval": 60
   },
   "p2p": {
-    "network-id": 209,
+    "network-id": 210,
     "target-outbound": 10
   },
   "post": {
