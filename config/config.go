@@ -62,6 +62,8 @@ type Configuration struct {
 	SmappVersion             string `mapstructure:"smapp-version"`
 	TLSKey                   string `mapstructure:"tls-key"`
 	TLSCert                  string `mapstructure:"tls-cert"`
+	GoSmReleaseVersion       string `mapstructure:"go-sm-release-version"`
+	GithubToken              string `mapstructure:"github-token"`
 }
 
 var Config = Configuration{
@@ -126,4 +128,6 @@ var Config = Configuration{
 	SmappVersion:             "0.1.25",
 	TLSKey:                   "./artifacts/ws/tls.key",
 	TLSCert:                  "./artifacts/ws/tls.crt",
+	GoSmReleaseVersion:       "",
+	GithubToken:              "",
 }

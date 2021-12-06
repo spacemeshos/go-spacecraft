@@ -3,6 +3,7 @@ package gcp
 import (
 	"context"
 	"io/ioutil"
+	"os"
 	"time"
 
 	"cloud.google.com/go/storage"
@@ -100,6 +101,34 @@ func UploadWSConfig(fileContent string) error {
 	wc := client.Bucket("sm-discovery-service").Object("networks.json").NewWriter(ctx)
 
 	if _, err := wc.Write([]byte(fileContent)); err != nil {
+		return err
+	}
+
+	if err := wc.Close(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func UploadReleaseBuild(fileName string, filePath string) error {
+	client, err := storage.NewClient(context.Background())
+
+	if err != nil {
+		return err
+	}
+
+	defer client.Close()
+
+	wc := client.Bucket("spacemesh-release-builds").Object(config.GoSmReleaseVersion + "/" + fileName).NewWriter(context.Background())
+
+	data, err := os.ReadFile(filePath)
+
+	if err != nil {
+		return err
+	}
+
+	if _, err := wc.Write(data); err != nil {
 		return err
 	}
 
