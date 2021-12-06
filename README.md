@@ -103,7 +103,7 @@ The bootnodes are always tied to a particular k8s worker node in round robin fas
 - Firstly if we don't do this then its possible k8s will host multiple bootnodes in one k8s worker node and if that VM crashes then all bootnodes are down and new smeshers cannot join the network.
 - Secondly the TCP port of the bootnodes needs to be bind'ed to the host node otherwise p2p discovery fails. p2p discover doesn't work over k8s NodePort service. Therefore if we don't bind bootnodes to host node then the k8s node in which the bootnodes are hosted can be rescheduled and therefore the IP to reach the bootnodes will change and smeshers will not be able to connect to the all or some bootnodes.
 
-Spacecraft calculates the total number of k8s nodes need to be created dynamically based on total pods and their resource size. 
+Spacecraft calculates the total number of k8s nodes need to be created dynamically based on total pods and their resource size. During deletion of network if we provide the `--keep-logs-metrics` flag then it sets cluster size to 1 and then GCP will automatically scales the cluster to required size. 
 
 The GRPC and JSON API ports of all the managed miners are exposed as separate NodePort. You can get list of all the managed miners GRPC URLs using the `hosts` sub-command.
 
