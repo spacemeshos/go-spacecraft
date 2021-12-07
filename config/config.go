@@ -62,6 +62,7 @@ type Configuration struct {
 	SmappVersion             string `mapstructure:"smapp-version"`
 	TLSKey                   string `mapstructure:"tls-key"`
 	TLSCert                  string `mapstructure:"tls-cert"`
+	KeepLogsMetrics          bool   `mapstructure:"keep-logs-metrics"`
 }
 
 var Config = Configuration{
@@ -126,4 +127,5 @@ var Config = Configuration{
 	SmappVersion:             "0.1.25",
 	TLSKey:                   "./artifacts/ws/tls.key",
 	TLSCert:                  "./artifacts/ws/tls.crt",
+	KeepLogsMetrics:          false,
 }
