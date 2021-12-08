@@ -64,6 +64,7 @@ type Configuration struct {
 	TLSCert                  string `mapstructure:"tls-cert"`
 	GoSmReleaseVersion       string `mapstructure:"go-sm-release-version"`
 	GithubToken              string `mapstructure:"github-token"`
+	KeepLogsMetrics          bool   `mapstructure:"keep-logs-metrics"`
 }
 
 var Config = Configuration{
@@ -130,4 +131,5 @@ var Config = Configuration{
 	TLSCert:                  "./artifacts/ws/tls.crt",
 	GoSmReleaseVersion:       "",
 	GithubToken:              "",
+	KeepLogsMetrics:          false,
 }

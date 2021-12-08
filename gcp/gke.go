@@ -330,3 +330,23 @@ func contains(s []string, str string) bool {
 
 	return false
 }
+
+func ResizeKubernetesClusterForLogs() error {
+	client, err := getClient()
+
+	if err != nil {
+		return err
+	}
+
+	_, err = client.SetNodePoolSize(context.TODO(), &containerpb.SetNodePoolSizeRequest{
+		//autoscaler kicks in
+		NodeCount: int32(1),
+		Name:      "projects/" + config.GCPProject + "/locations/" + config.GCPLocation + "/clusters/" + config.NetworkName + "/nodePools/default",
+	})
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
