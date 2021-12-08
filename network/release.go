@@ -16,11 +16,6 @@ import (
 )
 
 func ReleaseNetwork() error {
-	tc := oauth2.NewClient(context.Background(), oauth2.StaticTokenSource(
-		&oauth2.Token{AccessToken: config.GithubToken},
-	))
-
-	github.NewClient(tc)
 
 	tempDir := os.TempDir() + "go-spacecraft/"
 	err := os.RemoveAll(tempDir)
@@ -75,44 +70,53 @@ func ReleaseNetwork() error {
 		fmt.Println("zipping: " + osBuild + ".zip")
 		zipDir(tempDir+osBuild, tempDir+osBuild+".zip")
 
-		err = os.RemoveAll(tempDir + osBuild)
-
-		if err != nil {
-			return err
-		}
-
 		fmt.Println("uploading started for file: " + osBuild + ".zip")
 		gcp.UploadReleaseBuild(osBuild+".zip", tempDir+osBuild+".zip")
 		fmt.Println("uploading finished for file: " + osBuild + ".zip")
 		fmt.Println("download url: " + "https://storage.googleapis.com/spacemesh-release-builds/" + config.GoSmReleaseVersion + "/" + osBuild + ".zip")
-
-		err = os.RemoveAll(tempDir)
-
-		if err != nil {
-			return err
-		}
 	}
 
-	// name := "Devnet"
+	err = os.RemoveAll(tempDir)
 
-	// input := &github.RepositoryRelease{
-	// 	Name:                 &name,
-	// 	GenerateReleaseNotes: true,
-	// 	TagName:              "v1.0",
-	// 	Body:                 "",
-	// 	Draft:                true,
-	// 	Prerelease:           true,
-	// }
+	if err != nil {
+		return err
+	}
 
-	// client.Repositories.CreateRelease(context.Background(), "spacemeshos", "sm-net", input)
+	draft := true
+	preRelease := true
+	name := strings.ToUpper(config.NetworkName)
+	tagName := config.GoSmReleaseVersion
+	body := fmt.Sprintf(`
+## Apps
 
-	// k8sRestConfig, k8sClient, err := gcp.GetKubernetesClient()
+Windows: https://storage.googleapis.com/spacemesh-release-builds/%s/Windows.zip
+macOS: https://storage.googleapis.com/spacemesh-release-builds/%s/macOS.zip
+Linux: https://storage.googleapis.com/spacemesh-release-builds/%s/Linux.zip
 
-	// if err != nil {
-	// 	return err
-	// }
+## Config File
 
-	// kubernetes := k8s.Kubernetes{Client: k8sClient, RestConfig: k8sRestConfig}
+https://storage.googleapis.com/spacecraft-data/%s-archive/config.json
+	`, config.GoSmReleaseVersion, config.GoSmReleaseVersion, config.GoSmReleaseVersion, config.NetworkName)
+
+	input := &github.RepositoryRelease{
+		Name:       &name,
+		TagName:    &tagName,
+		Body:       &body,
+		Draft:      &draft,
+		Prerelease: &preRelease,
+	}
+
+	tc := oauth2.NewClient(context.Background(), oauth2.StaticTokenSource(
+		&oauth2.Token{AccessToken: config.GithubToken},
+	))
+
+	client := github.NewClient(tc)
+
+	_, _, err = client.Repositories.CreateRelease(context.Background(), "spacemeshos", "sm-net", input)
+
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
