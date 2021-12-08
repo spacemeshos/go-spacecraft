@@ -42,20 +42,22 @@
   "main": {
     "space-to-commit": 1048576,
     "layer-duration-sec": 200,
-    "layer-average-size": 30,
+    "layer-average-size": 50,
     "layers-per-epoch": 6,
     "block-cache-size": 20,
     "sync-request-timeout": 60000,
     "sync-interval": 10,
     "sync-validation-delta": 30,
     "hdist": 10,
-    "atxs-per-block": 25,
-    "tortoise-window-size": 30,
-    "tortoise-rerun-interval": 60
+    "atxs-per-block": 25
   },
   "p2p": {
     "network-id": 210,
     "target-outbound": 10
+  },
+  "tortoise": {
+    "tortoise-window-size": 30,
+    "tortoise-rerun-interval": 60
   },
   "post": {
     "post-bits-per-label": 8,
