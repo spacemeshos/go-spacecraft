@@ -11,6 +11,7 @@ Features supported by spacecraft are the following:
 - create a network without bootstrap i.e., it doesn't deploy a bootstrap node and instead connects to an existing network.
 - calculate rewards of a network
 - deploy web services for a network.
+- create releases in sm-net
 
 Here is an high level architecture of a complete network deployed on GCP using spacecraft:
 
@@ -65,6 +66,9 @@ SPACECRAFT_SLACK_TOKEN=
 
 SPACECRAFT_TLS_CRT=
 SPACECRAFT_TLS_KEY=
+
+# Github
+SPACECRAFT_GITHUB_TOKEN=
 ```
 
 If you don't want slack alerts or if you don't want to deploy web services then you can omit the slack and SSL ENVs respectively. 
@@ -154,3 +158,9 @@ Here is the architecture of the deployment:
 ![metrics.png](docs/metrics.png)
 
 The managed miners will start to push metrics to prometheus. The grafana URL is printed after the network is deployed.
+
+## Release
+
+Once a network is deployed and works fine the next step is to invite the community to join the network. For that we create a release in go-spacemesh repository and then release the builds with config file in sm-net repository. During creation of sm-net release we need to bundle the go-spacemesh builds with config file. 
+
+Spacecraft automates the process of bundling and creatig draft release. You can use `releaseNetwork` sub command. You also need to pass the go-spacemesh release version using `--go-sm-release-version` CLI option so that it knows where to find the go-spacemesh builds.

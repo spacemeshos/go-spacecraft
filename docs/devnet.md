@@ -92,7 +92,7 @@ To deploy web services first you first need to place the secret `tls.key` and `t
 Then you can run the below command:
 
 ```
-./go-spacecraft deployWS --config=--config=./artifacts/devnet/config.json --network-name=devnet
+./go-spacecraft deployWS --config=./artifacts/devnet/config.json --network-name=devnet
 ```
 
 
