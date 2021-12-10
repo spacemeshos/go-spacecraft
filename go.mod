@@ -7,24 +7,18 @@ require (
 	cloud.google.com/go/storage v1.6.0
 	github.com/Jeffail/gabs/v2 v2.6.0
 	github.com/cloudflare/cloudflare-go v0.20.0
-	github.com/ethereum/go-ethereum v1.10.2
+	github.com/ethereum/go-ethereum v1.10.10
 	github.com/fatih/color v1.7.0
-	github.com/fsnotify/fsnotify v1.4.9 // indirect
 	github.com/google/go-github/v41 v41.0.0
 	github.com/magiconair/properties v1.8.4 // indirect
-	github.com/mitchellh/go-homedir v1.1.0
-	github.com/mitchellh/mapstructure v1.4.1 // indirect
 	github.com/mittwald/go-helm-client v0.4.3
 	github.com/pelletier/go-toml v1.8.1 // indirect
 	github.com/sethvargo/go-password v0.2.0
 	github.com/spacemeshos/api/release/go v0.0.0-20201210094223-105249951c66
 	github.com/spf13/afero v1.6.0 // indirect
-	github.com/spf13/cast v1.3.1 // indirect
 	github.com/spf13/cobra v1.1.3
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
-	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.7.1
-	golang.org/x/crypto v0.0.0-20210817164053-32db794688a5
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
 	google.golang.org/api v0.20.0
 	google.golang.org/genproto v0.0.0-20210401141331-865547bb08e2
