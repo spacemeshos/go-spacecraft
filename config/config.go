@@ -125,7 +125,7 @@ var Config = Configuration{
 	EnableSlackAlerts:        false,
 	CloudflareAPIToken:       "",
 	DashboardVersion:         "v0.0.2",
-	ExplorerVersion:          "v0.0.9",
+	ExplorerVersion:          "v0.0.10",
 	SmappVersion:             "0.1.25",
 	TLSKey:                   "./artifacts/ws/tls.key",
 	TLSCert:                  "./artifacts/ws/tls.crt",
