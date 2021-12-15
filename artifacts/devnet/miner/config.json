@@ -55,10 +55,6 @@
     "network-id": 210,
     "target-outbound": 10
   },
-  "tortoise": {
-    "tortoise-window-size": 30,
-    "tortoise-rerun-interval": 60
-  },
   "post": {
     "post-bits-per-label": 8,
     "post-labels-per-unit": 1024,
