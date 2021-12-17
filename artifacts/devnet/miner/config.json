@@ -55,6 +55,10 @@
     "network-id": 210,
     "target-outbound": 10
   },
+  "tortoise": {
+    "full-mode-verification-window": 10,
+    "verifying-mode-verification-window": 100
+  },
   "post": {
     "post-bits-per-label": 8,
     "post-labels-per-unit": 1024,
