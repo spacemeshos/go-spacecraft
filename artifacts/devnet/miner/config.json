@@ -56,8 +56,8 @@
     "target-outbound": 10
   },
   "tortoise": {
-    "tortoise-window-size": 30,
-    "tortoise-rerun-interval": 60
+    "full-mode-verification-window": 10,
+    "verifying-mode-verification-window": 100
   },
   "post": {
     "post-bits-per-label": 8,
