@@ -52,7 +52,7 @@
     "atxs-per-block": 25
   },
   "p2p": {
-    "network-id": 210,
+    "network-id": 213,
     "target-outbound": 10
   },
   "tortoise": {
