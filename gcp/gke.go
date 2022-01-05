@@ -54,6 +54,32 @@ func getCluster() (*containerpb.Cluster, error) {
 	return client.GetCluster(context.Background(), req)
 }
 
+func GetClusters() ([]string, error) {
+	client, err := getClient()
+
+	if err != nil {
+		return nil, err
+	}
+
+	req := &containerpb.ListClustersRequest{
+		Parent: "projects/" + config.GCPProject + "/locations/" + config.GCPLocation,
+	}
+
+	list, err := client.ListClusters(context.Background(), req)
+
+	if err != nil {
+		return nil, err
+	}
+
+	networks := []string{}
+
+	for _, cluster := range list.Clusters {
+		networks = append(networks, cluster.Name)
+	}
+
+	return networks, nil
+}
+
 func CreateKubernetesCluster() error {
 	client, err := getClient()
 
