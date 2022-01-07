@@ -40,7 +40,7 @@ func getClient() (*container.ClusterManagerClient, error) {
 	return c, nil
 }
 
-func getCluster() (*containerpb.Cluster, error) {
+func getCluster(networkName string) (*containerpb.Cluster, error) {
 	client, err := getClient()
 
 	if err != nil {
@@ -48,7 +48,7 @@ func getCluster() (*containerpb.Cluster, error) {
 	}
 
 	req := &containerpb.GetClusterRequest{
-		Name: "projects/" + config.GCPProject + "/locations/" + config.GCPLocation + "/clusters/" + config.NetworkName,
+		Name: "projects/" + config.GCPProject + "/locations/" + config.GCPLocation + "/clusters/" + networkName,
 	}
 
 	return client.GetCluster(context.Background(), req)
@@ -87,7 +87,7 @@ func CreateKubernetesCluster() error {
 		return err
 	}
 
-	_, err = getCluster()
+	_, err = getCluster(config.NetworkName)
 
 	if err == nil {
 		return errors.New("cluster already exists")
@@ -183,7 +183,7 @@ func CreateKubernetesCluster() error {
 	fmt.Println("waiting for k8s cluster to be ready")
 
 	for range time.Tick(10 * time.Second) {
-		cluster, err := getCluster()
+		cluster, err := getCluster(config.NetworkName)
 
 		if err != nil {
 			return err
@@ -205,8 +205,8 @@ func CreateKubernetesCluster() error {
 	return nil
 }
 
-func GetKubernetesClient() (*restclient.Config, *kubernetes.Clientset, error) {
-	cluster, err := getCluster()
+func GetKubernetesClient(networkName string) (*restclient.Config, *kubernetes.Clientset, error) {
+	cluster, err := getCluster(networkName)
 
 	if err != nil {
 		return nil, nil, err
@@ -323,7 +323,7 @@ func DeleteKubernetesCluster(volumes []string) error {
 	}
 
 	for range time.Tick(time.Duration(10) * time.Second) {
-		_, err = getCluster()
+		_, err = getCluster(config.NetworkName)
 
 		if err != nil {
 			break

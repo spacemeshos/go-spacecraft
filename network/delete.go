@@ -10,7 +10,7 @@ import (
 )
 
 func Delete() error {
-	k8sRestConfig, k8sClient, err := gcp.GetKubernetesClient()
+	k8sRestConfig, k8sClient, err := gcp.GetKubernetesClient(config.NetworkName)
 
 	if err != nil {
 		return err
@@ -43,7 +43,7 @@ func Delete() error {
 			return err
 		}
 	} else {
-		k8sRestConfig, k8sClient, err := gcp.GetKubernetesClient()
+		k8sRestConfig, k8sClient, err := gcp.GetKubernetesClient(config.NetworkName)
 
 		if err != nil {
 			return err
