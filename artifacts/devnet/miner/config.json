@@ -61,7 +61,7 @@
     "sync-validation-delta": 30
   },
   "p2p": {
-    "network-id": 217,
+    "network-id": 218,
     "target-outbound": 10
   },
   "post": {
