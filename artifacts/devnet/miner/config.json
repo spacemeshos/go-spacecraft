@@ -52,7 +52,7 @@
     "atxs-per-block": 25,
     "block-cache-size": 20,
     "hdist": 10,
-    "layer-average-size": 30,
+    "layer-average-size": 50,
     "layer-duration-sec": 200,
     "layers-per-epoch": 6,
     "space-to-commit": 1048576,
@@ -61,7 +61,7 @@
     "sync-validation-delta": 30
   },
   "p2p": {
-    "network-id": 214,
+    "network-id": 218,
     "target-outbound": 10
   },
   "post": {
@@ -88,10 +88,6 @@
     "max-allowed-time-drift": "10s",
     "ntp-queries": 5,
     "refresh-ntp-interval": "30m"
-  },
-  "tortoise": {
-    "tortoise-rerun-interval": "60m",
-    "tortoise-window-size": 30
   },
   "tortoise-beacon": {
     "tortoise-beacon-first-voting-round-duration": "3m",

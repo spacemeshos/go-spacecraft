@@ -58,7 +58,7 @@ func Delete() error {
 		}
 
 		for _, deployment := range deployments.Items {
-			if strings.Contains(deployment.Name, "miner") || strings.Contains(deployment.Name, "poet") {
+			if strings.Contains(deployment.Name, "miner") || strings.Contains(deployment.Name, "poet") || strings.Contains(deployment.Name, "watch") {
 				err := kubernetes.Client.AppsV1().Deployments("default").Delete(context.TODO(), deployment.Name, metav1.DeleteOptions{})
 
 				if err != nil {
