@@ -74,8 +74,7 @@ Grafana Password: prom-operator
 Prometheus URL: https://prometheus-%s.spacemesh.io
 Pyroscope URL: http://%s
 Config: https://storage.googleapis.com/spacecraft-data/%s-archive/config.json
-Docker URL: %s
-			`,
+Docker URL: %s`,
 				fmt.Sprintf("%v", netID),
 				name,
 				kibanaPassword,
