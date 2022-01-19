@@ -141,7 +141,7 @@ func (k8s *Kubernetes) DeployWS() error {
 
 	respository := imageSplit[0]
 
-	minerConfigStr, err := gcp.ReadConfig()
+	minerConfigStr, err := gcp.ReadConfig(config.NetworkName)
 
 	if err != nil {
 		return err
@@ -317,7 +317,7 @@ func (k8s *Kubernetes) AddToDiscovery() error {
 		tag = "latest"
 	}
 
-	minerConfigStr, err := gcp.ReadConfig()
+	minerConfigStr, err := gcp.ReadConfig(config.NetworkName)
 
 	if err != nil {
 		return err

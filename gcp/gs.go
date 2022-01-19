@@ -32,7 +32,7 @@ func UploadConfig(fileContent string) error {
 	return nil
 }
 
-func ReadConfig() (string, error) {
+func ReadConfig(networkName string) (string, error) {
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 
@@ -42,7 +42,7 @@ func ReadConfig() (string, error) {
 
 	defer client.Close()
 
-	rc, err := client.Bucket("spacecraft-data").Object(config.NetworkName + "-archive" + "/config.json").NewReader(ctx)
+	rc, err := client.Bucket("spacecraft-data").Object(networkName + "-archive" + "/config.json").NewReader(ctx)
 	if err != nil {
 		return "", err
 	}

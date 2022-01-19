@@ -30,7 +30,7 @@ func AddMiner() error {
 	configStr := ""
 
 	if config.MinerGoSmConfig == "" {
-		configStr, err = gcp.ReadConfig()
+		configStr, err = gcp.ReadConfig(config.NetworkName)
 
 		if err != nil {
 			return err
