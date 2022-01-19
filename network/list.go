@@ -58,6 +58,11 @@ func ListNetworks() error {
 				return errors.New("cannot read network-id")
 			}
 
+			image, err := kubernetes.GetMinerImage("miner-1")
+			if err != nil {
+				return err
+			}
+
 			log.Success.Print("\nNetwork Name: " + name)
 			fmt.Printf(`
 NETID: %s
@@ -69,6 +74,7 @@ Grafana Password: prom-operator
 Prometheus URL: https://prometheus-%s.spacemesh.io
 Pyroscope URL: http://%s
 Config: https://storage.googleapis.com/spacecraft-data/%s-archive/config.json
+Docker URL: %s
 			`,
 				fmt.Sprintf("%v", netID),
 				name,
@@ -77,6 +83,7 @@ Config: https://storage.googleapis.com/spacecraft-data/%s-archive/config.json
 				name,
 				pyroscopeURL,
 				name,
+				image,
 			)
 		}
 	}
