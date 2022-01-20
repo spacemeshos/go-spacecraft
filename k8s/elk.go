@@ -420,6 +420,16 @@ func (k8s *Kubernetes) GetKibanaURL() (string, error) {
 	return ip + ":" + port, nil
 }
 
+func (k8s *Kubernetes) GetKibanaPassword() (string, error) {
+	secret, err := k8s.GetSecret("elastic-credentials", "password")
+
+	if err != nil {
+		return "", err
+	}
+
+	return secret, nil
+}
+
 func (k8s *Kubernetes) GetESURL() (string, error) {
 	port, err := k8s.GetExternalPort("elasticsearch-master", "http")
 

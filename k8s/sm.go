@@ -192,6 +192,26 @@ func (k8s *Kubernetes) getDeploymentPodAndNode(name string) (string, string, err
 	return "", "", errors.New("pod not found")
 }
 
+func (k8s *Kubernetes) GetMinerImage(name string) (string, error) {
+	pods, err := k8s.Client.CoreV1().Pods("default").List(context.TODO(), metav1.ListOptions{})
+
+	if err != nil {
+		return "", err
+	}
+
+	imageURL := ""
+
+	for _, pod := range pods.Items {
+		if strings.Contains(pod.Name, name) {
+			imageURL = pod.Spec.Containers[0].Image
+
+			return imageURL, nil
+		}
+	}
+
+	return "", errors.New("pod not found")
+}
+
 func (k8s *Kubernetes) NextNode() (string, error) {
 	nodes, err := k8s.Client.CoreV1().Nodes().List(context.Background(), metav1.ListOptions{})
 
@@ -906,6 +926,25 @@ func (k8s *Kubernetes) MinerAccounts() ([]string, error) {
 	}
 
 	return addresses, nil
+}
+
+func (k8s *Kubernetes) GetSecret(name string, dataName string) (string, error) {
+	secretsClient := k8s.Client.CoreV1().Secrets("default")
+	secrets, err := secretsClient.List(context.Background(), metav1.ListOptions{})
+
+	if err != nil {
+		return "", err
+	}
+
+	for _, secret := range secrets.Items {
+		if secret.Name == name {
+			if val, ok := secret.Data[dataName]; ok {
+				return string(val), nil
+			}
+		}
+	}
+
+	return "", errors.New("secret not found")
 }
 
 func int32Ptr(i int32) *int32 { return &i }
