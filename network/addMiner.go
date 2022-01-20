@@ -8,7 +8,7 @@ import (
 )
 
 func AddMiner() error {
-	k8sRestConfig, k8sClient, err := gcp.GetKubernetesClient()
+	k8sRestConfig, k8sClient, err := gcp.GetKubernetesClient(config.NetworkName)
 
 	if err != nil {
 		return err
@@ -30,7 +30,7 @@ func AddMiner() error {
 	configStr := ""
 
 	if config.MinerGoSmConfig == "" {
-		configStr, err = gcp.ReadConfig()
+		configStr, err = gcp.ReadConfig(config.NetworkName)
 
 		if err != nil {
 			return err

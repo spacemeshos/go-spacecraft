@@ -34,7 +34,7 @@ func ReleaseNetwork() error {
 
 	osList := []string{"Windows", "macOS", "Linux"}
 
-	configFile, err := gcp.ReadConfig()
+	configFile, err := gcp.ReadConfig(config.NetworkName)
 
 	if err != nil {
 		return err

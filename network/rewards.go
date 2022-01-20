@@ -20,7 +20,7 @@ func Rewards() error {
 		return errors.New("You need to specify the host")
 	}
 
-	k8sRestConfig, k8sClient, err := gcp.GetKubernetesClient()
+	k8sRestConfig, k8sClient, err := gcp.GetKubernetesClient(config.NetworkName)
 
 	if err != nil {
 		return err
