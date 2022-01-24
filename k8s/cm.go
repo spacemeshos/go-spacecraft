@@ -52,7 +52,7 @@ func (k8s *Kubernetes) DeployChaosMesh() error {
 		Namespace:   "chaos-testing",
 		Wait:        true,
 		Force:       true,
-		Version:     "2.1.1",
+		Version:     config.ChaosMeshVersion,
 		ValuesYaml: sanitizeYaml(`
 			chaosDaemon:
 				runtime: containerd

@@ -26,6 +26,7 @@ var deployCMCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(deployCMCmd)
+	deployCMCmd.Flags().StringVar(&config.ChaosMeshVersion, "chaos-mesh-version", config.ChaosMeshVersion, "chaosmesh version")
 
 	err := viper.BindPFlags(deployCMCmd.Flags())
 	if err != nil {
