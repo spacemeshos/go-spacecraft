@@ -81,6 +81,8 @@ func init() {
 	createNetworkCmd.Flags().StringVar(&config.SlackChannelId, "slack-channel-id", config.SlackChannelId, "slack channel ID to post alerts")
 	createNetworkCmd.Flags().BoolVar(&config.EnableSlackAlerts, "enable-slack-alerts", config.EnableSlackAlerts, "deploy spacemesh-watch")
 	createNetworkCmd.Flags().StringVar(&config.CloudflareAPIToken, "cloudflare-api-token", config.CloudflareAPIToken, "cloudflare API token")
+	createNetworkCmd.Flags().BoolVar(&config.ChaosMesh, "chaos-mesh", config.ChaosMesh, "deploy chaos mesh")
+	createNetworkCmd.Flags().StringVar(&config.ChaosMeshVersion, "chaos-mesh-version", config.ChaosMeshVersion, "chaosmesh version")
 
 	err := viper.BindPFlags(createNetworkCmd.Flags())
 	if err != nil {

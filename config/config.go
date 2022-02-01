@@ -65,6 +65,8 @@ type Configuration struct {
 	GoSmReleaseVersion       string `mapstructure:"go-sm-release-version"`
 	GithubToken              string `mapstructure:"github-token"`
 	KeepLogsMetrics          bool   `mapstructure:"keep-logs-metrics"`
+	ChaosMesh                bool   `mapstructure:"chaos-mesh"`
+	ChaosMeshVersion         string `mapstructure:"chaos-mesh-version"`
 }
 
 var Config = Configuration{
@@ -132,4 +134,6 @@ var Config = Configuration{
 	GoSmReleaseVersion:       "",
 	GithubToken:              "",
 	KeepLogsMetrics:          false,
+	ChaosMesh:                false,
+	ChaosMeshVersion:         "2.1.1",
 }

@@ -274,6 +274,14 @@ func Create() error {
 		}
 	}
 
+	if config.ChaosMesh {
+		err = kubernetes.DeployChaosMesh()
+
+		if err != nil {
+			return err
+		}
+	}
+
 	log.Info.Println("Kibana URL: https://kibana-" + config.NetworkName + ".spacemesh.io")
 	log.Info.Println("Kibana Username: elastic")
 	log.Info.Println("Kibana Password: " + kubernetes.Password)
