@@ -1,105 +1,11 @@
 {
-  "api": {
-    "grpc": "gateway,node,mesh,globalstate,transaction,smesher,debug"
-  },
-  "genesis": {
-    "accounts": {
-      "0x8868600d2835019249a0f756f754d5a5ab17ebf0": 100000000000000000,
-      "0x9f120e40e330affe6aa27d5bda49ac0960df7d6f": 100000000000000000,
-      "0xafed9a1c17ca7eaa7a6795dbc7bee1b1d992c7ba": 100000000000000000,
-      "0xb20c3a31f973231e01bf2d6b5c00a22cc13b5c63": 100000000000000000,
-      "0xff083c9a22e05d3459b03f3dbed61c7ad6e0a209": 100000000000000000
-    }
-  },
-  "hare": {
-    "hare-committee-size": "800",
-    "hare-exp-leaders": "10",
-    "hare-limit-concurrent": "5",
-    "hare-limit-iterations": "10",
-    "hare-max-adversaries": "399",
-    "hare-round-duration-sec": "30",
-    "hare-wakeup-delta": "30"
-  },
-  "hare-eligibility": {
-    "eligibility-confidence-param": "25",
-    "eligibility-epoch-offset": "0"
-  },
-  "logging": {
-    "app": "info",
-    "atx-builder": "info",
-    "atxDb": "info",
-    "block-builder": "info",
-    "block-eligibility": "info",
-    "block-listener": "info",
-    "block-oracle": "info",
-    "hare": "info",
-    "hare-beacon": "info",
-    "hare-oracle": "info",
-    "mesh": "info",
-    "meshDb": "info",
-    "nipst": "info",
-    "p2p": "info",
-    "poet": "info",
-    "poetDb": "info",
-    "post": "info",
-    "state": "info",
-    "stateDb": "info",
-    "store": "info",
-    "sync": "info",
-    "trtl": "info"
-  },
-  "main": {
-    "atxs-per-block": 25,
-    "block-cache-size": 20,
-    "hdist": 10,
-    "layer-average-size": 50,
-    "layer-duration-sec": 200,
-    "layers-per-epoch": 6,
-    "space-to-commit": 1048576,
-    "sync-interval": 10,
-    "sync-request-timeout": 60000,
-    "sync-validation-delta": 30
-  },
+  "preset": "testnet",
   "p2p": {
-    "network-id": 219,
-    "target-outbound": 10
-  },
-  "post": {
-    "post-bits-per-label": 8,
-    "post-k1": 2000,
-    "post-k2": 1800,
-    "post-labels-per-unit": 1024,
-    "post-max-numunits": 4,
-    "post-min-numunits": 2
+    "network-id": 219
   },
   "smeshing": {
-    "smeshing-coinbase": "1",
     "smeshing-opts": {
-      "smeshing-opts-datadir": "./",
-      "smeshing-opts-numfiles": 1,
-      "smeshing-opts-numunits": 2,
-      "smeshing-opts-provider": 1,
-      "smeshing-opts-throttle": true
-    },
-    "smeshing-start": false
-  },
-  "time": {
-    "default-timeout-latency": "10s",
-    "max-allowed-time-drift": "10s",
-    "ntp-queries": 5,
-    "refresh-ntp-interval": "30m"
-  },
-  "beacon": {
-    "beacon-first-voting-round-duration": "3m",
-    "beacon-grace-period-duration": "10s",
-    "beacon-kappa": 40,
-    "beacon-proposal-duration": "30s",
-    "beacon-q": "1/3",
-    "beacon-rounds-number": 6,
-    "beacon-sync-num-blocks": "30",
-    "beacon-theta": "1/4",
-    "beacon-votes-limit": 100,
-    "beacon-voting-round-duration": "50s",
-    "beacon-weak-coin-round-duration": "10s"
+      "smeshing-opts-datadir": "./"
+    }
   }
 }
