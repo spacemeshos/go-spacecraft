@@ -7,5 +7,9 @@
     "smeshing-opts": {
       "smeshing-opts-datadir": "./"
     }
+  },
+  "main": {
+    "layer-duration-sec": 200,
+    "layers-per-epoch": 6
   }
 }
