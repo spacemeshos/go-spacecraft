@@ -1,4 +1,7 @@
 {
+  "api": {
+    "grpc": "gateway,node,mesh,globalstate,transaction,smesher,debug"
+  },
   "preset": "testnet",
   "p2p": {
     "network-id": 219
