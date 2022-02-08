@@ -104,7 +104,7 @@ func (k8s *Kubernetes) getNodeId(podName string) (string, error) {
 			return resFinal, nil
 		} else {
 
-			res = strings.SplitAfter(str, "\",\"identity\":\"")
+			res = strings.SplitAfter(str, "\", \"identity\": \"")
 
 			if len(res) >= 2 {
 				res = strings.SplitAfter(res[1], "\"")
