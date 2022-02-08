@@ -12,7 +12,7 @@
     }
   },
   "main": {
-    "layer-duration-sec": 200,
-    "layers-per-epoch": 6
+    "layer-duration-sec": 120,
+    "layers-per-epoch": 60
   }
 }
