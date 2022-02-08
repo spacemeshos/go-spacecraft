@@ -327,7 +327,6 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 
 	command := []string{
 		"/bin/go-spacemesh",
-		"--test-mode",
 		fmt.Sprintf("--listen=/ip4/0.0.0.0/tcp/%s", bindPortStr),
 		"--json-server=true",
 		"--config=/etc/config/config.json",
