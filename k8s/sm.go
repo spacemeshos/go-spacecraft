@@ -334,6 +334,7 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 		"--smeshing-coinbase=" + publicKeyHex[2:],
 		"--smeshing-start=true",
 		"--smeshing-opts-datadir=/root/data/post",
+		"--log-encoder=json",
 	}
 
 	if config.EnableJsonAPI == true {
