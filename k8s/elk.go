@@ -691,57 +691,7 @@ func (k8s *Kubernetes) SetupLogDeletionPolicy() error {
 		return errors.New(string(body))
 	}
 
-	req, err = http.NewRequest(http.MethodPut, "http://"+esURL+"/ws-*/_settings?pretty", bytes.NewBuffer([]byte("{\"lifecycle.name\":\"cleanup-history\"}")))
-	if err != nil {
-		return err
-	}
-
-	req.Header.Add("Content-Type", "application/json")
-	req.Header.Add("Authorization", "Basic "+basicAuth("elastic", k8s.Password))
-
-	resp, err = httpClient.Do(req)
-
-	if err != nil {
-		return err
-	}
-
-	if !(resp.StatusCode >= 200 && resp.StatusCode <= 299) {
-		defer resp.Body.Close()
-		body, err := ioutil.ReadAll(resp.Body)
-
-		if err != nil {
-			return err
-		}
-
-		return errors.New(string(body))
-	}
-
 	req, err = http.NewRequest(http.MethodPut, "http://"+esURL+"/_template/logging_policy_template?pretty", bytes.NewBuffer([]byte("{\"index_patterns\":[\"sm-*\"],\"settings\":{\"index.lifecycle.name\":\"cleanup-history\"}}")))
-	if err != nil {
-		return err
-	}
-
-	req.Header.Add("Content-Type", "application/json")
-	req.Header.Add("Authorization", "Basic "+basicAuth("elastic", k8s.Password))
-
-	resp, err = httpClient.Do(req)
-
-	if err != nil {
-		return err
-	}
-
-	if !(resp.StatusCode >= 200 && resp.StatusCode <= 299) {
-		defer resp.Body.Close()
-		body, err := ioutil.ReadAll(resp.Body)
-
-		if err != nil {
-			return err
-		}
-
-		return errors.New(string(body))
-	}
-
-	req, err = http.NewRequest(http.MethodPut, "http://"+esURL+"/_template/logging_policy_template?pretty", bytes.NewBuffer([]byte("{\"index_patterns\":[\"ws-*\"],\"settings\":{\"index.lifecycle.name\":\"cleanup-history\"}}")))
 	if err != nil {
 		return err
 	}
