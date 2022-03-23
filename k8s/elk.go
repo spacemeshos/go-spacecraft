@@ -540,8 +540,6 @@ func (k8s *Kubernetes) SetupLogDeletionPolicy() error {
 		return err
 	}
 
-	fmt.Println("Working 1")
-
 	req, err := http.NewRequest(http.MethodPut, "http://"+esURL+"/_ilm/policy/cleanup-history", bytes.NewBuffer([]byte(fmt.Sprintf("{\"policy\":{\"phases\":{\"hot\":{\"actions\":{}},\"delete\":{\"min_age\":\"%sd\",\"actions\":{\"delete\":{}}}}}}", config.LogsExpiry))))
 	if err != nil {
 		return err
@@ -566,8 +564,6 @@ func (k8s *Kubernetes) SetupLogDeletionPolicy() error {
 
 		return errors.New(string(body))
 	}
-
-	fmt.Println("Working 2")
 
 	req, err = http.NewRequest(http.MethodPut, "http://"+esURL+"/sm-*/_settings?pretty", bytes.NewBuffer([]byte("{\"lifecycle.name\":\"cleanup-history\"}")))
 	if err != nil {
@@ -594,8 +590,6 @@ func (k8s *Kubernetes) SetupLogDeletionPolicy() error {
 		return errors.New(string(body))
 	}
 
-	fmt.Println("Working 3")
-
 	req, err = http.NewRequest(http.MethodPut, "http://"+esURL+"/ws-*/_settings?pretty", bytes.NewBuffer([]byte("{\"lifecycle.name\":\"cleanup-history\"}")))
 	if err != nil {
 		return err
@@ -605,6 +599,10 @@ func (k8s *Kubernetes) SetupLogDeletionPolicy() error {
 	req.Header.Add("Authorization", "Basic "+basicAuth("elastic", k8s.Password))
 
 	resp, err = httpClient.Do(req)
+
+	if err != nil {
+		return err
+	}
 
 	if !(resp.StatusCode >= 200 && resp.StatusCode <= 299) {
 		defer resp.Body.Close()
@@ -616,8 +614,6 @@ func (k8s *Kubernetes) SetupLogDeletionPolicy() error {
 
 		return errors.New(string(body))
 	}
-
-	fmt.Println("Working 4")
 
 	req, err = http.NewRequest(http.MethodPut, "http://"+esURL+"/_template/logging_policy_template?pretty", bytes.NewBuffer([]byte("{\"index_patterns\":[\"sm-*\"],\"settings\":{\"index.lifecycle.name\":\"cleanup-history\"}}")))
 	if err != nil {
@@ -643,8 +639,6 @@ func (k8s *Kubernetes) SetupLogDeletionPolicy() error {
 
 		return errors.New(string(body))
 	}
-
-	fmt.Println("Working 5")
 
 	req, err = http.NewRequest(http.MethodPut, "http://"+esURL+"/_template/logging_policy_template?pretty", bytes.NewBuffer([]byte("{\"index_patterns\":[\"ws-*\"],\"settings\":{\"index.lifecycle.name\":\"cleanup-history\"}}")))
 	if err != nil {
