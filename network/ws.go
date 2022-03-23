@@ -14,9 +14,17 @@ func DeployWS() error {
 
 	kubernetes := k8s.Kubernetes{Client: k8sClient, RestConfig: k8sRestConfig}
 
+	if err = kubernetes.DeployFilebeatForWS(); err != nil {
+		return err
+	}
+
 	err = kubernetes.DeployWS()
 
 	if err != nil {
+		return err
+	}
+
+	if err = kubernetes.SetupLogDeletionPolicyForWS(); err != nil {
 		return err
 	}
 

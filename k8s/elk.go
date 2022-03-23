@@ -488,6 +488,107 @@ func (k8s *Kubernetes) DeployELK() error {
 	return nil
 }
 
+func (k8s *Kubernetes) DeployFilebeatForWS() error {
+	opt := &helm.RestConfClientOptions{
+		Options: &helm.Options{
+			Debug:   true,
+			Linting: true,
+		},
+		RestConfig: k8s.RestConfig,
+	}
+
+	client, err := helm.NewClientFromRestConf(opt)
+	if err != nil {
+		return err
+	}
+
+	filebeatSpecWS := helm.ChartSpec{
+		ReleaseName: "filebeat-ws",
+		ChartName:   "elastic/filebeat",
+		Namespace:   "default",
+		Wait:        true,
+		Force:       true,
+		Version:     "7.15.0",
+		ValuesYaml: sanitizeYaml(`
+			daemonset:
+				extraEnvs:
+				- name: 'ELASTICSEARCH_USERNAME'
+					valueFrom:
+						secretKeyRef:
+							name: elastic-credentials
+							key: username
+				- name: 'ELASTICSEARCH_PASSWORD'
+					valueFrom:
+						secretKeyRef:
+							name: elastic-credentials
+							key: password
+				resources: {}
+				filebeatConfig:
+					filebeat.yml: |
+						processors:
+							- script:
+									lang: javascript
+									id: my_filter
+									source: >
+										function process(event) {
+											var message = event.Get('message')
+											try {
+												var msg = JSON.parse(message)
+												Object.keys(msg).forEach(function(k) {msg[k] = msg[k].toString()})
+												event.Put("name", event.Get("kubernetes.labels.app_kubernetes_io/instance"))
+												delete msg.T
+												event.Put("sm", JSON.stringify(msg))
+												event.Delete("message")
+											} catch(e) {
+												var message = event.Get('message')
+												var sm = { message: message }
+												event.Delete("message")
+												event.Put("sm", JSON.stringify(sm));
+												event.Put("name", event.Get("kubernetes.labels.app_kubernetes_io/instance"))
+											}
+										}
+							- drop_fields:
+									fields: ["log", "cloud", "ecs", "agent", "input", "tags", "docker", "container", "host", "kubernetes"]
+							- decode_json_fields:
+									fields: ["sm"]
+									target: "sm"
+									process_array: false
+									max_depth: 2
+									overwrite_keys: true
+									add_error_key: true
+						filebeat:
+							autodiscover.providers:
+							- type: kubernetes
+								templates:
+									- condition:
+											equals:
+												kubernetes.namespace: ws
+									- condition.contains:
+											kubernetes.container.name: node
+										config:
+											- type: container
+												paths:
+													- /var/log/containers/*-${data.kubernetes.container.id}.log
+						output.elasticsearch:
+							host: '${NODE_NAME}'
+							hosts: '${ELASTICSEARCH_HOSTS:elasticsearch-master:9200}'
+							username: "${ELASTICSEARCH_USERNAME}"
+							password: "${ELASTICSEARCH_PASSWORD}"
+							index: "ws-%{+YYYY.MM.dd}"
+							worker: 3
+							bulk_max_size: 1000
+						setup.template.enabled: false
+						setup.ilm.enabled: false
+		`),
+	}
+
+	if err := client.InstallOrUpgradeChart(context.Background(), &filebeatSpecWS); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (k8s *Kubernetes) GetKibanaURL() (string, error) {
 	port, err := k8s.GetExternalPort("kibana-kibana", "http")
 
@@ -624,6 +725,68 @@ func (k8s *Kubernetes) SetupLogDeletionPolicy() error {
 	req.Header.Add("Authorization", "Basic "+basicAuth("elastic", k8s.Password))
 
 	resp, err = httpClient.Do(req)
+
+	if err != nil {
+		return err
+	}
+
+	if !(resp.StatusCode >= 200 && resp.StatusCode <= 299) {
+		defer resp.Body.Close()
+		body, err := ioutil.ReadAll(resp.Body)
+
+		if err != nil {
+			return err
+		}
+
+		return errors.New(string(body))
+	}
+
+	req, err = http.NewRequest(http.MethodPut, "http://"+esURL+"/_template/logging_policy_template?pretty", bytes.NewBuffer([]byte("{\"index_patterns\":[\"ws-*\"],\"settings\":{\"index.lifecycle.name\":\"cleanup-history\"}}")))
+	if err != nil {
+		return err
+	}
+
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Authorization", "Basic "+basicAuth("elastic", k8s.Password))
+
+	resp, err = httpClient.Do(req)
+
+	if err != nil {
+		return err
+	}
+
+	if !(resp.StatusCode >= 200 && resp.StatusCode <= 299) {
+		defer resp.Body.Close()
+		body, err := ioutil.ReadAll(resp.Body)
+
+		if err != nil {
+			return err
+		}
+
+		return errors.New(string(body))
+	}
+
+	return nil
+}
+
+func (k8s *Kubernetes) SetupLogDeletionPolicyForWS() error {
+	esURL, err := k8s.GetESURL()
+
+	httpClient := &http.Client{}
+
+	if err != nil {
+		return err
+	}
+
+	req, err := http.NewRequest(http.MethodPut, "http://"+esURL+"/ws-*/_settings?pretty", bytes.NewBuffer([]byte("{\"lifecycle.name\":\"cleanup-history\"}")))
+	if err != nil {
+		return err
+	}
+
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Authorization", "Basic "+basicAuth("elastic", k8s.Password))
+
+	resp, err := httpClient.Do(req)
 
 	if err != nil {
 		return err
