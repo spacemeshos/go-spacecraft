@@ -502,6 +502,15 @@ func (k8s *Kubernetes) DeployFilebeatForWS() error {
 		return err
 	}
 
+	chartRepo := repo.Entry{
+		Name: "elastic",
+		URL:  "https://helm.elastic.co",
+	}
+
+	if err := client.AddOrUpdateChartRepo(chartRepo); err != nil {
+		return err
+	}
+
 	filebeatSpecWS := helm.ChartSpec{
 		ReleaseName: "filebeat-ws",
 		ChartName:   "elastic/filebeat",
@@ -720,7 +729,19 @@ func (k8s *Kubernetes) SetupLogDeletionPolicy() error {
 }
 
 func (k8s *Kubernetes) SetupLogDeletionPolicyForWS() error {
+	pass, err := k8s.GetKibanaPassword()
+
+	if err != nil {
+		return err
+	}
+
+	k8s.Password = pass
+
 	esURL, err := k8s.GetESURL()
+
+	if err != nil {
+		return err
+	}
 
 	httpClient := &http.Client{}
 
