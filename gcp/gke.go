@@ -169,8 +169,8 @@ func CreateKubernetesCluster() error {
 		},
 	}
 
-	if config.UseVPN {
-		cluster.Network = config.VPN
+	if config.UseVPC {
+		cluster.Network = config.VPC
 	}
 
 	req := &containerpb.CreateClusterRequest{

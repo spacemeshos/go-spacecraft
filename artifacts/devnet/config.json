@@ -34,5 +34,5 @@
   "prometheus-cpu": "2",
   "enable-slack-alerts": true,
   "chaos-mesh": true,
-  "use-vpn": true
+  "use-vpc": true
 }
