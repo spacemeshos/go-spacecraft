@@ -83,6 +83,8 @@ func init() {
 	createNetworkCmd.Flags().StringVar(&config.CloudflareAPIToken, "cloudflare-api-token", config.CloudflareAPIToken, "cloudflare API token")
 	createNetworkCmd.Flags().BoolVar(&config.ChaosMesh, "chaos-mesh", config.ChaosMesh, "deploy chaos mesh")
 	createNetworkCmd.Flags().StringVar(&config.ChaosMeshVersion, "chaos-mesh-version", config.ChaosMeshVersion, "chaosmesh version")
+	createNetworkCmd.Flags().StringVar(&config.VPN, "vpn", config.VPN, "name of existing vpn to use")
+	createNetworkCmd.Flags().BoolVar(&config.UseVPN, "use-vpn", config.UseVPN, "create cluster in an VPN")
 
 	err := viper.BindPFlags(createNetworkCmd.Flags())
 	if err != nil {
