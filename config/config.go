@@ -67,6 +67,8 @@ type Configuration struct {
 	KeepLogsMetrics          bool   `mapstructure:"keep-logs-metrics"`
 	ChaosMesh                bool   `mapstructure:"chaos-mesh"`
 	ChaosMeshVersion         string `mapstructure:"chaos-mesh-version"`
+	UseVPC                   bool   `mapstructure:"use-vpc"`
+	VPC                      string `mapstructure:"vpc"`
 }
 
 var Config = Configuration{
@@ -136,4 +138,6 @@ var Config = Configuration{
 	KeepLogsMetrics:          false,
 	ChaosMesh:                false,
 	ChaosMeshVersion:         "2.1.1",
+	UseVPC:                   false,
+	VPC:                      "spacecraft",
 }

@@ -83,6 +83,8 @@ func init() {
 	createNetworkCmd.Flags().StringVar(&config.CloudflareAPIToken, "cloudflare-api-token", config.CloudflareAPIToken, "cloudflare API token")
 	createNetworkCmd.Flags().BoolVar(&config.ChaosMesh, "chaos-mesh", config.ChaosMesh, "deploy chaos mesh")
 	createNetworkCmd.Flags().StringVar(&config.ChaosMeshVersion, "chaos-mesh-version", config.ChaosMeshVersion, "chaosmesh version")
+	createNetworkCmd.Flags().StringVar(&config.VPC, "vpc", config.VPC, "name of existing VPC to use. if you don't have a VPC then create a VPC with firewall rules for ingress: #1 10255 port blocked and #2 all other ports open")
+	createNetworkCmd.Flags().BoolVar(&config.UseVPC, "use-vpc", config.UseVPC, "create cluster in an VPC")
 
 	err := viper.BindPFlags(createNetworkCmd.Flags())
 	if err != nil {
