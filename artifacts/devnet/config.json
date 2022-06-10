@@ -1,5 +1,5 @@
 {
-  "network-name": "devnet222",
+  "network-name": "devnet",
   "miners": 50,
   "poets": 1,
   "miner-ram": "4",
@@ -26,8 +26,8 @@
   "deploy-pyroscope": true,
   "pyroscope-cpu": "2",
   "pyroscope-memory": "8",
-  "metrics": true,
-  "go-sm-image": "spacemeshos/go-spacemesh-dev:38b6a9f",
+  "metrics": false,
+  "go-sm-image": "spacemeshos/go-spacemesh-dev:9a8d583",
   "poet-image": "spacemeshos/poet:develop",
   "enable-go-debug": true,
   "prometheus-memory": "2",
