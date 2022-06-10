@@ -130,7 +130,7 @@ var Config = Configuration{
 	CloudflareAPIToken:       "",
 	DashboardVersion:         "v0.0.2",
 	ExplorerVersion:          "v0.0.10",
-	SmappVersion:             "0.1.25",
+	SmappVersion:             "0.2.1",
 	TLSKey:                   "./artifacts/ws/tls.key",
 	TLSCert:                  "./artifacts/ws/tls.crt",
 	GoSmReleaseVersion:       "",
