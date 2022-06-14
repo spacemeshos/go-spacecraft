@@ -66,7 +66,13 @@ func ReadWSConfig() (string, error) {
 
 	defer client.Close()
 
-	rc, err := client.Bucket("sm-discovery-service").Object("networks.json").NewReader(ctx)
+	discoverFileName := "networks.json"
+
+	if config.Private {
+		discoverFileName = "networks.private.json"
+	}
+
+	rc, err := client.Bucket("sm-discovery-service").Object(discoverFileName).NewReader(ctx)
 	if err != nil {
 		return "", err
 	}
@@ -93,12 +99,18 @@ func UploadWSConfig(fileContent string) error {
 	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
 	defer cancel()
 
-	o := client.Bucket("sm-discovery-service").Object("networks.json")
+	discoverFileName := "networks.json"
+
+	if config.Private {
+		discoverFileName = "networks.private.json"
+	}
+
+	o := client.Bucket("sm-discovery-service").Object(discoverFileName)
 	if err := o.Delete(ctx); err != nil {
 		return err
 	}
 
-	wc := client.Bucket("sm-discovery-service").Object("networks.json").NewWriter(ctx)
+	wc := client.Bucket("sm-discovery-service").Object(discoverFileName).NewWriter(ctx)
 
 	if _, err := wc.Write([]byte(fileContent)); err != nil {
 		return err

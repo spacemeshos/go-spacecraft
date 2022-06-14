@@ -35,6 +35,7 @@ func init() {
 	deployWSCmd.Flags().StringVar(&config.DashboardVersion, "dash-version", config.DashboardVersion, "docker image tag for spacemeshos/dash-backend")
 	deployWSCmd.Flags().StringVar(&config.ExplorerVersion, "explorer-version", config.ExplorerVersion, "docker image tag for spacemeshos/explorer-apiserver and spacemeshos/explorer-collector")
 	deployWSCmd.Flags().StringVar(&config.CloudflareAPIToken, "cloudflare-api-token", config.CloudflareAPIToken, "cloudflare API token")
+	deployWSCmd.Flags().BoolVar(&config.Private, "private", config.Private, "is network private")
 
 	err := viper.BindPFlags(deployWSCmd.Flags())
 	if err != nil {

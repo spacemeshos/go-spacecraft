@@ -69,6 +69,7 @@ type Configuration struct {
 	ChaosMeshVersion         string `mapstructure:"chaos-mesh-version"`
 	UseVPC                   bool   `mapstructure:"use-vpc"`
 	VPC                      string `mapstructure:"vpc"`
+	Private                  bool   `mapstructure:"private"`
 }
 
 var Config = Configuration{
@@ -140,4 +141,5 @@ var Config = Configuration{
 	ChaosMeshVersion:         "2.1.1",
 	UseVPC:                   false,
 	VPC:                      "spacecraft",
+	Private:                  false,
 }
