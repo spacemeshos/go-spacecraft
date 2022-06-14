@@ -27,7 +27,7 @@
   "pyroscope-cpu": "2",
   "pyroscope-memory": "8",
   "metrics": false,
-  "go-sm-image": "spacemeshos/go-spacemesh-dev:9a8d583",
+  "go-sm-image": "spacemeshos/go-spacemesh-dev:d298a63",
   "poet-image": "spacemeshos/poet:develop",
   "enable-go-debug": true,
   "prometheus-memory": "2",
