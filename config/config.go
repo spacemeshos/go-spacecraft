@@ -48,8 +48,6 @@ type Configuration struct {
 	MaxConcurrentDeployments int    `mapstructure:"max-concurrent-deployments"`
 	EnableJsonAPI            bool   `mapstructure:"enable-json-api"`
 	EnableGoDebug            bool   `mapstructure:"enable-go-debug"`
-	PrometheusMemory         string `mapstructure:"prometheus-memory"`
-	PrometheusCPU            string `mapstructure:"prometheus-cpu"`
 	AcceleratorCount         int64  `mapstructure:"accelerator-count"`
 	AcceletatorType          string `mapstructure:"accelerator-type"`
 	ImageType                string `mapstructure:"image-type"`
@@ -70,6 +68,7 @@ type Configuration struct {
 	UseVPC                   bool   `mapstructure:"use-vpc"`
 	VPC                      string `mapstructure:"vpc"`
 	Private                  bool   `mapstructure:"private"`
+	PushGatewayURL           string `mapstructure:"push-gateway-url"`
 }
 
 var Config = Configuration{
@@ -120,8 +119,6 @@ var Config = Configuration{
 	MaxConcurrentDeployments: 100,
 	EnableJsonAPI:            true,
 	EnableGoDebug:            false,
-	PrometheusMemory:         "1",
-	PrometheusCPU:            "1",
 	AcceleratorCount:         0,
 	AcceletatorType:          "",
 	ImageType:                "ubuntu-2010-groovy-v20210622a",
@@ -142,4 +139,5 @@ var Config = Configuration{
 	UseVPC:                   false,
 	VPC:                      "spacecraft",
 	Private:                  false,
+	PushGatewayURL:           "https://pushgateway.spacemesh.dev/",
 }

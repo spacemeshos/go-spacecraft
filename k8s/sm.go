@@ -359,16 +359,16 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 		}
 	}
 
-	if config.Metrics == true {
+	if config.Metrics {
 		command = append(command, "--metrics")
-		command = append(command, "--metrics-port=1010")
+		command = append(command, "--metrics-push="+config.PushGatewayURL)
 	}
 
 	command = append(command, "; sleep 100000000")
 
 	envs := []apiv1.EnvVar{}
 
-	if config.EnableGoDebug == true {
+	if config.EnableGoDebug {
 		envs = append(envs, apiv1.EnvVar{
 			Name:  "GODEBUG",
 			Value: "gctrace=1,scavtrace=1,gcpacertrace=1",

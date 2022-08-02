@@ -260,12 +260,6 @@ func Create() error {
 		return err
 	}
 
-	if config.Metrics {
-		if err = kubernetes.DeployPrometheus(); err != nil {
-			return err
-		}
-	}
-
 	if config.EnableSlackAlerts {
 		err = kubernetes.DeploySpacemeshWatch()
 
@@ -285,13 +279,6 @@ func Create() error {
 	log.Info.Println("Kibana URL: https://kibana-" + config.NetworkName + ".spacemesh.io")
 	log.Info.Println("Kibana Username: elastic")
 	log.Info.Println("Kibana Password: " + kubernetes.Password)
-
-	if config.Metrics {
-		log.Info.Println("Grafana URL: https://" + "grafana-" + config.NetworkName + ".spacemesh.io")
-		log.Info.Println("Grafana Username: admin")
-		log.Info.Println("Grafana Password: prom-operator")
-		log.Info.Println("Prometheus URL: https://" + "prometheus-" + config.NetworkName + ".spacemesh.io")
-	}
 
 	if config.DeployPyroscope {
 		pyroscopeURL, err := kubernetes.GetPyroscopeURL()

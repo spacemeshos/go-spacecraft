@@ -13,6 +13,7 @@
   },
   "main": {
     "layer-duration-sec": 120,
-    "layers-per-epoch": 60
+    "layers-per-epoch": 60,
+    "optimistic-filtering-threshold": 100
   }
 }

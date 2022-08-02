@@ -72,8 +72,6 @@ func init() {
 	createNetworkCmd.Flags().BoolVar(&config.EnableJsonAPI, "enable-json-api", config.EnableJsonAPI, "enables JSON api in all nodes")
 	createNetworkCmd.Flags().IntVar(&config.MaxConcurrentDeployments, "max-concurrent-deployments", config.MaxConcurrentDeployments, "number of miners that can be deployed concurrently")
 	createNetworkCmd.Flags().BoolVar(&config.EnableGoDebug, "enable-go-debug", config.EnableGoDebug, "start miners with GODEBUG=\"gctrace=1,scavtrace=1,gcpacertrace=1\" env")
-	createNetworkCmd.Flags().StringVar(&config.PrometheusMemory, "prometheus-memory", config.PrometheusMemory, "memory to allocate to prometheus in GB")
-	createNetworkCmd.Flags().StringVar(&config.PrometheusCPU, "prometheus-cpu", config.PrometheusCPU, "vCPU to allocate to prometheus")
 	createNetworkCmd.Flags().StringVar(&config.AcceletatorType, "accelerator-type", config.AcceletatorType, "VM GPU accelerator type (https://cloud.google.com/compute/docs/gpus)")
 	createNetworkCmd.Flags().Int64Var(&config.AcceleratorCount, "accelerator-count", config.AcceleratorCount, "number of accelerators")
 	createNetworkCmd.Flags().StringVar(&config.GCPMachineType, "gcp-machine-type", config.GCPMachineType, "VM machine type")
