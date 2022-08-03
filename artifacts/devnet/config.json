@@ -1,5 +1,5 @@
 {
-  "network-name": "devnet",
+  "network-name": "devnet225",
   "miners": 50,
   "poets": 1,
   "miner-ram": "4",

@@ -139,5 +139,5 @@ var Config = Configuration{
 	UseVPC:                   false,
 	VPC:                      "spacecraft",
 	Private:                  false,
-	PushGatewayURL:           "https://pushgateway.spacemesh.dev/",
+	PushGatewayURL:           "https://public-metrics.spacemesh.dev/",
 }
