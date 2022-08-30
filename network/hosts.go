@@ -11,7 +11,6 @@ import (
 
 func ListHosts() error {
 	k8sRestConfig, k8sClient, err := gcp.GetKubernetesClient(config.NetworkName)
-
 	if err != nil {
 		return err
 	}
@@ -19,7 +18,6 @@ func ListHosts() error {
 	kubernetes := k8s.Kubernetes{Client: k8sClient, RestConfig: k8sRestConfig}
 
 	miners, err := kubernetes.GetMiners()
-
 	if err != nil {
 		return err
 	}
@@ -27,7 +25,6 @@ func ListHosts() error {
 	apiURLs := []string{}
 
 	ip, err := kubernetes.GetExternalIP()
-
 	if err != nil {
 		return err
 	}

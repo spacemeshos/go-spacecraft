@@ -16,15 +16,13 @@ import (
 )
 
 func ReleaseNetwork() error {
-
 	tempDir := os.TempDir() + "go-spacecraft/"
 	err := os.RemoveAll(tempDir)
-
 	if err != nil {
 		return err
 	}
 
-	err = os.Mkdir(tempDir, 0755)
+	err = os.Mkdir(tempDir, 0o755)
 
 	if err != nil {
 		return err
@@ -35,7 +33,6 @@ func ReleaseNetwork() error {
 	osList := []string{"Windows", "macOS", "Linux"}
 
 	configFile, err := gcp.ReadConfig(config.NetworkName)
-
 	if err != nil {
 		return err
 	}
@@ -122,7 +119,6 @@ https://storage.googleapis.com/spacecraft-data/%s-archive/config.json
 }
 
 func downloadFile(filepath string, url string) error {
-
 	// Get the data
 	resp, err := http.Get(url)
 	if err != nil {
@@ -143,7 +139,6 @@ func downloadFile(filepath string, url string) error {
 }
 
 func unzip(src string, dest string) ([]string, error) {
-
 	var filenames []string
 
 	r, err := zip.OpenReader(src)

@@ -70,8 +70,7 @@ func (k8s *Kubernetes) DeployPyroscope() error {
 		},
 	}
 
-	deployment, err := deploymentClient.Create(context.TODO(), deployment, metav1.CreateOptions{})
-
+	_, err := deploymentClient.Create(context.TODO(), deployment, metav1.CreateOptions{})
 	if err != nil {
 		return err
 	}
@@ -102,7 +101,7 @@ func (k8s *Kubernetes) DeployPyroscope() error {
 		},
 		Spec: corev1.ServiceSpec{
 			Ports: []corev1.ServicePort{
-				corev1.ServicePort{Name: "http", Port: 4040, TargetPort: intstr.FromInt(4040)},
+				{Name: "http", Port: 4040, TargetPort: intstr.FromInt(4040)},
 			},
 			Selector: map[string]string{
 				"name": "pyroscope",
@@ -122,13 +121,11 @@ func (k8s *Kubernetes) DeployPyroscope() error {
 
 func (k8s *Kubernetes) GetPyroscopeURL() (string, error) {
 	ip, err := k8s.GetExternalIP()
-
 	if err != nil {
 		return "", err
 	}
 
 	port, err := k8s.GetExternalPort("pyroscope", "http")
-
 	if err != nil {
 		return "", err
 	}

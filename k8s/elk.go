@@ -88,7 +88,7 @@ func (k8s *Kubernetes) DeployELK() error {
 		Version:     "3.34.0",
 	}
 
-	if err = client.InstallOrUpgradeChart(context.Background(), &ingressSpec); err != nil {
+	if _, err = client.InstallOrUpgradeChart(context.Background(), &ingressSpec, &helm.GenericHelmOptions{}); err != nil {
 		return err
 	}
 
@@ -102,7 +102,6 @@ func (k8s *Kubernetes) DeployELK() error {
 	}
 
 	certData, err := ioutil.ReadFile(config.ESCert)
-
 	if err != nil {
 		return err
 	}
@@ -179,7 +178,7 @@ func (k8s *Kubernetes) DeployELK() error {
 		`, config.ESReplicas, config.ESMasterNodes, clusterHealthCheckParams, config.ESDiskSize, config.ESCPU, config.ESMemory, config.ESCPU, config.ESMemory, config.ESHeapMemory, config.ESHeapMemory)),
 	}
 
-	if err = client.InstallOrUpgradeChart(context.Background(), &elasticSearchSpec); err != nil {
+	if _, err = client.InstallOrUpgradeChart(context.Background(), &elasticSearchSpec, &helm.GenericHelmOptions{}); err != nil {
 		return err
 	}
 
@@ -224,7 +223,7 @@ func (k8s *Kubernetes) DeployELK() error {
 		`, config.KibanaCPU, config.KibanaMemory, config.KibanaCPU, config.KibanaMemory, config.NetworkName)),
 	}
 
-	if err = client.InstallOrUpgradeChart(context.Background(), &kibanaSpec); err != nil {
+	if _, err = client.InstallOrUpgradeChart(context.Background(), &kibanaSpec, &helm.GenericHelmOptions{}); err != nil {
 		if !strings.Contains(err.Error(), "failed to replace object") {
 			return err
 		}
@@ -313,7 +312,7 @@ func (k8s *Kubernetes) DeployELK() error {
 		`),
 	}
 
-	if err = client.InstallOrUpgradeChart(context.Background(), &filebeatSpec); err != nil {
+	if _, err = client.InstallOrUpgradeChart(context.Background(), &filebeatSpec, &helm.GenericHelmOptions{}); err != nil {
 		return err
 	}
 
@@ -397,12 +396,11 @@ func (k8s *Kubernetes) DeployELK() error {
 		`),
 	}
 
-	if err = client.InstallOrUpgradeChart(context.Background(), &filebeatSpecWS); err != nil {
+	if _, err = client.InstallOrUpgradeChart(context.Background(), &filebeatSpecWS, &helm.GenericHelmOptions{}); err != nil {
 		return err
 	}
 
 	kibanaURL, err := k8s.GetKibanaURL()
-
 	if err != nil {
 		return err
 	}
@@ -435,7 +433,6 @@ func (k8s *Kubernetes) DeployELK() error {
 
 	httpClient := &http.Client{}
 	req, err := http.NewRequest(method, url, payload)
-
 	if err != nil {
 		return err
 	}
@@ -452,7 +449,6 @@ func (k8s *Kubernetes) DeployELK() error {
 	if config.CloudflareAPIToken != "" {
 		ingressClient := k8s.Client.ExtensionsV1beta1().Ingresses("default")
 		ingress, err := ingressClient.Get(context.Background(), "kibana-kibana", metav1.GetOptions{})
-
 		if err != nil {
 			return err
 		}
@@ -460,13 +456,11 @@ func (k8s *Kubernetes) DeployELK() error {
 		ip := ingress.Status.LoadBalancer.Ingress[0].IP
 
 		api, err := cloudflare.NewWithAPIToken(config.CloudflareAPIToken)
-
 		if err != nil {
 			return err
 		}
 
 		id, err := api.ZoneIDByName("spacemesh.io")
-
 		if err != nil {
 			return err
 		}
@@ -591,7 +585,7 @@ func (k8s *Kubernetes) DeployFilebeatForWS() error {
 		`),
 	}
 
-	if err := client.InstallOrUpgradeChart(context.Background(), &filebeatSpecWS); err != nil {
+	if _, err := client.InstallOrUpgradeChart(context.Background(), &filebeatSpecWS, &helm.GenericHelmOptions{}); err != nil {
 		return err
 	}
 
@@ -600,13 +594,11 @@ func (k8s *Kubernetes) DeployFilebeatForWS() error {
 
 func (k8s *Kubernetes) GetKibanaURL() (string, error) {
 	port, err := k8s.GetExternalPort("kibana-kibana", "http")
-
 	if err != nil {
 		return "", err
 	}
 
 	ip, err := k8s.GetExternalIP()
-
 	if err != nil {
 		return "", err
 	}
@@ -616,7 +608,6 @@ func (k8s *Kubernetes) GetKibanaURL() (string, error) {
 
 func (k8s *Kubernetes) GetKibanaPassword() (string, error) {
 	secret, err := k8s.GetSecret("elastic-credentials", "password")
-
 	if err != nil {
 		return "", err
 	}
@@ -626,19 +617,16 @@ func (k8s *Kubernetes) GetKibanaPassword() (string, error) {
 
 func (k8s *Kubernetes) GetESURL() (string, error) {
 	port, err := k8s.GetExternalPort("elasticsearch-master", "http")
-
 	if err != nil {
 		return "", err
 	}
 
 	ip, err := k8s.GetExternalIP()
-
 	if err != nil {
 		return "", err
 	}
 
 	return ip + ":" + port, nil
-
 }
 
 func (k8s *Kubernetes) SetupLogDeletionPolicy() error {
@@ -659,7 +647,6 @@ func (k8s *Kubernetes) SetupLogDeletionPolicy() error {
 	req.Header.Add("Authorization", "Basic "+basicAuth("elastic", k8s.Password))
 
 	resp, err := httpClient.Do(req)
-
 	if err != nil {
 		return err
 	}
@@ -667,7 +654,6 @@ func (k8s *Kubernetes) SetupLogDeletionPolicy() error {
 	if !(resp.StatusCode >= 200 && resp.StatusCode <= 299) {
 		defer resp.Body.Close()
 		body, err := ioutil.ReadAll(resp.Body)
-
 		if err != nil {
 			return err
 		}
@@ -692,7 +678,6 @@ func (k8s *Kubernetes) SetupLogDeletionPolicy() error {
 	if !(resp.StatusCode >= 200 && resp.StatusCode <= 299) {
 		defer resp.Body.Close()
 		body, err := ioutil.ReadAll(resp.Body)
-
 		if err != nil {
 			return err
 		}
@@ -717,7 +702,6 @@ func (k8s *Kubernetes) SetupLogDeletionPolicy() error {
 	if !(resp.StatusCode >= 200 && resp.StatusCode <= 299) {
 		defer resp.Body.Close()
 		body, err := ioutil.ReadAll(resp.Body)
-
 		if err != nil {
 			return err
 		}
@@ -730,7 +714,6 @@ func (k8s *Kubernetes) SetupLogDeletionPolicy() error {
 
 func (k8s *Kubernetes) SetupLogDeletionPolicyForWS() error {
 	pass, err := k8s.GetKibanaPassword()
-
 	if err != nil {
 		return err
 	}
@@ -738,7 +721,6 @@ func (k8s *Kubernetes) SetupLogDeletionPolicyForWS() error {
 	k8s.Password = pass
 
 	esURL, err := k8s.GetESURL()
-
 	if err != nil {
 		return err
 	}
@@ -758,7 +740,6 @@ func (k8s *Kubernetes) SetupLogDeletionPolicyForWS() error {
 	req.Header.Add("Authorization", "Basic "+basicAuth("elastic", k8s.Password))
 
 	resp, err := httpClient.Do(req)
-
 	if err != nil {
 		return err
 	}
@@ -766,7 +747,6 @@ func (k8s *Kubernetes) SetupLogDeletionPolicyForWS() error {
 	if !(resp.StatusCode >= 200 && resp.StatusCode <= 299) {
 		defer resp.Body.Close()
 		body, err := ioutil.ReadAll(resp.Body)
-
 		if err != nil {
 			return err
 		}
@@ -791,7 +771,6 @@ func (k8s *Kubernetes) SetupLogDeletionPolicyForWS() error {
 	if !(resp.StatusCode >= 200 && resp.StatusCode <= 299) {
 		defer resp.Body.Close()
 		body, err := ioutil.ReadAll(resp.Body)
-
 		if err != nil {
 			return err
 		}
@@ -805,13 +784,11 @@ func (k8s *Kubernetes) SetupLogDeletionPolicyForWS() error {
 func (k8s *Kubernetes) DeleteELKDNSRecords() error {
 	if config.CloudflareAPIToken != "" {
 		api, err := cloudflare.NewWithAPIToken(config.CloudflareAPIToken)
-
 		if err != nil {
 			return err
 		}
 
 		id, err := api.ZoneIDByName("spacemesh.io")
-
 		if err != nil {
 			return err
 		}
@@ -819,7 +796,6 @@ func (k8s *Kubernetes) DeleteELKDNSRecords() error {
 		records, err := api.DNSRecords(context.Background(), id, cloudflare.DNSRecord{
 			Name: "kibana-" + config.NetworkName + ".spacemesh.io",
 		})
-
 		if err != nil {
 			return err
 		}

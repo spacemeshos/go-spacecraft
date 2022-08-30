@@ -9,7 +9,6 @@ import (
 
 func Upgrade() error {
 	k8sRestConfig, k8sClient, err := gcp.GetKubernetesClient(config.NetworkName)
-
 	if err != nil {
 		return err
 	}
@@ -17,7 +16,6 @@ func Upgrade() error {
 	kubernetes := k8s.Kubernetes{Client: k8sClient, RestConfig: k8sRestConfig}
 
 	miners, err := kubernetes.GetMiners()
-
 	if err != nil {
 		return err
 	}

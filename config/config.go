@@ -79,8 +79,8 @@ var Config = Configuration{
 	MinerCPU:                 "1",
 	PoetMemory:               "2",
 	PoetCPU:                  "1",
-	MinerDiskSize:            "10", //200
-	PoetDiskSize:             "10", //50
+	MinerDiskSize:            "10", // 200
+	PoetDiskSize:             "10", // 50
 	GoSmImage:                "spacemeshos/go-spacemesh-dev:38056f5",
 	PoetImage:                "spacemeshos/poet:develop",
 	SpacemeshWatchImage:      "spacemeshos/spacemesh-watch:latest",

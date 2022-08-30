@@ -12,7 +12,6 @@ import (
 func UploadConfig(fileContent string) error {
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
-
 	if err != nil {
 		return err
 	}
@@ -35,7 +34,6 @@ func UploadConfig(fileContent string) error {
 func ReadConfig(networkName string) (string, error) {
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
-
 	if err != nil {
 		return "", err
 	}
@@ -59,7 +57,6 @@ func ReadConfig(networkName string) (string, error) {
 func ReadWSConfig() (string, error) {
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
-
 	if err != nil {
 		return "", err
 	}
@@ -89,7 +86,6 @@ func ReadWSConfig() (string, error) {
 func UploadWSConfig(fileContent string) error {
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
-
 	if err != nil {
 		return err
 	}
@@ -125,7 +121,6 @@ func UploadWSConfig(fileContent string) error {
 
 func UploadReleaseBuild(fileName string, filePath string) error {
 	client, err := storage.NewClient(context.Background())
-
 	if err != nil {
 		return err
 	}
@@ -135,7 +130,6 @@ func UploadReleaseBuild(fileName string, filePath string) error {
 	wc := client.Bucket("spacemesh-release-builds").Object(config.GoSmReleaseVersion + "/" + fileName).NewWriter(context.Background())
 
 	data, err := os.ReadFile(filePath)
-
 	if err != nil {
 		return err
 	}

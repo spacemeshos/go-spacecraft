@@ -12,7 +12,6 @@ import (
 
 func ListNetworks() error {
 	networks, err := gcp.GetClusters()
-
 	if err != nil {
 		return err
 	}
@@ -23,7 +22,6 @@ func ListNetworks() error {
 		log.Info.Println("Here is the list of deployed networks:")
 		for _, name := range networks {
 			k8sRestConfig, k8sClient, err := gcp.GetKubernetesClient(name)
-
 			if err != nil {
 				return err
 			}
@@ -31,13 +29,11 @@ func ListNetworks() error {
 			kubernetes := k8s.Kubernetes{Client: k8sClient, RestConfig: k8sRestConfig}
 
 			pyroscopeURL, err := kubernetes.GetPyroscopeURL()
-
 			if err != nil {
 				return err
 			}
 
 			kibanaPassword, err := kubernetes.GetKibanaPassword()
-
 			if err != nil {
 				return err
 			}

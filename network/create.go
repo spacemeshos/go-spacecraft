@@ -18,15 +18,12 @@ import (
 )
 
 func Create() error {
-
 	err := gcp.CreateKubernetesCluster()
-
 	if err != nil {
 		return err
 	}
 
 	k8sRestConfig, k8sClient, err := gcp.GetKubernetesClient(config.NetworkName)
-
 	if err != nil {
 		return err
 	}
@@ -61,7 +58,6 @@ func Create() error {
 
 	minerConfigStr := string(minerConfigBuf)
 	minerConfigJson, err := gabs.ParseJSON([]byte(minerConfigStr))
-
 	if err != nil {
 		return err
 	}
@@ -103,7 +99,7 @@ func Create() error {
 		Done: make(chan *k8s.PoetDeploymentData),
 	}
 
-	//Deploy Poet(s)
+	// Deploy Poet(s)
 	for i := 0; i < config.NumberOfPoets; i++ {
 		go kubernetes.DeployPoet(poetInitialDurations[i], strconv.Itoa(i+1), poetConfig, poetChan)
 	}
@@ -117,7 +113,7 @@ func Create() error {
 		}
 	}
 
-	//assign poets to miners in round robin fashion
+	// assign poets to miners in round robin fashion
 	currentPoet := 0
 	nextPoet := func() string {
 		if currentPoet >= len(poetRESTUrls) {
@@ -137,7 +133,7 @@ func Create() error {
 		Done: make(chan *k8s.MinerDeploymentData),
 	}
 
-	//Deploy Bootstrap
+	// Deploy Bootstrap
 	if config.Bootstrap {
 		nextNode, err := kubernetes.NextNode()
 		if err != nil {
@@ -156,7 +152,7 @@ func Create() error {
 
 	start, end := 0, 0
 
-	//Deploy bootnodes
+	// Deploy bootnodes
 	if config.Bootstrap {
 		minerConfigJson.SetP(miners[0:1], "p2p.bootnodes")
 		start = 1
@@ -185,7 +181,7 @@ func Create() error {
 		}
 	}
 
-	//Deploy remaining miners
+	// Deploy remaining miners
 	if config.Bootstrap {
 		minerConfigJson.SetP(miners[1:config.BootnodeAmount+1], "p2p.bootnodes")
 		start = config.BootnodeAmount + 1
@@ -224,7 +220,7 @@ func Create() error {
 		}
 	}
 
-	//Activate poet(s)
+	// Activate poet(s)
 	gateways := minerGRPCURls[0:config.PoetGatewayAmount]
 
 	for i := 0; i < config.NumberOfPoets; i++ {
@@ -234,7 +230,6 @@ func Create() error {
 		})
 		requestBody := bytes.NewBuffer(postBody)
 		resp, err := http.Post("http://"+poetRESTUrl+"/v1/start", "application/json", requestBody)
-
 		if err != nil {
 			return err
 		}
@@ -242,7 +237,6 @@ func Create() error {
 		if !(resp.StatusCode >= 200 && resp.StatusCode <= 299) {
 			defer resp.Body.Close()
 			body, err := ioutil.ReadAll(resp.Body)
-
 			if err != nil {
 				return err
 			}
@@ -282,7 +276,6 @@ func Create() error {
 
 	if config.DeployPyroscope {
 		pyroscopeURL, err := kubernetes.GetPyroscopeURL()
-
 		if err != nil {
 			return err
 		}
