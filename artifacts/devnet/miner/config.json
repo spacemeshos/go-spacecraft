@@ -4,7 +4,7 @@
   },
   "preset": "testnet",
   "p2p": {
-    "network-id": 225
+    "network-id": 226
   },
   "smeshing": {
     "smeshing-opts": {
