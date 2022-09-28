@@ -1,6 +1,6 @@
 {
-  "network-name": "devnet226",
-  "miners": 50,
+  "network-name": "devnet227",
+  "miners": 25,
   "poets": 1,
   "miner-ram": "1",
   "miner-cpu": "100m",
