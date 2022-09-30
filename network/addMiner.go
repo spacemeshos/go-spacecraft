@@ -9,7 +9,6 @@ import (
 
 func AddMiner() error {
 	k8sRestConfig, k8sClient, err := gcp.GetKubernetesClient(config.NetworkName)
-
 	if err != nil {
 		return err
 	}
@@ -37,7 +36,6 @@ func AddMiner() error {
 		}
 	} else {
 		buf, err := ioutil.ReadFile(config.MinerGoSmConfig)
-
 		if err != nil {
 			return err
 		}

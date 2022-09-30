@@ -2,3 +2,4 @@ go-spacecraft
 artifacts/ws/tls.crt
 artifacts/ws/tls.key
 spacecraft
+.DS_Store

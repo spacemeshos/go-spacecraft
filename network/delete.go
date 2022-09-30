@@ -11,7 +11,6 @@ import (
 
 func Delete() error {
 	k8sRestConfig, k8sClient, err := gcp.GetKubernetesClient(config.NetworkName)
-
 	if err != nil {
 		return err
 	}
@@ -20,7 +19,6 @@ func Delete() error {
 
 	if !config.KeepLogsMetrics {
 		volumes, err := kubernetes.GetPVCs()
-
 		if err != nil {
 			return err
 		}
@@ -38,7 +36,6 @@ func Delete() error {
 		}
 	} else {
 		k8sRestConfig, k8sClient, err := gcp.GetKubernetesClient(config.NetworkName)
-
 		if err != nil {
 			return err
 		}
@@ -46,7 +43,6 @@ func Delete() error {
 		kubernetes := k8s.Kubernetes{Client: k8sClient, RestConfig: k8sRestConfig}
 
 		deployments, err := kubernetes.Client.AppsV1().Deployments("default").List(context.TODO(), metav1.ListOptions{})
-
 		if err != nil {
 			return err
 		}
@@ -54,7 +50,6 @@ func Delete() error {
 		for _, deployment := range deployments.Items {
 			if strings.Contains(deployment.Name, "miner") || strings.Contains(deployment.Name, "poet") || strings.Contains(deployment.Name, "watch") {
 				err := kubernetes.Client.AppsV1().Deployments("default").Delete(context.TODO(), deployment.Name, metav1.DeleteOptions{})
-
 				if err != nil {
 					return err
 				}

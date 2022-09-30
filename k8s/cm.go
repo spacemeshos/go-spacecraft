@@ -60,9 +60,6 @@ func (k8s *Kubernetes) DeployChaosMesh() error {
 		`),
 	}
 
-	if err = client.InstallOrUpgradeChart(context.Background(), &ingressSpec); err != nil {
-		return err
-	}
-
-	return nil
+	_, err = client.InstallOrUpgradeChart(context.Background(), &ingressSpec, &helm.GenericHelmOptions{})
+	return err
 }

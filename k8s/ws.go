@@ -55,13 +55,11 @@ func (k8s *Kubernetes) DeployWS() error {
 	}
 
 	certData, err := ioutil.ReadFile(config.TLSCert)
-
 	if err != nil {
 		return err
 	}
 
 	keyData, err := ioutil.ReadFile(config.TLSKey)
-
 	if err != nil {
 		return err
 	}
@@ -116,7 +114,7 @@ func (k8s *Kubernetes) DeployWS() error {
 		Version:     "3.34.0",
 	}
 
-	if err = client.InstallOrUpgradeChart(context.Background(), &ingressSpec); err != nil {
+	if _, err = client.InstallOrUpgradeChart(context.Background(), &ingressSpec, &helm.GenericHelmOptions{}); err != nil {
 		return err
 	}
 
@@ -142,7 +140,6 @@ func (k8s *Kubernetes) DeployWS() error {
 	respository := imageSplit[0]
 
 	minerConfigStr, err := gcp.ReadConfig(config.NetworkName)
-
 	if err != nil {
 		return err
 	}
@@ -168,7 +165,7 @@ func (k8s *Kubernetes) DeployWS() error {
 		`, config.MinerMemory, config.MinerCPU, respository, tag, config.NetworkName, config.NetworkName, strings.ReplaceAll(minerConfigStr, "\n", ""))),
 	}
 
-	if err = client.InstallOrUpgradeChart(context.Background(), &spacemeshAPISpec); err != nil {
+	if _, err = client.InstallOrUpgradeChart(context.Background(), &spacemeshAPISpec, &helm.GenericHelmOptions{}); err != nil {
 		return err
 	}
 
@@ -194,7 +191,7 @@ func (k8s *Kubernetes) DeployWS() error {
 		`, config.MinerMemory, config.MinerCPU, config.ExplorerVersion, config.NetworkName, respository, tag, strings.ReplaceAll(minerConfigStr, "\n", ""))),
 	}
 
-	if err = client.InstallOrUpgradeChart(context.Background(), &spacemeshExplorerSpec); err != nil {
+	if _, err = client.InstallOrUpgradeChart(context.Background(), &spacemeshExplorerSpec, &helm.GenericHelmOptions{}); err != nil {
 		return err
 	}
 
@@ -211,7 +208,7 @@ func (k8s *Kubernetes) DeployWS() error {
 		`, config.NetworkName, config.DashboardVersion)),
 	}
 
-	if err = client.InstallOrUpgradeChart(context.Background(), &spacemeshDashSpec); err != nil {
+	if _, err = client.InstallOrUpgradeChart(context.Background(), &spacemeshDashSpec, &helm.GenericHelmOptions{}); err != nil {
 		return err
 	}
 
@@ -220,7 +217,6 @@ func (k8s *Kubernetes) DeployWS() error {
 
 		for range time.Tick(5 * time.Second) {
 			ingress, err := ingressClient.Get(context.Background(), "spacemesh-api", metav1.GetOptions{})
-
 			if err != nil {
 				return err
 			}
@@ -231,13 +227,11 @@ func (k8s *Kubernetes) DeployWS() error {
 				ip := ingress.Status.LoadBalancer.Ingress[0].IP
 
 				api, err := cloudflare.NewWithAPIToken(config.CloudflareAPIToken)
-
 				if err != nil {
 					return err
 				}
 
 				id, err := api.ZoneIDByName("spacemesh.io")
-
 				if err != nil {
 					return err
 				}
@@ -296,7 +290,6 @@ func (k8s *Kubernetes) DeployWS() error {
 
 func (k8s *Kubernetes) AddToDiscovery() error {
 	networksConfig, err := gcp.ReadWSConfig()
-
 	if err != nil {
 		return err
 	}
@@ -318,13 +311,11 @@ func (k8s *Kubernetes) AddToDiscovery() error {
 	}
 
 	minerConfigStr, err := gcp.ReadConfig(config.NetworkName)
-
 	if err != nil {
 		return err
 	}
 
 	minerConfigJson, err := gabs.ParseJSON([]byte(minerConfigStr))
-
 	if err != nil {
 		return err
 	}
@@ -360,7 +351,6 @@ func (k8s *Kubernetes) AddToDiscovery() error {
 	networks = append([]Network{network}, networks...)
 
 	json, err := json.MarshalIndent(networks, "", "  ")
-
 	if err != nil {
 		return err
 	}
@@ -376,7 +366,6 @@ func (k8s *Kubernetes) AddToDiscovery() error {
 
 func (k8s *Kubernetes) RemoveFromDiscovery() error {
 	networksConfig, err := gcp.ReadWSConfig()
-
 	if err != nil {
 		return err
 	}
@@ -393,7 +382,6 @@ func (k8s *Kubernetes) RemoveFromDiscovery() error {
 	}
 
 	json, err := json.MarshalIndent(newNetworks, "", "  ")
-
 	if err != nil {
 		return err
 	}
@@ -418,13 +406,11 @@ func (k8s *Kubernetes) RemoveFromDiscovery() error {
 func (k8s *Kubernetes) DeleteWSDNSRecords() error {
 	if config.CloudflareAPIToken != "" {
 		api, err := cloudflare.NewWithAPIToken(config.CloudflareAPIToken)
-
 		if err != nil {
 			return err
 		}
 
 		id, err := api.ZoneIDByName("spacemesh.io")
-
 		if err != nil {
 			return err
 		}
@@ -432,7 +418,6 @@ func (k8s *Kubernetes) DeleteWSDNSRecords() error {
 		records, err := api.DNSRecords(context.Background(), id, cloudflare.DNSRecord{
 			Name: "api-json-" + config.NetworkName + ".spacemesh.io",
 		})
-
 		if err != nil {
 			return err
 		}

@@ -17,7 +17,6 @@ func (k8s *Kubernetes) DeploySpacemeshWatch() error {
 	deploymentClient := k8s.Client.AppsV1().Deployments(apiv1.NamespaceDefault)
 
 	miners, err := k8s.GetMiners()
-
 	if err != nil {
 		return err
 	}
@@ -25,7 +24,6 @@ func (k8s *Kubernetes) DeploySpacemeshWatch() error {
 	apiURLs := []string{}
 
 	ip, err := k8s.GetExternalIP()
-
 	if err != nil {
 		return err
 	}
@@ -109,7 +107,6 @@ func (k8s *Kubernetes) DeleteSpacemeshWatch() error {
 	deploymentClient := k8s.Client.AppsV1().Deployments(apiv1.NamespaceDefault)
 
 	err := deploymentClient.Delete(context.TODO(), "spacemesh-watch", metav1.DeleteOptions{})
-
 	if err != nil {
 		return err
 	}

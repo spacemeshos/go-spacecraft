@@ -32,9 +32,8 @@ func getClient() (*container.ClusterManagerClient, error) {
 	}
 
 	c, err := container.NewClusterManagerClient(ctx)
-
 	if err != nil {
-		return nil, fmt.Errorf("could not authorize gcp", err)
+		return nil, fmt.Errorf("could not authorize gcp: %w", err)
 	}
 
 	return c, nil
@@ -42,7 +41,6 @@ func getClient() (*container.ClusterManagerClient, error) {
 
 func getCluster(networkName string) (*containerpb.Cluster, error) {
 	client, err := getClient()
-
 	if err != nil {
 		return nil, err
 	}
@@ -56,7 +54,6 @@ func getCluster(networkName string) (*containerpb.Cluster, error) {
 
 func GetClusters() ([]string, error) {
 	client, err := getClient()
-
 	if err != nil {
 		return nil, err
 	}
@@ -66,7 +63,6 @@ func GetClusters() ([]string, error) {
 	}
 
 	list, err := client.ListClusters(context.Background(), req)
-
 	if err != nil {
 		return nil, err
 	}
@@ -82,7 +78,6 @@ func GetClusters() ([]string, error) {
 
 func CreateKubernetesCluster() error {
 	client, err := getClient()
-
 	if err != nil {
 		return err
 	}
@@ -163,7 +158,7 @@ func CreateKubernetesCluster() error {
 	cluster := &containerpb.Cluster{
 		Name:                  config.NetworkName,
 		NodePools:             nodePools,
-		InitialClusterVersion: "1.21.14-gke.3000", //https://cloud.google.com/kubernetes-engine/docs/release-notes
+		InitialClusterVersion: "1.21.14-gke.3000", // https://cloud.google.com/kubernetes-engine/docs/release-notes
 		ReleaseChannel: &containerpb.ReleaseChannel{
 			Channel: containerpb.ReleaseChannel_UNSPECIFIED,
 		},
@@ -190,7 +185,6 @@ func CreateKubernetesCluster() error {
 
 	for range time.Tick(10 * time.Second) {
 		cluster, err := getCluster(config.NetworkName)
-
 		if err != nil {
 			return err
 		}
@@ -202,7 +196,7 @@ func CreateKubernetesCluster() error {
 		} else if cluster.Status == containerpb.Cluster_RUNNING {
 			break
 		} else if cluster.Status == containerpb.Cluster_STOPPING || cluster.Status == containerpb.Cluster_ERROR || cluster.Status == containerpb.Cluster_DEGRADED {
-			return fmt.Errorf("an unknown occured while k8s cluster was being created. status: ", cluster.Status)
+			return fmt.Errorf("an unknown occurred while k8s cluster was being created. status: %s", cluster.Status)
 		}
 	}
 
@@ -213,7 +207,6 @@ func CreateKubernetesCluster() error {
 
 func GetKubernetesClient(networkName string) (*restclient.Config, *kubernetes.Clientset, error) {
 	cluster, err := getCluster(networkName)
-
 	if err != nil {
 		return nil, nil, err
 	}
@@ -227,7 +220,6 @@ func GetKubernetesClient(networkName string) (*restclient.Config, *kubernetes.Cl
 	}
 	name := fmt.Sprintf("gke_%s_%s_%s", config.GCPProject, cluster.Zone, cluster.Name)
 	cert, err := base64.StdEncoding.DecodeString(cluster.MasterAuth.ClusterCaCertificate)
-
 	if err != nil {
 		return nil, nil, err
 	}
@@ -265,10 +257,8 @@ func GetKubernetesClient(networkName string) (*restclient.Config, *kubernetes.Cl
 }
 
 func DeleteKubernetesCluster(volumes []string) error {
-
 	ctx := context.Background()
 	computeService, err := compute.NewService(ctx)
-
 	if err != nil {
 		return err
 	}
@@ -286,7 +276,6 @@ func DeleteKubernetesCluster(volumes []string) error {
 		}
 
 		list, err := disks.Do()
-
 		if err != nil {
 			return err
 		}
@@ -311,7 +300,6 @@ func DeleteKubernetesCluster(volumes []string) error {
 	}
 
 	client, err := getClient()
-
 	if err != nil {
 		return err
 	}
@@ -344,7 +332,6 @@ func DeleteKubernetesCluster(volumes []string) error {
 		fmt.Println("deleting disk: " + name)
 		disk := computeService.Disks.Delete(config.GCPProject, config.GCPZone, name)
 		_, err := disk.Do()
-
 		if err != nil {
 			return err
 		}
@@ -365,13 +352,12 @@ func contains(s []string, str string) bool {
 
 func ResizeKubernetesClusterForLogs() error {
 	client, err := getClient()
-
 	if err != nil {
 		return err
 	}
 
 	_, err = client.SetNodePoolSize(context.TODO(), &containerpb.SetNodePoolSizeRequest{
-		//autoscaler kicks in
+		// autoscaler kicks in
 		NodeCount: int32(1),
 		Name:      "projects/" + config.GCPProject + "/locations/" + config.GCPLocation + "/clusters/" + config.NetworkName + "/nodePools/default",
 	})

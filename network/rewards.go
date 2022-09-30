@@ -2,7 +2,6 @@ package network
 
 import (
 	"context"
-	"encoding/hex"
 	"errors"
 	"fmt"
 	"strconv"
@@ -21,7 +20,6 @@ func Rewards() error {
 	}
 
 	k8sRestConfig, k8sClient, err := gcp.GetKubernetesClient(config.NetworkName)
-
 	if err != nil {
 		return err
 	}
@@ -29,7 +27,6 @@ func Rewards() error {
 	kubernetes := k8s.Kubernetes{Client: k8sClient, RestConfig: k8sRestConfig}
 
 	managedAddresses, err := kubernetes.MinerAccounts()
-
 	if err != nil {
 		return err
 	}
@@ -43,15 +40,14 @@ func Rewards() error {
 
 	c := pb.NewDebugServiceClient(conn)
 	r, err := c.Accounts(context.Background(), &emptypb.Empty{})
-
 	if err != nil {
 		return err
 	}
 
 	for _, account := range r.AccountWrapper {
-		log.Info.Println("Account: " + hex.EncodeToString(account.AccountId.Address))
+		log.Info.Println("Account: " + account.AccountId.Address)
 		fmt.Println("Balance: " + strconv.FormatUint(account.StateCurrent.Balance.Value, 10))
-		_, exists := find(managedAddresses, hex.EncodeToString(account.AccountId.Address))
+		_, exists := find(managedAddresses, account.AccountId.Address)
 		fmt.Println("Managed Miner Account: ", strconv.FormatBool(exists)+"\n")
 	}
 

@@ -21,7 +21,6 @@ Or else create a network that joins another network using a config file generate
 spacecraft createNetwork -m=10 -p=3 --network-name=devnet1 --bootstrap=false --miner-go-sm-config=./config.json
 `,
 	Run: func(cmd *cobra.Command, args []string) {
-
 		err := network.Create()
 		if err != nil {
 			log.Error.Println(err)

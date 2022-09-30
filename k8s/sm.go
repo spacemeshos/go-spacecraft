@@ -3,6 +3,7 @@ package k8s
 import (
 	"bytes"
 	"context"
+	"crypto/ecdsa"
 	"errors"
 	"fmt"
 	"io"
@@ -18,8 +19,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	intstr "k8s.io/apimachinery/pkg/util/intstr"
 	v1beta1 "k8s.io/client-go/kubernetes/typed/policy/v1beta1"
-
-	"crypto/ecdsa"
 
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
@@ -46,7 +45,6 @@ type PoetChannel struct {
 
 func (k8s *Kubernetes) getExternalIpOfNode(nodeId string) (string, error) {
 	node, err := k8s.Client.CoreV1().Nodes().Get(context.Background(), nodeId, metav1.GetOptions{})
-
 	if err != nil {
 		return "", err
 	}
@@ -62,7 +60,6 @@ func (k8s *Kubernetes) getExternalIpOfNode(nodeId string) (string, error) {
 
 func (k8s *Kubernetes) GetExternalPort(serviceId string, portName string) (string, error) {
 	svc, err := k8s.Client.CoreV1().Services("default").Get(context.TODO(), serviceId, metav1.GetOptions{})
-
 	if err != nil {
 		return "", err
 	}
@@ -146,7 +143,6 @@ func (k8s *Kubernetes) createPVC(name string, size string) error {
 	}
 
 	_, err := k8s.Client.CoreV1().PersistentVolumeClaims("default").Create(context.TODO(), createOpts, metav1.CreateOptions{})
-
 	if err != nil {
 		return err
 	}
@@ -156,7 +152,6 @@ func (k8s *Kubernetes) createPVC(name string, size string) error {
 
 func (k8s *Kubernetes) GetPVCs() ([]string, error) {
 	pvcs, err := k8s.Client.CoreV1().PersistentVolumeClaims("default").List(context.TODO(), metav1.ListOptions{})
-
 	if err != nil {
 		return []string{}, err
 	}
@@ -172,7 +167,6 @@ func (k8s *Kubernetes) GetPVCs() ([]string, error) {
 
 func (k8s *Kubernetes) getDeploymentPodAndNode(name string) (string, string, error) {
 	pods, err := k8s.Client.CoreV1().Pods("default").List(context.TODO(), metav1.ListOptions{})
-
 	if err != nil {
 		return "", "", err
 	}
@@ -194,7 +188,6 @@ func (k8s *Kubernetes) getDeploymentPodAndNode(name string) (string, string, err
 
 func (k8s *Kubernetes) GetMinerImage(name string) (string, error) {
 	pods, err := k8s.Client.CoreV1().Pods("default").List(context.TODO(), metav1.ListOptions{})
-
 	if err != nil {
 		return "", err
 	}
@@ -214,7 +207,6 @@ func (k8s *Kubernetes) GetMinerImage(name string) (string, error) {
 
 func (k8s *Kubernetes) NextNode() (string, error) {
 	nodes, err := k8s.Client.CoreV1().Nodes().List(context.Background(), metav1.ListOptions{})
-
 	if err != nil {
 		return "", err
 	}
@@ -235,7 +227,6 @@ func (k8s *Kubernetes) NextNode() (string, error) {
 
 func (k8s *Kubernetes) DisablePodRescheduling() error {
 	client, err := v1beta1.NewForConfig(k8s.RestConfig)
-
 	if err != nil {
 		return err
 	}
@@ -269,7 +260,6 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 	fmt.Println("creating miner-" + minerNumber + " pvc")
 
 	err := k8s.createPVC("miner-"+minerNumber, config.MinerDiskSize)
-
 	if err != nil {
 		channel.Err <- err
 		return
@@ -512,7 +502,6 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 	fmt.Println("finished miner-" + minerNumber + " deployment")
 
 	nodeName, podName, err := k8s.getDeploymentPodAndNode("miner-" + minerNumber)
-
 	if err != nil {
 		channel.Err <- err
 		return
@@ -521,7 +510,7 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 	fmt.Println("creating miner-" + minerNumber + " service")
 
 	ports := []corev1.ServicePort{
-		corev1.ServicePort{Name: "grpcport", Port: 6000, TargetPort: intstr.FromInt(6000)},
+		{Name: "grpcport", Port: 6000, TargetPort: intstr.FromInt(6000)},
 	}
 
 	if config.EnableJsonAPI == true {
@@ -555,7 +544,7 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 
 	if config.Metrics == true {
 		ports = []corev1.ServicePort{
-			corev1.ServicePort{Name: "metrics", Port: 1010, TargetPort: intstr.FromInt(1010)},
+			{Name: "metrics", Port: 1010, TargetPort: intstr.FromInt(1010)},
 		}
 
 		_, err = k8s.Client.CoreV1().Services("default").Create(context.TODO(), &corev1.Service{
@@ -589,7 +578,6 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 	}
 
 	externalIP, err := k8s.getExternalIpOfNode(nodeName)
-
 	if err != nil {
 		channel.Err <- err
 		return
@@ -605,7 +593,6 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 	}
 
 	nodeId, err := k8s.getNodeId(podName)
-
 	if err != nil {
 		channel.Err <- err
 		return
@@ -617,11 +604,9 @@ func (k8s *Kubernetes) DeployMiner(bootstrapNode bool, minerNumber string, confi
 }
 
 func (k8s *Kubernetes) DeployPoet(initialDuration string, poetNumber string, configFile string, channel *PoetChannel) {
-
 	fmt.Println("creating poet-" + poetNumber + " pvc")
 
 	err := k8s.createPVC("poet-"+poetNumber, config.MinerDiskSize)
-
 	if err != nil {
 		channel.Err <- err
 		return
@@ -731,8 +716,7 @@ func (k8s *Kubernetes) DeployPoet(initialDuration string, poetNumber string, con
 		},
 	}
 
-	deployment, err = deploymentClient.Create(context.TODO(), deployment, metav1.CreateOptions{})
-
+	_, err = deploymentClient.Create(context.TODO(), deployment, metav1.CreateOptions{})
 	if err != nil {
 		channel.Err <- err
 		return
@@ -767,7 +751,7 @@ func (k8s *Kubernetes) DeployPoet(initialDuration string, poetNumber string, con
 		},
 		Spec: corev1.ServiceSpec{
 			Ports: []corev1.ServicePort{
-				corev1.ServicePort{Name: "restport", Port: 5000, TargetPort: intstr.FromInt(5000)},
+				{Name: "restport", Port: 5000, TargetPort: intstr.FromInt(5000)},
 			},
 			Selector: map[string]string{
 				"name": "poet-" + poetNumber,
@@ -784,16 +768,18 @@ func (k8s *Kubernetes) DeployPoet(initialDuration string, poetNumber string, con
 	fmt.Println("created poet-" + poetNumber + " service")
 
 	nodeName, _, err := k8s.getDeploymentPodAndNode("poet-" + poetNumber)
+	if err != nil {
+		channel.Err <- err
+		return
+	}
 
 	externalIP, err := k8s.getExternalIpOfNode(nodeName)
-
 	if err != nil {
 		channel.Err <- err
 		return
 	}
 
 	port, err := k8s.GetExternalPort("poet-"+poetNumber, "restport")
-
 	if err != nil {
 		channel.Err <- err
 		return
@@ -826,7 +812,6 @@ func (k8s *Kubernetes) NextMinerName() (string, error) {
 		if strings.Contains(deployment.Name, "miner-") {
 			s := strings.Split(deployment.Name, "-")
 			i, err := strconv.Atoi(s[1])
-
 			if err != nil {
 				return "", err
 			}
@@ -911,7 +896,6 @@ func (k8s *Kubernetes) GetExternalIP() (string, error) {
 func (k8s *Kubernetes) MinerAccounts() ([]string, error) {
 	secretsClient := k8s.Client.CoreV1().Secrets("default")
 	secrets, err := secretsClient.List(context.Background(), metav1.ListOptions{})
-
 	if err != nil {
 		return []string{}, err
 	}
@@ -931,7 +915,6 @@ func (k8s *Kubernetes) MinerAccounts() ([]string, error) {
 func (k8s *Kubernetes) GetSecret(name string, dataName string) (string, error) {
 	secretsClient := k8s.Client.CoreV1().Secrets("default")
 	secrets, err := secretsClient.List(context.Background(), metav1.ListOptions{})
-
 	if err != nil {
 		return "", err
 	}
